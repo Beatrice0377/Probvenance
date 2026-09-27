@@ -1,0 +1,114 @@
+{
+  "artifact_type": "calibration-transport-r2c-method-adequacy-design",
+  "artifact_version": 1,
+  "lambda_grid": [
+    1e-06,
+    0.0001,
+    0.01,
+    0.1,
+    1.0
+  ],
+  "method_families": [
+    {
+      "id": "raw-identity",
+      "kind": "baseline",
+      "role": "native-target-baseline",
+      "version": 1
+    },
+    {
+      "feature": {
+        "id": "identity-raw-probability",
+        "version": 1
+      },
+      "id": "research-l2-logistic-fixed-decision-probability",
+      "kind": "fitted",
+      "objective": {
+        "id": "mean-bernoulli-nll-plus-l2",
+        "version": 1
+      },
+      "regularized_parameters": [
+        "slope",
+        "intercept"
+      ],
+      "role": "source-measurement-calibrator",
+      "version": 1
+    },
+    {
+      "endpoint_policy": {
+        "id": "reject-exact-probability-endpoints",
+        "version": 1
+      },
+      "feature": {
+        "id": "exact-logit-probability",
+        "version": 1
+      },
+      "id": "research-l2-logistic-logit-fixed-decision-probability",
+      "kind": "fitted",
+      "objective": {
+        "id": "mean-bernoulli-nll-plus-l2",
+        "version": 1
+      },
+      "regularized_parameters": [
+        "slope",
+        "intercept"
+      ],
+      "role": "source-measurement-calibrator",
+      "version": 1
+    }
+  ],
+  "no_model_rerun": true,
+  "paired_test_bootstrap": {
+    "percentile_rule": {
+      "id": "nearest-rank-percentile",
+      "version": 1
+    },
+    "protocol_id": "sha256-r2c-paired-test-bootstrap",
+    "protocol_version": 1,
+    "replicates": 2000
+  },
+  "paired_train_refit_bootstrap": {
+    "percentile_rule": {
+      "id": "nearest-rank-percentile",
+      "version": 1
+    },
+    "protocol_id": "sha256-r2c-paired-train-refit-bootstrap",
+    "protocol_version": 1,
+    "replicates": 1000
+  },
+  "primary_metric": {
+    "id": "native-brier-change-vs-raw",
+    "version": 1
+  },
+  "research_spec": {
+    "id": "calibration-transport-research-spec",
+    "version": 1
+  },
+  "round_id": "calibration-method-adequacy-sensitivity",
+  "round_version": 1,
+  "secondary_metrics": [
+    {
+      "id": "exact-logloss",
+      "version": 1
+    },
+    {
+      "id": "transport-brier-delta-vs-self",
+      "version": 1
+    },
+    {
+      "id": "cross-brier-delta-vs-raw-target",
+      "version": 1
+    }
+  ],
+  "source_r2b_raw": {
+    "file_sha256": "16a07ecd69a4ec0081f76790b7bde0b4e8bcd87172e06b7af94c06ea699967a4",
+    "model": "Qwen/Qwen3.5-2B",
+    "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+    "paired_dataset_fingerprint": "b17fd3a44747ffa1597e4b74206d79a82135ed97337b69283ef89572181a0062",
+    "path": "experiments/calibration_transport/results/r2b-stability-qwen35-2b-v1.json",
+    "plan_fingerprint": "1127ea01f01c2671de6888fcd6759db17addf340aafe64f4e182b5aa2b58ead8",
+    "r2b_run_provenance_fingerprint": "3eeab561b27453a6af80e0f1bd1fd3b8da36412ee12961d5203a2e1ead0c0683",
+    "source_case_set_fingerprint": "c0bdc31bab6db3b91605321bc70da71c8692aca3ecddc3257840e01171a333d9",
+    "source_case_set_version": "calibration-transport-r2b-v1",
+    "source_measurement_code_commit": "dd68e299c364b038c959c42bc5c264640c52f7ca"
+  }
+}

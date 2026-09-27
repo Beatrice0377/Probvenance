@@ -183,7 +183,34 @@ rendering (`enable_thinking=false`), CAT v1, OVR v1, the OVR proposition, the
 anchor protocol, the research L2-logistic method, and `l2_strength = 0.01`. It
 adds no method sweep, no second model, and no second measurement axis.
 
-## 13. Running the tests
+## 13. R2C — the calibration-method adequacy sensitivity
+
+R2C asks one narrow question, offline and analysis-only, from the frozen R2B raw
+evidence: is the observed native-calibration degradation specific to the frozen
+`raw-p logistic + lambda = 1e-2` configuration, or does it persist across a
+pre-declared, narrow sensitivity set? It NEVER reruns the model, never touches
+the network or GPU, and never regrids after seeing results.
+
+- `r2c_method_adequacy_design.json` — the pre-analysis declaration. It pins the
+  frozen R2B raw artifact path and SHA256, the source identities, the two
+  families, the exact five-value lambda grid, the two bootstrap contracts, and a
+  `no_model_rerun` declaration.
+- `r2c_method_adequacy.py` — the analysis. Family `P` is the existing raw-p
+  logistic (`sigmoid(a*p + b)`); Family `L` is the same solver on the
+  logit feature (`sigmoid(a*logit(p) + b)`), which fails closed on exact 0/1
+  endpoints with no clipping or smoothing. Both reuse the production kernels
+  `_solve_l2_logistic` and `_stable_sigmoid` without touching `src/`. It reports
+  native Brier change vs raw, the 2x2 transport matrices and deltas,
+  cross-vs-raw changes, exact LogLoss (no clipping), a shared paired TEST
+  bootstrap (2000) and a shared paired train-refit bootstrap (1000), parameter
+  stability, and transport-sign counts across all ten configurations.
+- `tests/test_r2c_method_adequacy.py` — locks the exact grid, the Family L
+  identity-map property, endpoint rejection, artifact determinism, and the exact
+  reproduction of the committed R2B `P:0.01` configuration.
+
+R2C selects no method: it reports facts for a later human research gate.
+
+## 14. Running the tests
 
 No model, no GPU, and no network are required:
 

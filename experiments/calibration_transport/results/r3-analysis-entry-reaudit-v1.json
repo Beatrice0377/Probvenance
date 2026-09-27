@@ -1,0 +1,49 @@
+{
+  "artifact_type": "r3-analysis-entry-reaudit",
+  "artifact_version": 1,
+  "fingerprint_version": 1,
+  "protocol_fingerprint": "3ef63056ae16b18ad65d9c87d1fbec5b43550873a0e3e25ec0a323f954ee974d",
+  "population_manifest_fingerprint": "40cc9753a711314ff3b25ed6e234d0cbda11f3f60cd87f1d3915195a3d1780b8",
+  "raw_evidence_commit": "ba90a6c325b764347feaa5ba9cc5b8956d36cb21",
+  "historical_analysis_code_commit": "3a929a6931762a518498ad9df2e5f82cf6e6deed",
+  "first_conformance_fix_commit": "5829a8650c826c2521ce3287764d3f83b582f015",
+  "first_closure_record_commit": "fa97d6f548c2d1b820f076225e28527fde3c669a",
+  "first_closure_record_status": "preserved-not-amended",
+  "reaudit_finding": "TRAIN-refit successful-subset inference mismatch",
+  "reaudit_finding_class": "protocol-conformance-must-fix",
+  "reaudit_finding_detail": "The pre-reaudit _train_refit_stability refit the full procedure panel atomically per replicate and, on any refit failure, skipped the replicate while still computing TRAIN-refit intervals from the surviving successful replicates. This violated frozen R3_PROTOCOL.md section 17, which requires the affected procedure/model block to be INCOMPLETE and forbids a successful-subset interval.",
+  "failure_contract": {
+    "failure_granularity": "procedure-model",
+    "affected_procedure_model_block": "INCOMPLETE",
+    "successful_subset_interval": "FORBIDDEN",
+    "unaffected_procedures": "remain reportable",
+    "reference_point_estimate_retained": true,
+    "resample_reuse": "one deterministic resampled TRAIN multiset per replicate, reused across all procedures",
+    "draws_per_subject": 10,
+    "retry_or_replacement_replicate": "FORBIDDEN"
+  },
+  "failure_contract_fix_commit": "8996e6760a7c5d424edbd5747ee5c6caffca4283",
+  "implementation_files": [
+    "experiments/calibration_transport/r3_analysis.py",
+    "experiments/calibration_transport/tests/test_r3_analysis.py"
+  ],
+  "raw_artifacts_rewritten": false,
+  "frozen_scientific_design_changed": false,
+  "official_confirmatory_statistical_outcome_computed": false,
+  "analysis_entry_authorized": false,
+  "analyses_not_run": [
+    "official R3 Brier risks",
+    "official R3 exact LogLoss values",
+    "official R3 cross/native/raw contrasts",
+    "Fisher combination / six primary factorial contrasts",
+    "20,000-replicate TEST bootstrap intervals",
+    "2,000-replicate TRAIN-refit stability results",
+    "native-reference states",
+    "accuracy aggregates",
+    "winner-agreement aggregates",
+    "calibrator parameter values",
+    "empirical score-geometry summaries"
+  ],
+  "analyses_not_run_evidentiary_basis": "No committed R3 confirmatory statistical analysis artifact, and no committed post-outcome analysis-code change, existed before this correction; the project's recorded gate state was analysis NOT RUN / LOCKED. This statement is bounded by the committed record and does not claim filesystem history beyond it.",
+  "reaudit_fingerprint": "deb760d915edbc769a2174cbd4dff8a2b3ab319f1aa698335b5cc94e98f243a4"
+}

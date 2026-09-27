@@ -636,3 +636,145 @@ class TestTrainRefitDrawUnit:
         )
         assert all(count == 10 for count in per_replicate_subject.values())
         assert sorted({call["draw"] for call in train_calls}) == list(range(10))
+
+
+class TestTrainRefitFailureContract:
+    """Frozen §17: a procedure-level refit failure makes only that block INCOMPLETE."""
+
+    _TARGET_INDEX = 1
+
+    def _inject_failure(self, target_label: str, *, fail_first: int = 1) -> Any:
+        real = analysis.fit_panel
+        seen = {"count": 0}
+
+        def fake(items: Any, procedures: Any) -> Any:
+            labels = [procedure.label for procedure in procedures]
+            if labels == [target_label]:
+                seen["count"] += 1
+                if seen["count"] <= fail_first:
+                    raise analysis.AnalysisError("synthetic procedure refit failure")
+            return real(items, procedures)
+
+        return fake
+
+    def test_failed_procedure_incomplete_others_complete(self) -> None:
+        train, test = _skewed_fixture()
+        target = PROCEDURES[self._TARGET_INDEX].label
+        real = analysis.fit_panel
+        analysis.fit_panel = self._inject_failure(target)
+        try:
+            result = analysis._train_refit_stability(train, test, PROCEDURES, replicates=3)
+        finally:
+            analysis.fit_panel = real
+        blocks = result["procedures"]
+
+        failed = blocks[target]
+        assert failed["status"] == "INCOMPLETE"
+        assert failed["planned_replicates"] == 3
+        assert failed["failed_replicates"] >= 1
+        assert failed["successful_replicates"] == 3 - failed["failed_replicates"]
+        assert failed["successful_replicates"] > 0
+        assert len(failed["failures"]) == failed["failed_replicates"]
+        record = failed["failures"][0]
+        assert record["replicate"] == 0
+        assert record["procedure_label"] == target
+        assert record["error_type"] == "AnalysisError"
+        assert "synthetic" in record["message"]
+        for direction in protocol.PRIMARY_DIRECTIONS:
+            assert failed["directions"][direction]["interval"] is None
+
+        for procedure in PROCEDURES:
+            if procedure.label == target:
+                continue
+            healthy = blocks[procedure.label]
+            assert healthy["status"] == "COMPLETE"
+            assert healthy["failed_replicates"] == 0
+            assert healthy["successful_replicates"] == 3
+            assert healthy["failures"] == []
+            for direction in protocol.PRIMARY_DIRECTIONS:
+                assert healthy["directions"][direction]["interval"] is not None
+
+    def test_incomplete_procedure_never_calls_interval(self) -> None:
+        train, test = _skewed_fixture()
+        target = PROCEDURES[self._TARGET_INDEX].label
+        real_fit_panel = analysis.fit_panel
+        real_interval = analysis._interval
+        interval_sizes: list[int] = []
+
+        def spy_interval(samples: Any, percentiles: Any) -> Any:
+            interval_sizes.append(len(samples))
+            return real_interval(samples, percentiles)
+
+        analysis.fit_panel = self._inject_failure(target)
+        analysis._interval = spy_interval
+        try:
+            result = analysis._train_refit_stability(train, test, PROCEDURES, replicates=3)
+        finally:
+            analysis.fit_panel = real_fit_panel
+            analysis._interval = real_interval
+
+        complete = [procedure.label for procedure in PROCEDURES if procedure.label != target]
+        assert len(interval_sizes) == len(complete) * len(protocol.PRIMARY_DIRECTIONS)
+        assert all(size == 3 for size in interval_sizes)
+        assert (
+            result["procedures"][target]["directions"][analysis.DIRECTION_CAT_TO_OVR]["interval"]
+            is None
+        )
+        assert (
+            result["procedures"][target]["directions"][analysis.DIRECTION_OVR_TO_CAT]["interval"]
+            is None
+        )
+
+    def test_one_resample_per_replicate_reused_across_procedures(self) -> None:
+        train, test = _skewed_fixture()
+        resamples: list[tuple[int, Any]] = []
+        refit_inputs: list[tuple[str, int]] = []
+        real_resample = analysis.resample_train_multiset
+        real_fit_panel = analysis.fit_panel
+
+        def spy_resample(items: Any, *, replicate: int, draws_per_subject: int = 10) -> Any:
+            resampled = real_resample(
+                items, replicate=replicate, draws_per_subject=draws_per_subject
+            )
+            resamples.append((replicate, resampled))
+            return resampled
+
+        def spy_fit_panel(items: Any, procedures: Any) -> Any:
+            labels = [procedure.label for procedure in procedures]
+            if len(labels) == 1:
+                refit_inputs.append((labels[0], id(items)))
+            return real_fit_panel(items, procedures)
+
+        analysis.resample_train_multiset = spy_resample
+        analysis.fit_panel = spy_fit_panel
+        try:
+            analysis._train_refit_stability(train, test, PROCEDURES, replicates=3)
+        finally:
+            analysis.resample_train_multiset = real_resample
+            analysis.fit_panel = real_fit_panel
+
+        assert [replicate for replicate, _ in resamples] == [0, 1, 2]
+        width = len(PROCEDURES)
+        assert len(refit_inputs) == 3 * width
+        expected_labels = {procedure.label for procedure in PROCEDURES}
+        for index, (_replicate, resampled) in enumerate(resamples):
+            group = refit_inputs[index * width : (index + 1) * width]
+            assert {label for label, _ in group} == expected_labels
+            assert all(object_id == id(resampled) for _label, object_id in group)
+
+    def test_zero_failures_yields_complete_with_interval(self) -> None:
+        train, test = _skewed_fixture()
+        result = analysis._train_refit_stability(train, test, PROCEDURES, replicates=3)
+        assert result["replicates"] == 3
+        for procedure in PROCEDURES:
+            block = result["procedures"][procedure.label]
+            assert block["status"] == "COMPLETE"
+            assert block["planned_replicates"] == 3
+            assert block["successful_replicates"] == 3
+            assert block["failed_replicates"] == 0
+            assert block["failures"] == []
+            for direction in protocol.PRIMARY_DIRECTIONS:
+                cell = block["directions"][direction]
+                assert cell["interval"] is not None
+                assert cell["interval"]["n"] == 3
+                assert isinstance(cell["point"], float)

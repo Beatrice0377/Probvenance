@@ -81,6 +81,12 @@ QUANTILE_UPPER = 97.5
 # many TRAIN item positions with replacement (the TRAIN pool itself has 8).
 TRAIN_REFIT_DRAWS_PER_SUBJECT = 10
 
+# Frozen R3_PROTOCOL.md §17 failure contract: a procedure/model block with any
+# failed refit is INCOMPLETE and must never receive a successful-subset interval;
+# unaffected procedure blocks remain reportable.
+TRAIN_REFIT_STATUS_COMPLETE = "COMPLETE"
+TRAIN_REFIT_STATUS_INCOMPLETE = "INCOMPLETE"
+
 STATE_IMPROVEMENT = "NATIVE_IMPROVEMENT_SUPPORTED"
 STATE_DEGRADATION = "NATIVE_DEGRADATION_SUPPORTED"
 STATE_UNRESOLVED = "NATIVE_ADEQUACY_UNRESOLVED"
@@ -874,29 +880,41 @@ def _train_refit_stability(
     *,
     replicates: int,
 ) -> dict[str, Any]:
+    """Frozen §17 TRAIN-refit stability under a procedure-level fail-closed contract.
+
+    One deterministic resampled TRAIN multiset is drawn per replicate and reused
+    for every procedure. Each procedure is refit independently (its CAT and OVR
+    calibrators together); a procedure refit failure is recorded against that
+    procedure alone and never suppresses another procedure. Any nonzero failure
+    count makes the affected procedure block INCOMPLETE and forbids a
+    successful-subset interval; the full-TRAIN reference point is retained.
+    """
     reference = fit_panel(train_items, procedures)
     labels = [procedure.label for procedure in procedures]
     directions = _protocol.PRIMARY_DIRECTIONS
     samples: dict[str, dict[str, list[float]]] = {
-        direction: {label: [] for label in labels} for direction in directions
+        label: {direction: [] for direction in directions} for label in labels
     }
-    failures: dict[str, list[dict[str, Any]]] = {direction: [] for direction in directions}
+    failures: dict[str, list[dict[str, Any]]] = {label: [] for label in labels}
+    successful: dict[str, int] = {label: 0 for label in labels}
     for replicate in range(replicates):
         resampled = resample_train_multiset(train_items, replicate=replicate)
-        try:
-            refit = fit_panel(resampled, procedures)
-        except Exception as exc:  # recorded, never silently dropped
-            record = {
-                "replicate": replicate,
-                "error_type": type(exc).__name__,
-                "message": str(exc),
-            }
+        for procedure in procedures:
+            try:
+                refit = fit_panel(resampled, (procedure,))
+            except Exception as exc:  # recorded exactly; never substituted or retried
+                failures[procedure.label].append(
+                    {
+                        "replicate": replicate,
+                        "procedure_label": procedure.label,
+                        "error_type": type(exc).__name__,
+                        "message": str(exc),
+                    }
+                )
+                continue
+            successful[procedure.label] += 1
             for direction in directions:
-                failures[direction].append(dict(record))
-            continue
-        for direction in directions:
-            for procedure in procedures:
-                samples[direction][procedure.label].append(
+                samples[procedure.label][direction].append(
                     subject_weighted_mean(
                         test_items,
                         lambda item, procedure=procedure, refit=refit, direction=direction: (
@@ -905,29 +923,38 @@ def _train_refit_stability(
                         ),
                     )
                 )
-    result: dict[str, Any] = {}
-    for direction in directions:
-        block: dict[str, Any] = {
-            "replicates": replicates,
-            "failed_refits": failures[direction],
-            "reference_panel": reference.canonical_payload(),
+    blocks: dict[str, Any] = {}
+    for label in labels:
+        failed = len(failures[label])
+        status = TRAIN_REFIT_STATUS_COMPLETE if failed == 0 else TRAIN_REFIT_STATUS_INCOMPLETE
+        direction_blocks: dict[str, Any] = {}
+        for direction in directions:
+            point = subject_weighted_mean(
+                test_items,
+                lambda item, label=label, direction=direction: (
+                    _cross_loss(item, reference, label, direction, brier_loss)
+                    - _raw_loss(item, direction, brier_loss)
+                ),
+            )
+            # Any nonzero failure count invalidates the preregistered interval for
+            # the affected procedure: no success-subset interval is ever emitted.
+            interval = (
+                _interval(samples[label][direction], (2.5, 50.0, 97.5)) if failed == 0 else None
+            )
+            direction_blocks[direction] = {"point": point, "interval": interval}
+        blocks[label] = {
+            "status": status,
+            "planned_replicates": replicates,
+            "successful_replicates": successful[label],
+            "failed_replicates": failed,
+            "failures": failures[label],
+            "directions": direction_blocks,
         }
-        for label, values in samples[direction].items():
-            if values:
-                block[label] = {
-                    "point": subject_weighted_mean(
-                        test_items,
-                        lambda item, label=label, direction=direction: (
-                            _cross_loss(item, reference, label, direction, brier_loss)
-                            - _raw_loss(item, direction, brier_loss)
-                        ),
-                    ),
-                    "interval": _interval(values, (2.5, 50.0, 97.5)),
-                }
-            else:
-                block[label] = None
-        result[direction] = block
-    return result
+    return {
+        "replicates": replicates,
+        "reference_panel": reference.canonical_payload(),
+        "procedures": blocks,
+    }
 
 
 def build_analysis_artifact(

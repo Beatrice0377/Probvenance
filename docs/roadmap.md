@@ -281,7 +281,7 @@ These are directions under consideration, not current commitments. None of them
 is guaranteed to reach 1.0, and whether each is pursued must be decided by
 actual experimental results rather than by design intuition.
 
-### Calibration Transportability (research spec v1 frozen; R1 implemented, R2 empirical pilot executed — human research gate pending)
+### Calibration Transportability (research spec v1 frozen; R1 implemented, R2A pilot and R2B stability round executed — human research gate pending)
 
 `docs/research/calibration-transport-research-spec-v1.md` freezes the problem
 definition, measurement semantics, experimental separation, estimands, metrics,
@@ -304,9 +304,15 @@ empirical pilot ran once against the exact pinned `Qwen/Qwen3.5-2B` revision
 (`15852e8c16360a2fea060d615a32b45270f8a8fc`), producing a raw artifact, a
 reproducible analysis artifact, and an exploratory `REPORT.md`; the two
 calibration directions show opposite-signed exploratory transport excess risk.
+R2B (a stability/deconfounding round on a larger 150-item population with a
+pre-declared 90-train/60-test paired split) is **implemented and executed** in the
+same directory; it adds a paired test bootstrap, a paired train-refit calibrator
+stability bootstrap, and a train/test empirical-range loss decomposition, and
+records its evidence in `R2B_REPORT.md`. R2B is still **exploratory**, not
+confirmatory.
 This is **exploratory pilot evidence, not confirmatory evidence**, and no
 compatibility claim is authorized by it. The human research gate is **pending**,
-so R2 must still precede any investment in R3/R4 (transport benchmark,
+so R2A/R2B must still precede any investment in R3/R4 (transport benchmark,
 evidence-aware transport
 audit). Declared measurement identity remains the
 default fail-closed authorization boundary; empirical compatibility is a

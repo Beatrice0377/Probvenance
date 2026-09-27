@@ -1,0 +1,45 @@
+{
+  "analysis_execution_authorized": false,
+  "analysis_kernel_file": "experiments/calibration_transport/r3_analysis.py",
+  "analysis_kernel_file_sha256": "819f299304703d27ff89af7e8cfc00e6bffcb8d9ae11d8bb1724db0d7cc6a0c5",
+  "artifact_type": "r3-analysis-execution-entry-gate",
+  "artifact_version": 1,
+  "cross_condition_population_pairing_passed": true,
+  "expected_subjects": 57,
+  "expected_test_items_per_condition": 1140,
+  "expected_train_items_per_condition": 456,
+  "fingerprint_version": 1,
+  "gate_fingerprint": "092f6beb8b3d0aabd3680c0bb9b083cd4dcf529ece276cfbe92ea61b387a4419",
+  "official_cli_scientific_parameters_exposed": false,
+  "official_confirmatory_statistical_outcome_computed": false,
+  "official_input_structural_preflight_passed": true,
+  "official_output_files_created": false,
+  "population_manifest_fingerprint": "40cc9753a711314ff3b25ed6e234d0cbda11f3f60cd87f1d3915195a3d1780b8",
+  "protocol_fingerprint": "3ef63056ae16b18ad65d9c87d1fbec5b43550873a0e3e25ec0a323f954ee974d",
+  "push": false,
+  "raw_index": {
+    "fingerprint": "25fa4086e67a1cbd48cb8d857337092b132790ceb04925407649629c35d1bc51",
+    "sha256": "b04351acd878161d21022f3e5f5f08da1443977a484f62c8ba465adba051c461"
+  },
+  "raw_inputs": {
+    "primary": {
+      "child_plan_fingerprint": "787c668201fa1a2046bb3eb7c00ec1fd929d76bc164dadcef6f7dd6a2edb0ee6",
+      "evidence_fingerprint": "726bb8340aecfa0c98e4d4b7fe1548278f3cc8ff391b9f6d14aa5215e84d7c71",
+      "model_id": "openbmb/MiniCPM5-2B",
+      "model_revision": "12a3808a956f869c767195e9266b59c4d21d92e2",
+      "sha256": "e7b45e921d35523f9fb6aabaefe10e585f43f35f25e5e4159bb2211cec8b999b"
+    },
+    "replication": {
+      "child_plan_fingerprint": "dc2f58732921466891de16a031f20141e82a28107de7fef114456f65159c6ebe",
+      "evidence_fingerprint": "378b2676dad4b12be4d57c9030c9d44823df921dc62f4d9b7f73acf79f0d4887",
+      "model_id": "Qwen/Qwen3.5-2B",
+      "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "sha256": "00a1d04e6cb308cf609ccf3cde69b761497c4a3a110704ea069f3e933cf9248a"
+    }
+  },
+  "runner_file": "experiments/calibration_transport/run_r3_analysis.py",
+  "runner_file_sha256": "5dfcf531507b447c52e42286784b137676bad8c1fc1b95fcae9735c729167537",
+  "runner_implementation_commit": "2d6c3553c650b948f348e1d7d216a7d93dd4326d",
+  "static_semantic_closure_commit": "9d18f9f0efe6a6089f63e47ce15dc7cf218673db",
+  "validate_only_calls_analysis_kernel": false
+}

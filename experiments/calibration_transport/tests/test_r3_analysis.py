@@ -78,16 +78,25 @@ def _evidence_item(
     cat_anchor_score: float,
     ovr_winner: str | None,
     ovr_anchor_score: float,
+    ovr_candidate_scores: dict[str, float] | None = None,
 ) -> dict[str, Any]:
     def block(winner: str | None, anchor_score: float) -> dict[str, Any]:
         record = None if winner is None else {"winner": winner, "anchor_score": anchor_score}
         return {"status": "scored", "record": record}
 
+    ovr_block = block(ovr_winner, ovr_anchor_score)
+    if ovr_candidate_scores is not None and ovr_block["record"] is not None:
+        ovr_block["record"]["candidates"] = [
+            {"candidate": name, "probability_true": score}
+            for name, score in ovr_candidate_scores.items()
+        ]
+        ovr_block["candidate_scores"] = dict(ovr_candidate_scores)
+
     return {
         "item_id": item_id,
         "ground_truth_value": ground_truth_value,
         "cat": block(cat_winner, cat_anchor_score),
-        "ovr": block(ovr_winner, ovr_anchor_score),
+        "ovr": ovr_block,
     }
 
 
@@ -886,25 +895,83 @@ class TestEndToEndWinnerDiagnostics:
     """Native-winner semantics: no anchor threshold, no calibrated probability."""
 
     def test_cat_winner_correct_below_half_threshold(self) -> None:
-        record = _winner_record("i1", "option-1", "option-1", "option-3")
+        evidence = _evidence_item(
+            "i1",
+            "option-1",
+            cat_winner="option-1",
+            cat_anchor_score=0.40,
+            ovr_winner="option-3",
+            ovr_anchor_score=0.30,
+        )
+        cat_anchor = evidence["cat"]["record"]["anchor_score"]
+        assert cat_anchor < 0.5
+        record = analysis.winner_record_from_evidence(evidence)
         diagnostics = analysis.end_to_end_diagnostics([record])
         assert diagnostics["n"] == 1
         assert diagnostics["cat_own_winner_accuracy"] == 1.0
 
     def test_ovr_winner_correct_when_all_candidate_scores_below_half(self) -> None:
-        record = _winner_record("i1", "option-2", "option-2", "option-2")
-        diagnostics = analysis.end_to_end_diagnostics([record])
-        assert diagnostics["ovr_own_winner_accuracy"] == 1.0
+        candidate_scores = {
+            "option-1": 0.42,
+            "option-2": 0.47,
+            "option-3": 0.44,
+            "option-4": 0.31,
+        }
+        evidence = _evidence_item(
+            "i1",
+            "option-2",
+            cat_winner="option-4",
+            cat_anchor_score=0.31,
+            ovr_winner="option-2",
+            ovr_anchor_score=0.47,
+            ovr_candidate_scores=candidate_scores,
+        )
+        recorded = evidence["ovr"]["record"]
+        assert [entry["candidate"] for entry in recorded["candidates"]] == [
+            "option-1",
+            "option-2",
+            "option-3",
+            "option-4",
+        ]
+        assert all(entry["probability_true"] < 0.5 for entry in recorded["candidates"])
+        assert all(score < 0.5 for score in candidate_scores.values())
+        record = analysis.winner_record_from_evidence(evidence)
+        assert record.ovr_winner == "option-2"
+        assert record.ground_truth_value == "option-2"
+        assert analysis.end_to_end_diagnostics([record])["ovr_own_winner_accuracy"] == 1.0
 
     def test_threshold_class_agreement_masks_recorded_disagreement(self) -> None:
-        record = _winner_record("i1", "option-1", "option-1", "option-3")
-        diagnostics = analysis.end_to_end_diagnostics([record])
-        assert diagnostics["winner_agreement"] == 0.0
+        evidence = _evidence_item(
+            "i1",
+            "option-1",
+            cat_winner="option-1",
+            cat_anchor_score=0.40,
+            ovr_winner="option-3",
+            ovr_anchor_score=0.42,
+        )
+        cat_anchor = evidence["cat"]["record"]["anchor_score"]
+        ovr_anchor = evidence["ovr"]["record"]["anchor_score"]
+        assert (cat_anchor >= 0.5) == (ovr_anchor >= 0.5)
+        assert (cat_anchor >= 0.5) is False
+        record = analysis.winner_record_from_evidence(evidence)
+        assert record.cat_winner != record.ovr_winner
+        assert analysis.end_to_end_diagnostics([record])["winner_agreement"] == 0.0
 
     def test_recorded_agreement_when_threshold_classes_differ(self) -> None:
-        record = _winner_record("i1", "option-4", "option-3", "option-3")
-        diagnostics = analysis.end_to_end_diagnostics([record])
-        assert diagnostics["winner_agreement"] == 1.0
+        evidence = _evidence_item(
+            "i1",
+            "option-4",
+            cat_winner="option-3",
+            cat_anchor_score=0.60,
+            ovr_winner="option-3",
+            ovr_anchor_score=0.40,
+        )
+        cat_anchor = evidence["cat"]["record"]["anchor_score"]
+        ovr_anchor = evidence["ovr"]["record"]["anchor_score"]
+        assert (cat_anchor >= 0.5) != (ovr_anchor >= 0.5)
+        record = analysis.winner_record_from_evidence(evidence)
+        assert record.cat_winner == record.ovr_winner == "option-3"
+        assert analysis.end_to_end_diagnostics([record])["winner_agreement"] == 1.0
 
     def test_native_winner_accuracy_and_agreement_values(self) -> None:
         records = [
@@ -943,6 +1010,12 @@ class TestWinnerThresholdCounterexamples:
         assert analysis.end_to_end_diagnostics([record])["cat_own_winner_accuracy"] == 1.0
 
     def test_ovr_all_scores_below_half_with_recorded_winner(self) -> None:
+        candidate_scores = {
+            "option-1": 0.42,
+            "option-2": 0.47,
+            "option-3": 0.44,
+            "option-4": 0.31,
+        }
         evidence = _evidence_item(
             "i1",
             "option-2",
@@ -950,7 +1023,10 @@ class TestWinnerThresholdCounterexamples:
             cat_anchor_score=0.42,
             ovr_winner="option-2",
             ovr_anchor_score=0.47,
+            ovr_candidate_scores=candidate_scores,
         )
+        assert len(candidate_scores) == 4
+        assert all(score < 0.5 for score in candidate_scores.values())
         record = analysis.winner_record_from_evidence(evidence)
         old_correct = (evidence["ovr"]["record"]["anchor_score"] >= 0.5) == (
             record.ground_truth_value == record.ovr_winner

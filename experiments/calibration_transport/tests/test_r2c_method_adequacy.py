@@ -247,6 +247,56 @@ def test_artifact_records_excluded_families_and_limitations() -> None:
     assert "isotonic" in report["excluded_methods"]
     assert "full-3-parameter-beta" in report["excluded_methods"]
     assert "exploratory" in report["statement"]
+    assert artifact["round_status"] == "complete"
+    assert artifact["train_refit_bootstrap"]["failed_fits"] == 0
+
+
+def test_train_refit_failure_is_recorded_and_cell_marked_failed(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    train, test = _synthetic_points()
+    design = r2c.load_design()
+    real_fit = r2c._fit_calibrator
+    calls: dict[tuple[str, str], int] = {}
+
+    def flaky(
+        *, config: Any, source_measurement: str, training_rows: Any, plan_fingerprint: str
+    ) -> Any:
+        key = (config.label, source_measurement)
+        calls[key] = calls.get(key, 0) + 1
+        # The first call per key is the full-train fit; later calls are refits.
+        if key == ("P:0.01", "OVR") and calls[key] > 1:
+            raise r2c.InvalidDecisionError("forced uncertified refit")
+        return real_fit(
+            config=config,
+            source_measurement=source_measurement,
+            training_rows=training_rows,
+            plan_fingerprint=plan_fingerprint,
+        )
+
+    monkeypatch.setattr(r2c, "_fit_calibrator", flaky)
+    artifact = r2c.build_r2c_analysis_artifact(
+        raw=_raw_stub(),
+        design=design,
+        plan=_fake_plan(),
+        train_points=train,
+        test_points=test,
+        provenance=None,
+        test_bootstrap_replicates=3,
+        train_refit_replicates=4,
+    )
+    assert artifact["round_status"] == "incomplete"
+    assert artifact["train_refit_bootstrap"]["status"] == "incomplete"
+    assert artifact["train_refit_bootstrap"]["failed_fits"] == 4
+    failed = artifact["train_refit_bootstrap"]["per_configuration"]["P:0.01"]
+    assert failed["status"] == "failed"
+    assert failed["failed_fit_count"] == 4
+    assert len(failed["failures"]) == 4
+    assert failed["failures"][0]["measurement"] == "OVR"
+    # No subset interval is computed over the surviving replicates.
+    assert "native_cat" not in failed
+    assert "transport_cat_to_ovr" not in failed
+    assert artifact["train_refit_bootstrap"]["per_configuration"]["P:1e-06"]["status"] == "complete"
 
 
 # --- R2B current-configuration reproduction ---------------------------------

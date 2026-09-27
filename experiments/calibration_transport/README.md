@@ -203,7 +203,11 @@ the network or GPU, and never regrids after seeing results.
   native Brier change vs raw, the 2x2 transport matrices and deltas,
   cross-vs-raw changes, exact LogLoss (no clipping), a shared paired TEST
   bootstrap (2000) and a shared paired train-refit bootstrap (1000), parameter
-  stability, and transport-sign counts across all ten configurations.
+  stability, and transport-sign counts across all ten configurations. A refit
+  that the reused solver cannot certify is recorded per measurement/replicate
+  and the affected configuration's train-refit block is marked `failed` with no
+  interval computed over the surviving replicates (PART 36 fail-closed); the
+  round status becomes `incomplete`.
 - `tests/test_r2c_method_adequacy.py` — locks the exact grid, the Family L
   identity-map property, endpoint rejection, artifact determinism, and the exact
   reproduction of the committed R2B `P:0.01` configuration.

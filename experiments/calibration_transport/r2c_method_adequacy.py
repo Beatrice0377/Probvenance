@@ -39,6 +39,7 @@ from pathlib import Path
 from typing import Any
 
 from probvenance.calibration import _solve_l2_logistic, _stable_sigmoid
+from probvenance.errors import InvalidDecisionError
 from probvenance.fingerprint import fingerprint
 
 _HARNESS_DIR = Path(__file__).resolve().parent
@@ -613,8 +614,12 @@ def _train_refit_bootstrap(
     """Paired train-refit bootstrap with one shared resample per replicate.
 
     Every configuration and both measurements reuse the SAME resampled training
-    multiset per replicate. Any fit failure propagates: R2C fails closed rather
-    than reporting an interval over an implicitly selected subset.
+    multiset per replicate. If any refit cannot be certified by the reused
+    solver, the failure is RECORDED (config/measurement/replicate/exact error)
+    and the affected configuration's train-refit block is marked ``failed`` with
+    NO interval computed over the surviving replicates. This implements the
+    PART 36 fail-closed failure policy: failures are never silently dropped and
+    never reduced to a subset interval; the round status becomes ``incomplete``.
     """
     draws = _draw_matrix(
         protocol_id=PAIRED_TRAIN_REFIT_BOOTSTRAP_PROTOCOL_ID,
@@ -636,24 +641,37 @@ def _train_refit_bootstrap(
         }
         for computation in computations
     }
-    for row in draws:
+    failures: dict[str, list[dict[str, Any]]] = {
+        computation.config.label: [] for computation in computations
+    }
+    for replicate, row in enumerate(draws):
         sampled = [train_points[index] for index in row]
         rows_a = [(p.item_id, p.score_a, p.y) for p in sampled]
         rows_b = [(p.item_id, p.score_b, p.y) for p in sampled]
         for computation in computations:
             config = computation.config
-            g_cat = _fit_calibrator(
-                config=config,
-                source_measurement="CAT",
-                training_rows=rows_a,
-                plan_fingerprint=plan_fingerprint,
-            )
-            g_ovr = _fit_calibrator(
-                config=config,
-                source_measurement="OVR",
-                training_rows=rows_b,
-                plan_fingerprint=plan_fingerprint,
-            )
+            fitted: dict[str, Any] = {"CAT": None, "OVR": None}
+            for measurement, training_rows in (("CAT", rows_a), ("OVR", rows_b)):
+                try:
+                    fitted[measurement] = _fit_calibrator(
+                        config=config,
+                        source_measurement=measurement,
+                        training_rows=training_rows,
+                        plan_fingerprint=plan_fingerprint,
+                    )
+                except InvalidDecisionError as error:
+                    failures[config.label].append(
+                        {
+                            "measurement": measurement,
+                            "replicate": replicate,
+                            "error_type": type(error).__name__,
+                            "message": str(error),
+                        }
+                    )
+            g_cat = fitted["CAT"]
+            g_ovr = fitted["OVR"]
+            if g_cat is None or g_ovr is None:
+                continue
             bucket = series[config.label]
             bucket["cat_slope"].append(g_cat.slope)
             bucket["cat_intercept"].append(g_cat.intercept)
@@ -671,30 +689,40 @@ def _train_refit_bootstrap(
             bucket["transport_ovr_to_cat"].append(
                 _mean(_per_item_transport_diff(test_points, ovr_test, cat_test))
             )
+    per_configuration: dict[str, Any] = {}
+    for label, bucket in series.items():
+        if failures[label]:
+            per_configuration[label] = {
+                "status": "failed",
+                "failed_fit_count": len(failures[label]),
+                "failures": failures[label],
+            }
+            continue
+        per_configuration[label] = {
+            "status": "complete",
+            "native_cat": r2b_stability._interval(bucket["native_cat"]),
+            "native_ovr": r2b_stability._interval(bucket["native_ovr"]),
+            "transport_cat_to_ovr": r2b_stability._interval(bucket["transport_cat_to_ovr"]),
+            "transport_ovr_to_cat": r2b_stability._interval(bucket["transport_ovr_to_cat"]),
+            "native_cat_negative_fraction": _negative_fraction(bucket["native_cat"]),
+            "native_ovr_negative_fraction": _negative_fraction(bucket["native_ovr"]),
+            "parameter_cat": {
+                "slope": r2b_stability._interval(bucket["cat_slope"]),
+                "intercept": r2b_stability._interval(bucket["cat_intercept"]),
+            },
+            "parameter_ovr": {
+                "slope": r2b_stability._interval(bucket["ovr_slope"]),
+                "intercept": r2b_stability._interval(bucket["ovr_intercept"]),
+            },
+        }
+    failed_fits = sum(len(entries) for entries in failures.values())
     return {
         "protocol_id": PAIRED_TRAIN_REFIT_BOOTSTRAP_PROTOCOL_ID,
         "protocol_version": PAIRED_TRAIN_REFIT_BOOTSTRAP_PROTOCOL_VERSION,
         "replicates": replicates,
-        "failed_fits": 0,
-        "per_configuration": {
-            label: {
-                "native_cat": r2b_stability._interval(bucket["native_cat"]),
-                "native_ovr": r2b_stability._interval(bucket["native_ovr"]),
-                "transport_cat_to_ovr": r2b_stability._interval(bucket["transport_cat_to_ovr"]),
-                "transport_ovr_to_cat": r2b_stability._interval(bucket["transport_ovr_to_cat"]),
-                "native_cat_negative_fraction": _negative_fraction(bucket["native_cat"]),
-                "native_ovr_negative_fraction": _negative_fraction(bucket["native_ovr"]),
-                "parameter_cat": {
-                    "slope": r2b_stability._interval(bucket["cat_slope"]),
-                    "intercept": r2b_stability._interval(bucket["cat_intercept"]),
-                },
-                "parameter_ovr": {
-                    "slope": r2b_stability._interval(bucket["ovr_slope"]),
-                    "intercept": r2b_stability._interval(bucket["ovr_intercept"]),
-                },
-            }
-            for label, bucket in series.items()
-        },
+        "failed_fits": failed_fits,
+        "status": "complete" if failed_fits == 0 else "incomplete",
+        "per_configuration": per_configuration,
     }
 
 
@@ -811,6 +839,7 @@ def build_r2c_analysis_artifact(
         r["label"] for r in config_results if r["native"]["ovr"]["native_minus_raw_brier"] < 0.0
     ]
     source = design["source_r2b_raw"]
+    round_status = "complete" if train_refit["status"] == "complete" else "incomplete"
     return {
         "artifact_type": R2C_ANALYSIS_ARTIFACT_TYPE,
         "artifact_version": R2C_ANALYSIS_ARTIFACT_VERSION,
@@ -837,6 +866,7 @@ def build_r2c_analysis_artifact(
         },
         "provenance": dict(provenance or {}),
         "no_model_rerun": True,
+        "round_status": round_status,
         "lambda_grid": list(LAMBDA_GRID),
         "percentile_rule": {"id": PERCENTILE_RULE_ID, "version": PERCENTILE_RULE_VERSION},
         "raw_baseline": _raw_baseline_block(train_points=train_points, test_points=test_points),
@@ -849,11 +879,17 @@ def build_r2c_analysis_artifact(
         "native_improvement_ovr_configs": ovr_better,
         "transport_sign_counts": _transport_sign_counts(config_results),
         "limitations": {
-            "status": "exploratory",
+            "status": round_status,
             "statement": (
                 "R2C reuses R2B held-out data after R2B results were already observed; "
                 "it is an exploratory method-sensitivity study, not an independent "
                 "confirmation of any selected calibration method."
+            ),
+            "train_refit_failure_policy": (
+                "Any refit the reused solver cannot certify is recorded per "
+                "measurement/replicate with its exact error; the affected "
+                "configuration's train-refit block is marked 'failed' with NO "
+                "interval computed over the surviving replicates (PART 36 fail-closed)."
             ),
             "excluded_methods": [
                 "isotonic",

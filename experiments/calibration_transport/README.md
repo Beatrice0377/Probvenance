@@ -98,11 +98,14 @@ before constructing the plan. R1 cannot prove a caller's independence.
 
 ## 10. Status
 
-R1 is complete and unchanged. R2 (the tiny frozen-decision CAT↔OVR pilot) is
-**implemented** in this directory but its exploratory evidence is produced only
-by an actual local-model run; until that run is recorded, no empirical result
-and no compatibility claim exists. Nothing beyond the research gate is started
-here.
+R1 is complete and unchanged. The R2 exploratory program (R2A/R2B/R2C/R2C.1) is
+**executed and CLOSED**; `R2_CLOSURE.md` records the closure and the evidence map.
+R2 is exploratory only: it is not confirmatory evidence and authorizes no
+compatibility claim, and there is no R2D. The semantics required before any R3
+design are frozen prospectively in
+[`docs/research/calibration-transport-research-spec-v2.md`](../../docs/research/calibration-transport-research-spec-v2.md).
+R3 is **not started**: no R3 code, data, method panel, calibration procedure, or
+model set is selected here, and nothing beyond the research gate is started.
 
 ## 11. R2 — the minimal Frozen-Decision CAT↔OVR pilot
 

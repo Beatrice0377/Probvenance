@@ -261,10 +261,19 @@ method-sensitivity conclusions:
 
 None. The audit changes no production source. It does not require changing the
 production solver, its tolerance, its iterations, or its certificate, and it does
-not change the method, objective, or version. No production defect was found; the
-limitation is confined to the exploratory `lambda = 1e-6` research setting under
-the frozen binary64 kernel. `lambda = 1e-6` is retained (not removed) as a
-pre-declared configuration with a documented numerical-operational limitation.
+not change the method, objective, or version.
+
+**No production correctness violation was observed**: the frozen fitter failed
+closed on the affected cases and did not emit an uncertified fitted profile. R2C.1
+nevertheless identifies a **solver-path completeness/robustness limitation** under
+the observed `lambda = 1e-6` resamples. The limitation was observed in the
+exploratory R2C setting, but the same numerical path and accepted positive-`l2`
+domain are used by the production fitter; therefore the evidence does not justify
+claiming that the mechanism is confined to research-only use. This observation
+does not by itself authorize any production contract change.
+
+`lambda = 1e-6` is retained (not removed) as a pre-declared configuration with a
+documented numerical-operational limitation.
 
 ## 13. Determinism
 

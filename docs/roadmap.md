@@ -281,7 +281,7 @@ These are directions under consideration, not current commitments. None of them
 is guaranteed to reach 1.0, and whether each is pursued must be decided by
 actual experimental results rather than by design intuition.
 
-### Calibration Transportability (research spec v1 frozen; R1 implemented, R2A pilot, R2B stability round, R2C method-adequacy sensitivity and R2C.1 numerical closure executed — human research gate pending)
+### Calibration Transportability (R2 exploratory program CLOSED; spec v1 historical, spec v2 frozen for R3+; R3 not started — human research gate pending)
 
 `docs/research/calibration-transport-research-spec-v1.md` freezes the problem
 definition, measurement semantics, experimental separation, estimands, metrics,
@@ -323,15 +323,25 @@ executed** offline in the same directory. It adds no data, model, lambda, or
 calibration family: it re-solves the already-frozen `lambda = 1e-6` train-refit
 objectives with an independent, dependency-free 80-digit Decimal reference and
 characterizes the 15 fits the frozen binary64 solver could not certify, recording
-its evidence in `R2C1_REPORT.md`. R2C/R2C.1 numerical closure artifact recorded;
-the human research gate remains **pending** and R3 is not started.
-This is **exploratory pilot evidence, not confirmatory evidence**, and no
-compatibility claim is authorized by it. The human research gate is **pending**,
-so R2A/R2B/R2C/R2C.1 must still precede any investment in R3/R4 (transport benchmark,
-evidence-aware transport
-audit). Declared measurement identity remains the
-default fail-closed authorization boundary; empirical compatibility is a
-research result, not a runtime entitlement.
+its evidence in `R2C1_REPORT.md`.
+
+R2A/R2B/R2C/R2C.1 together are **exploratory evidence, not confirmatory evidence**,
+and no compatibility claim is authorized by them. The R2 exploratory program is now
+**CLOSED**; the closure and evidence map are recorded in
+`experiments/calibration_transport/R2_CLOSURE.md`. There is no R2D: further mining
+of the same one-model, synthetic R2 evidence cannot become confirmatory. Research
+Specification v1 is retained **unchanged** as the historical authority for
+R0/R1/R2. `docs/research/calibration-transport-research-spec-v2.md` prospectively
+freezes the conditioned-compatibility semantics required before any R3 design (the
+calibration procedure `F` as an explicit conditioning axis, the exact-map vs
+procedure-level claim separation, the three-baseline interpretation contract, and
+the confirmatory-analysis discipline). R3 is **not started**, and no R3 calibration
+procedure, method panel, model set, or confirmatory dataset is selected. The human
+research gate remains **pending**, to be decided after external review, and
+R2A/R2B/R2C/R2C.1 must still precede any investment in R3/R4 (transport benchmark,
+evidence-aware transport audit). Declared measurement identity remains the default
+fail-closed authorization boundary; empirical compatibility is a research result,
+not a runtime entitlement.
 
 ### Scoring Doctrine
 

@@ -532,8 +532,8 @@ def analyze_r2b_raw_artifact(
         source_case_set_version=raw["source_case_set_version"],
         source_case_set_fingerprint=raw["source_case_set_fingerprint"],
         plan=plan,
-        git_commit=raw["run_provenance_canonical_payload"]["code_provenance"]["git_commit"],
-        git_worktree_clean=True,
+        git_commit=raw["r2b_run_provenance_canonical_payload"]["code_provenance"]["git_commit"],
+        git_worktree_clean=raw["git_worktree_clean"],
     )
     if provenance.fingerprint != raw["r2b_run_provenance_fingerprint"]:
         raise ValueError("run provenance fingerprint does not match the raw artifact lineage")

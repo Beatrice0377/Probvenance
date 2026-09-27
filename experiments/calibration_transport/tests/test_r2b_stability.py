@@ -15,6 +15,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+import pytest
+
 HARNESS_DIR = Path(__file__).resolve().parents[1]
 REPO_ROOT = HARNESS_DIR.parents[1]
 SRC = REPO_ROOT / "src"
@@ -271,3 +273,20 @@ def test_analysis_artifact_schema_and_determinism() -> None:
     assert completeness["paired_scored_test_n"] == 60
     assert first["paired_test_bootstrap"]["replicates"] == 100
     assert first["train_refit_bootstrap"]["replicates"] == 50
+
+
+def test_analyze_raw_artifact_reproduces_the_committed_analysis() -> None:
+    """Regenerating from the frozen raw artifact must reproduce the analysis artifact.
+
+    This locks the analyze-from-raw path (its raw-artifact key names and its
+    fail-closed lineage checks). It skips before the empirical R2B run exists,
+    because no raw artifact is committed until then.
+    """
+    raw_path = HARNESS_DIR / "results" / "r2b-stability-qwen35-2b-v1.json"
+    analysis_path = HARNESS_DIR / "results" / "r2b-stability-qwen35-2b-v1-analysis.json"
+    if not raw_path.is_file() or not analysis_path.is_file():
+        pytest.skip("R2B raw/analysis artifacts are not committed yet")
+    raw = json.loads(raw_path.read_text(encoding="utf-8"))
+    regenerated = r2b_stability.analyze_r2b_raw_artifact(raw)
+    committed = json.loads(analysis_path.read_text(encoding="utf-8"))
+    assert json.dumps(regenerated, sort_keys=True) == json.dumps(committed, sort_keys=True)

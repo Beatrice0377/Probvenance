@@ -214,7 +214,39 @@ the network or GPU, and never regrids after seeing results.
 
 R2C selects no method: it reports facts for a later human research gate.
 
-## 14. Running the tests
+## 14. R2C.1 — the low-regularization numerical closure
+
+R2C.1 answers exactly one follow-up question about the frozen R2C evidence: were
+the 15 `lambda = 1e-6` train-refit fits that the reused binary64 solver could not
+certify a pathology of the objective, or the same objective already near its
+optimum in binary64 while the frozen sufficient gradient certificate reached a
+numerical conditioning floor? It adds NO data, model, GPU, network, lambda, or
+calibration family, and it does not modify `src/`.
+
+- `r2c1_numerical_closure_design.json` — the pre-analysis declaration. It pins the
+  frozen R2B raw and R2C analysis artifacts by SHA256, the exact 15-failure set,
+  the reference-solver contract (stdlib `decimal`, 80 digits, `ROUND_HALF_EVEN`,
+  objective-gap tolerance `1e-24`, fixed zero start), the all-4000-fit reference
+  policy, the cross-implementation agreement gate, and the rounded-reference and
+  ULP-neighbourhood diagnostics.
+- `r2c1_numerical_closure.py` — an independent, dependency-free Decimal reference
+  optimizer for the exact same objective (`mean Bernoulli NLL + lambda/2 * (a^2 +
+  b^2)`) with its own 2x2 Newton solve, Armijo backtracking line search, and
+  strong-convexity objective-gap certificate. It reuses the production binary64
+  kernel only to reproduce production behaviour (the agreement gate and the
+  rounded-reference certificate diagnostics). Feature values are the exact
+  binary64 R2C features (`Decimal.from_float` of the R2C float feature), so only
+  the optimizer arithmetic changes.
+- `tests/test_r2c1_numerical_closure.py` — locks the exact known optimum, agreement
+  with the production solver on an ordinary lambda, the exact binary64 feature
+  semantics for both families, deterministic bootstrap replay, the frozen
+  15-failure set / source lineage, and the classification rules.
+
+R2C.1 is a **numerical reference backend, not a new calibration family, not a new
+R2C configuration, and not an R3 candidate**. It selects no method and authorizes
+no R3 work; its evidence is recorded in `R2C1_REPORT.md`.
+
+## 15. Running the tests
 
 No model, no GPU, and no network are required:
 

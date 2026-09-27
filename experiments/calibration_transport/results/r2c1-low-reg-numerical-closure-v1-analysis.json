@@ -1,0 +1,752 @@
+{
+  "agreement_violations": [],
+  "artifact_type": "calibration-transport-r2c1-numerical-closure-analysis",
+  "artifact_version": 1,
+  "classification": {
+    "category": "A",
+    "evidence": {
+      "agreement_violations": 0,
+      "failed_diagnostic_count": 15,
+      "production_certificate_met_at_rounded_count": 15,
+      "reference_attempted": 4000,
+      "reference_failed": 0,
+      "rounded_reference_meets_objective_tolerance_count": 15
+    },
+    "summary": "numerical precision limitation of the frozen binary64 certification path: the high-precision reference certifies the lambda = 1e-6 objective for every resample, the successful float64 fits agree with it, and a binary64 point near the reference optimum already meets the declared objective-gap tolerance, yet the frozen binary64 solver does not reach a point it can certify for these resamples"
+  },
+  "completed_train_refit_summaries": {
+    "L:1e-06": {
+      "family_id": "research-l2-logistic-logit-fixed-decision-probability",
+      "family_version": 1,
+      "native_cat": {
+        "median": 0.0033994050826151928,
+        "n": 1000,
+        "p2_5": -0.0004135950608084047,
+        "p97_5": 0.042455985711714196
+      },
+      "native_cat_negative_fraction": 0.127,
+      "native_ovr": {
+        "median": -0.018670051533413074,
+        "n": 1000,
+        "p2_5": -0.022505676030898824,
+        "p97_5": -0.002366278544494973
+      },
+      "native_ovr_negative_fraction": 0.983,
+      "parameter_cat": {
+        "intercept": {
+          "median": -1.2626407632867613,
+          "n": 1000,
+          "p2_5": -71.22654509138121,
+          "p97_5": 0.2594895239416877
+        },
+        "slope": {
+          "median": 1.2339246980585934,
+          "n": 1000,
+          "p2_5": 0.7879430738222897,
+          "p97_5": 34.47623461034582
+        }
+      },
+      "parameter_ovr": {
+        "intercept": {
+          "median": -0.13443158253087617,
+          "n": 1000,
+          "p2_5": -0.6987073177335751,
+          "p97_5": 0.47626555988943314
+        },
+        "slope": {
+          "median": 2.331951189329103,
+          "n": 1000,
+          "p2_5": 1.2900626057881102,
+          "p97_5": 4.389635369414304
+        }
+      },
+      "replicates": 1000,
+      "transport_cat_to_ovr": {
+        "median": 0.058914437878711756,
+        "n": 1000,
+        "p2_5": 0.009546556509357007,
+        "p97_5": 0.22960664023670946
+      },
+      "transport_cat_to_ovr_negative_fraction": 0.001,
+      "transport_cat_to_ovr_positive_fraction": 0.999,
+      "transport_ovr_to_cat": {
+        "median": -0.0013963505038178006,
+        "n": 1000,
+        "p2_5": -0.040026878971942556,
+        "p97_5": 0.004538442024127291
+      },
+      "transport_ovr_to_cat_negative_fraction": 0.599,
+      "transport_ovr_to_cat_positive_fraction": 0.401
+    },
+    "P:1e-06": {
+      "family_id": "research-l2-logistic-fixed-decision-probability",
+      "family_version": 1,
+      "native_cat": {
+        "median": 0.0017085207905538828,
+        "n": 1000,
+        "p2_5": -0.00010743778935577909,
+        "p97_5": 0.03744489889559004
+      },
+      "native_cat_negative_fraction": 0.114,
+      "native_ovr": {
+        "median": -0.019032061367905386,
+        "n": 1000,
+        "p2_5": -0.022648926505983005,
+        "p97_5": -0.0028573935022820915
+      },
+      "native_ovr_negative_fraction": 0.984,
+      "parameter_cat": {
+        "intercept": {
+          "median": -5.4595170199866105,
+          "n": 1000,
+          "p2_5": -84.17369105342394,
+          "p97_5": -3.2848734785036195
+        },
+        "slope": {
+          "median": 8.821388536939173,
+          "n": 1000,
+          "p2_5": 6.046701473117842,
+          "p97_5": 95.13099540468376
+        }
+      },
+      "parameter_ovr": {
+        "intercept": {
+          "median": -5.2417365923887225,
+          "n": 1000,
+          "p2_5": -9.090598117370142,
+          "p97_5": -3.129049487672131
+        },
+        "slope": {
+          "median": 10.158485910564398,
+          "n": 1000,
+          "p2_5": 5.7307413432896475,
+          "p97_5": 18.44242848468547
+        }
+      },
+      "replicates": 1000,
+      "transport_cat_to_ovr": {
+        "median": 0.042535882532381046,
+        "n": 1000,
+        "p2_5": -0.0028776400674818585,
+        "p97_5": 0.22904756248745767
+      },
+      "transport_cat_to_ovr_negative_fraction": 0.047,
+      "transport_cat_to_ovr_positive_fraction": 0.953,
+      "transport_ovr_to_cat": {
+        "median": -0.0004495159393516241,
+        "n": 1000,
+        "p2_5": -0.03561537115758083,
+        "p97_5": 0.005614424141663327
+      },
+      "transport_ovr_to_cat_negative_fraction": 0.544,
+      "transport_ovr_to_cat_positive_fraction": 0.456
+    }
+  },
+  "design": {
+    "artifact_type": "calibration-transport-r2c1-numerical-closure-design",
+    "artifact_version": 1,
+    "fingerprint": "b40e070859df360d78d85250ea1f3e3a2b3a4836c32132561da58606e77ef49d"
+  },
+  "failed_fit_diagnostics": [
+    {
+      "family_id": "research-l2-logistic-fixed-decision-probability",
+      "hessian_condition_number": 9.643933086025132,
+      "hessian_max_eigenvalue": 0.05061985426070232,
+      "hessian_min_eigenvalue": 0.0052488807013867335,
+      "measurement": "CAT",
+      "production_certificate_met_at_rounded": true,
+      "production_certificate_threshold": 1.414213562373095e-10,
+      "production_style_gradient_norm_at_rounded": 9.283701822467312e-18,
+      "reference_gap_upper_bound": "1.4553008740486393802054918972342224240289720580831234331860169382922599071942757E-28",
+      "reference_gradient_norm": "1.7060485772970471781949579177764695516672333580953939261061829324240440223658898E-17",
+      "reference_intercept": "-3.9253552093710129660659272676674163272080905415989687595923849810041573001102007",
+      "reference_iterations": 7,
+      "reference_slope": "7.0229462244876447741880151622304026532122977452899463723169842180339117687089856",
+      "reference_status": "certified",
+      "replicate": 452,
+      "rounded_intercept": -3.925355209371013,
+      "rounded_reference_actual_gap_meets_objective_tolerance": true,
+      "rounded_reference_actual_gap_upper": "1.4552856250302864295558806939310405964805916326967222331860169382922599071942757E-28",
+      "rounded_slope": 7.022946224487645,
+      "train_multiset_fingerprint": "74f8513596e9926d551d7082c592c01183e9a70b1f063c687698444465db9e46",
+      "ulp_neighborhood_min_gradient_norm": 6.915976086520268e-18,
+      "ulp_neighborhood_min_gradient_ratio": 4.890333589302483e-08
+    },
+    {
+      "family_id": "research-l2-logistic-fixed-decision-probability",
+      "hessian_condition_number": 93.99636451459631,
+      "hessian_max_eigenvalue": 0.23555186532944244,
+      "hessian_min_eigenvalue": 0.0025059678270095706,
+      "measurement": "OVR",
+      "production_certificate_met_at_rounded": true,
+      "production_certificate_threshold": 1.414213562373095e-10,
+      "production_style_gradient_norm_at_rounded": 3.77844397891233e-17,
+      "reference_gap_upper_bound": "1.0209057377771710742441293646968657773617486019931196969343532772576320969149372E-31",
+      "reference_gradient_norm": "4.5186408084227519715596597675483720553210212959234544356813342665134194486889203E-19",
+      "reference_intercept": "-3.3093916000576649931906414490441498917418491790397943102966191852900540011512785",
+      "reference_iterations": 5,
+      "reference_slope": "5.8416326995118495725645517331985203671212366233965727844587202757776939159337392",
+      "reference_status": "certified",
+      "replicate": 169,
+      "rounded_intercept": -3.309391600057665,
+      "rounded_reference_actual_gap_meets_objective_tolerance": true,
+      "rounded_reference_actual_gap_upper": "1.0280136105539876364452643531415930143751486537760196969343532772576320969149372E-31",
+      "rounded_slope": 5.84163269951185,
+      "train_multiset_fingerprint": "a759af53aecea41b7238a29d0b06d205bf823a37105e2f5e06b3e5e0f5d98cd5",
+      "ulp_neighborhood_min_gradient_norm": 9.947382922577883e-18,
+      "ulp_neighborhood_min_gradient_ratio": 7.033861919614079e-08
+    },
+    {
+      "family_id": "research-l2-logistic-logit-fixed-decision-probability",
+      "hessian_condition_number": 9.616184646963596,
+      "hessian_max_eigenvalue": 0.15657177780539125,
+      "hessian_min_eigenvalue": 0.016282110166720883,
+      "measurement": "CAT",
+      "production_certificate_met_at_rounded": true,
+      "production_certificate_threshold": 1.414213562373095e-10,
+      "production_style_gradient_norm_at_rounded": 3.1620622140139033e-18,
+      "reference_gap_upper_bound": "3.7698861190673030788579210060881630922729322206621479627581321043987848981825736E-30",
+      "reference_gradient_norm": "2.7458645702464289886035994058061161513732498365438448965867139725311850181775227E-18",
+      "reference_intercept": "-1.1480988102175228285433487833576592510272612959578885737415403136555816584066875",
+      "reference_iterations": 9,
+      "reference_slope": "1.1990101516466005503869167818847816134896361481026291038949435852419801138846049",
+      "reference_status": "certified",
+      "replicate": 125,
+      "rounded_intercept": -1.148098810217523,
+      "rounded_reference_actual_gap_meets_objective_tolerance": true,
+      "rounded_reference_actual_gap_upper": "3.7701806239067849413576718370911261887233979591710449627581321043987848981825736E-30",
+      "rounded_slope": 1.1990101516466005,
+      "train_multiset_fingerprint": "48c9f405474d30b1ef1e0611b4ffb32eb5d3816e4754ed1495e5f347f8a33c34",
+      "ulp_neighborhood_min_gradient_norm": 3.1620622140139033e-18,
+      "ulp_neighborhood_min_gradient_ratio": 2.2359156340629792e-08
+    },
+    {
+      "family_id": "research-l2-logistic-logit-fixed-decision-probability",
+      "hessian_condition_number": 12.126497836646147,
+      "hessian_max_eigenvalue": 0.449539846370529,
+      "hessian_min_eigenvalue": 0.03707087177404381,
+      "measurement": "CAT",
+      "production_certificate_met_at_rounded": true,
+      "production_certificate_threshold": 1.414213562373095e-10,
+      "production_style_gradient_norm_at_rounded": 6.110473198283083e-18,
+      "reference_gap_upper_bound": "7.932251714694778318314281862806074200908458697658263974069037274029540300646747E-31",
+      "reference_gradient_norm": "1.2595437042591875317712985828777232043815759215181352112148414846403804745890199E-18",
+      "reference_intercept": "-0.72204670155170995730983008553959044600579961207670655899816183947712478730621311",
+      "reference_iterations": 8,
+      "reference_slope": "0.82046691037039603695915908459990889595517886518149923386687997901873116631323256",
+      "reference_status": "certified",
+      "replicate": 308,
+      "rounded_intercept": -0.7220467015517099,
+      "rounded_reference_actual_gap_meets_objective_tolerance": true,
+      "rounded_reference_actual_gap_upper": "7.937507979762930798463931641673499264785857425314963974069037274029540300646747E-31",
+      "rounded_slope": 0.820466910370396,
+      "train_multiset_fingerprint": "2a1278fe0ace71f2066233c1d08a9d678d132c53f600b2e4240960221152ce6f",
+      "ulp_neighborhood_min_gradient_norm": 4.584750450314831e-18,
+      "ulp_neighborhood_min_gradient_ratio": 3.2419081334656944e-08
+    },
+    {
+      "family_id": "research-l2-logistic-logit-fixed-decision-probability",
+      "hessian_condition_number": 4.933322603637644,
+      "hessian_max_eigenvalue": 0.08769894496143524,
+      "hessian_min_eigenvalue": 0.01777685183141467,
+      "measurement": "CAT",
+      "production_certificate_met_at_rounded": true,
+      "production_certificate_threshold": 1.414213562373095e-10,
+      "production_style_gradient_norm_at_rounded": 4.28466346058371e-18,
+      "reference_gap_upper_bound": "3.7774631293181774607313196413084342283759200119197735219944234820235051651583059E-29",
+      "reference_gradient_norm": "8.6919078795373544395187694920402039886551655946850320630956074856935071484145044E-18",
+      "reference_intercept": "-0.66657874113901524133223778223231925362552803206709584408748812533813218864473864",
+      "reference_iterations": 9,
+      "reference_slope": "1.3340910322742431003696997043880183675004569470951846754261877193527765942453492",
+      "reference_status": "certified",
+      "replicate": 444,
+      "rounded_intercept": -0.6665787411390153,
+      "rounded_reference_actual_gap_meets_objective_tolerance": true,
+      "rounded_reference_actual_gap_upper": "3.7774154395954306961694627250015292609413536571193982219944234820235051651583059E-29",
+      "rounded_slope": 1.3340910322742432,
+      "train_multiset_fingerprint": "5e8c1560339ae1480e4c4945e8df9b4b0b7e535749966b6a6514cf27b9486842",
+      "ulp_neighborhood_min_gradient_norm": 3.590033175454782e-18,
+      "ulp_neighborhood_min_gradient_ratio": 2.538536803048751e-08
+    },
+    {
+      "family_id": "research-l2-logistic-logit-fixed-decision-probability",
+      "hessian_condition_number": 5.426444286458979,
+      "hessian_max_eigenvalue": 0.10265200844400973,
+      "hessian_min_eigenvalue": 0.018916992974601272,
+      "measurement": "CAT",
+      "production_certificate_met_at_rounded": true,
+      "production_certificate_threshold": 1.414213562373095e-10,
+      "production_style_gradient_norm_at_rounded": 1.6796871177923476e-17,
+      "reference_gap_upper_bound": "6.1139696583563478358485273694952509911796660153091718481123116004775051472876455E-29",
+      "reference_gradient_norm": "1.1058001318824616450470319753108875082204303168652303756325994004853642713416052E-17",
+      "reference_intercept": "-0.82317413737498292849843616319582900345962272676157075204673533967365170647657542",
+      "reference_iterations": 9,
+      "reference_slope": "1.2590577219628379068540340289394523161293979600351524020920542987083393631983521",
+      "reference_status": "certified",
+      "replicate": 497,
+      "rounded_intercept": -0.8231741373749829,
+      "rounded_reference_actual_gap_meets_objective_tolerance": true,
+      "rounded_reference_actual_gap_upper": "6.1140882195150617906103264866707114014447338584320743481123116004775051472876455E-29",
+      "rounded_slope": 1.2590577219628378,
+      "train_multiset_fingerprint": "b3615a07e010731d43f62171a2135c58bb08804982ee47188d26386425e58f9b",
+      "ulp_neighborhood_min_gradient_norm": 3.472565509240903e-18,
+      "ulp_neighborhood_min_gradient_ratio": 2.4554746196987593e-08
+    },
+    {
+      "family_id": "research-l2-logistic-logit-fixed-decision-probability",
+      "hessian_condition_number": 5.017954937589613,
+      "hessian_max_eigenvalue": 0.08615960428142562,
+      "hessian_min_eigenvalue": 0.01717026265740294,
+      "measurement": "CAT",
+      "production_certificate_met_at_rounded": true,
+      "production_certificate_threshold": 1.414213562373095e-10,
+      "production_style_gradient_norm_at_rounded": 9.406981124422386e-18,
+      "reference_gap_upper_bound": "1.2972419140001875304171571160845260596732916932051106098437391159058989629004918E-28",
+      "reference_gradient_norm": "1.6107401491241146376301413558714835320914792891142635697908910351925171727246226E-17",
+      "reference_intercept": "-0.79461969231889215606810721711422298028018704346881591795258442671538971500288529",
+      "reference_iterations": 9,
+      "reference_slope": "1.2432895043500986092984197677950572147539705482648333963176141065046820840882094",
+      "reference_status": "certified",
+      "replicate": 549,
+      "rounded_intercept": -0.7946196923188922,
+      "rounded_reference_actual_gap_meets_objective_tolerance": true,
+      "rounded_reference_actual_gap_upper": "1.2972352719823369874737627709416636823407927483955651498437391159058989629004918E-28",
+      "rounded_slope": 1.2432895043500987,
+      "train_multiset_fingerprint": "7767a2aa478e711ff26cca203bff4bb893a484a233f6a8b65ce4fcd2d86709d6",
+      "ulp_neighborhood_min_gradient_norm": 8.341358178479644e-18,
+      "ulp_neighborhood_min_gradient_ratio": 5.8982309323088245e-08
+    },
+    {
+      "family_id": "research-l2-logistic-logit-fixed-decision-probability",
+      "hessian_condition_number": 6.6948464042293265,
+      "hessian_max_eigenvalue": 0.12819547939165807,
+      "hessian_min_eigenvalue": 0.019148382449920478,
+      "measurement": "CAT",
+      "production_certificate_met_at_rounded": true,
+      "production_certificate_threshold": 1.414213562373095e-10,
+      "production_style_gradient_norm_at_rounded": 9.493016573379984e-18,
+      "reference_gap_upper_bound": "1.9943783942342888621861367724852957890350105506159246159435884153757384106249204E-31",
+      "reference_gradient_norm": "6.3156605263967265614527223470611073103630942662073470128777976611492139016567344E-19",
+      "reference_intercept": "-0.99601160652950106493727824200002961675608713695643029393802300406730908073705621",
+      "reference_iterations": 9,
+      "reference_slope": "1.3156762629889658684560656884626276840093999709239760511403145508011397430694431",
+      "reference_status": "certified",
+      "replicate": 571,
+      "rounded_intercept": -0.996011606529501,
+      "rounded_reference_actual_gap_meets_objective_tolerance": true,
+      "rounded_reference_actual_gap_upper": "1.9988228223192143962236009033092609836756000460827246159435884153757384106249204E-31",
+      "rounded_slope": 1.3156762629889658,
+      "train_multiset_fingerprint": "121bdf2694e4f94c4e84e936caecb1038e24d8de1effc94d0b48f9a5f60cbe88",
+      "ulp_neighborhood_min_gradient_norm": 5.988220672281878e-18,
+      "ulp_neighborhood_min_gradient_ratio": 4.234311444611982e-08
+    },
+    {
+      "family_id": "research-l2-logistic-logit-fixed-decision-probability",
+      "hessian_condition_number": 8.084201446002577,
+      "hessian_max_eigenvalue": 0.6389203988774698,
+      "hessian_min_eigenvalue": 0.07903321102833216,
+      "measurement": "CAT",
+      "production_certificate_met_at_rounded": true,
+      "production_certificate_threshold": 1.414213562373095e-10,
+      "production_style_gradient_norm_at_rounded": 2.315912097104699e-18,
+      "reference_gap_upper_bound": "6.1743639243048451158075798914384624741669646121242275738065381699708779364535995E-32",
+      "reference_gradient_norm": "3.5140756748552940392489157149127174961507998577637313523396752160440511650508726E-19",
+      "reference_intercept": "-0.54794697269748121754280714259774682909826063486118784946532198772311013404820573",
+      "reference_iterations": 7,
+      "reference_slope": "0.67187526203520019162303782716878078563006026722272078331241874910270900639958135",
+      "reference_status": "certified",
+      "replicate": 936,
+      "rounded_intercept": -0.5479469726974813,
+      "rounded_reference_actual_gap_meets_objective_tolerance": true,
+      "rounded_reference_actual_gap_upper": "6.1890589323362331180221378954554855065287962423572275738065381699708779364535995E-32",
+      "rounded_slope": 0.6718752620352002,
+      "train_multiset_fingerprint": "1dee47f27e2d2a0d9932ccb9f479bc101abf935cfa2dcbe3eeba8d0700f6175c",
+      "ulp_neighborhood_min_gradient_norm": 2.315912097104699e-18,
+      "ulp_neighborhood_min_gradient_ratio": 1.6375971484946907e-08
+    },
+    {
+      "family_id": "research-l2-logistic-logit-fixed-decision-probability",
+      "hessian_condition_number": 9.754099350312911,
+      "hessian_max_eigenvalue": 0.16428484745578487,
+      "hessian_min_eigenvalue": 0.016842646517693568,
+      "measurement": "CAT",
+      "production_certificate_met_at_rounded": true,
+      "production_certificate_threshold": 1.414213562373095e-10,
+      "production_style_gradient_norm_at_rounded": 4.895981959087701e-18,
+      "reference_gap_upper_bound": "3.1740663426182706457932489961315293295121100294795133767991126572234640711242805E-31",
+      "reference_gradient_norm": "7.9675169816176364969132599254582814457897173953587242278229789769804432361991327E-19",
+      "reference_intercept": "-0.64453104490773460976226078838206636680535222732333216474071686442336876311576771",
+      "reference_iterations": 9,
+      "reference_slope": "1.1381505858821098874415099160135368062188515243727465574598045253700673875582739",
+      "reference_status": "certified",
+      "replicate": 960,
+      "rounded_intercept": -0.6445310449077346,
+      "rounded_reference_actual_gap_meets_objective_tolerance": true,
+      "rounded_reference_actual_gap_upper": "3.1753783560311817945154721548343782410019927279591333767991126572234640711242805E-31",
+      "rounded_slope": 1.13815058588211,
+      "train_multiset_fingerprint": "b816a6e6d43d0b1799e6ef2948161e83e594fde51ae996f6ae75a6ac88b485cd",
+      "ulp_neighborhood_min_gradient_norm": 3.585853228118227e-18,
+      "ulp_neighborhood_min_gradient_ratio": 2.53558113394207e-08
+    },
+    {
+      "family_id": "research-l2-logistic-logit-fixed-decision-probability",
+      "hessian_condition_number": 20.535252948279414,
+      "hessian_max_eigenvalue": 0.26780641426927027,
+      "hessian_min_eigenvalue": 0.013041300973685301,
+      "measurement": "CAT",
+      "production_certificate_met_at_rounded": true,
+      "production_certificate_threshold": 1.414213562373095e-10,
+      "production_style_gradient_norm_at_rounded": 3.3678013589671737e-17,
+      "reference_gap_upper_bound": "1.0698593951298255767849310710790284760080088385852364207186498599737814832362964E-30",
+      "reference_gradient_norm": "1.4627777651645006986221183305691319242860355422281378264734850305892596658896480E-18",
+      "reference_intercept": "-1.9924911847107639311465961886361315849729505242362118979426980964220941124226641",
+      "reference_iterations": 9,
+      "reference_slope": "1.2013273828096176618105052622843011004454260079141970985922847135487619834094112",
+      "reference_status": "certified",
+      "replicate": 995,
+      "rounded_intercept": -1.992491184710764,
+      "rounded_reference_actual_gap_meets_objective_tolerance": true,
+      "rounded_reference_actual_gap_upper": "1.0711806401077845194861098879090064808185168582295664207186498599737814832362964E-30",
+      "rounded_slope": 1.2013273828096176,
+      "train_multiset_fingerprint": "29a937fac59799b86ad8a2fb7681cb29dae17b1340409c17960633ba49d35961",
+      "ulp_neighborhood_min_gradient_norm": 3.8988059427105265e-18,
+      "ulp_neighborhood_min_gradient_ratio": 2.7568721206210235e-08
+    },
+    {
+      "family_id": "research-l2-logistic-logit-fixed-decision-probability",
+      "hessian_condition_number": 4.128365248343927,
+      "hessian_max_eigenvalue": 0.21242937818091906,
+      "hessian_min_eigenvalue": 0.051456052311779826,
+      "measurement": "OVR",
+      "production_certificate_met_at_rounded": true,
+      "production_certificate_threshold": 1.414213562373095e-10,
+      "production_style_gradient_norm_at_rounded": 1.9262223932950422e-17,
+      "reference_gap_upper_bound": "8.7107033931896398412085445610341755340497407136889130861638643493266304680087025E-29",
+      "reference_gradient_norm": "1.3199017685562543287434592003520214719807672935374272237672636301217866901347451E-17",
+      "reference_intercept": "-0.096186320116669171431003141449299568380366828197258975956559978436032878744653553",
+      "reference_iterations": 5,
+      "reference_slope": "1.5071745904449665410060960749097119640275759698732127578349821305511384377953651",
+      "reference_status": "certified",
+      "replicate": 81,
+      "rounded_intercept": -0.09618632011666917,
+      "rounded_reference_actual_gap_meets_objective_tolerance": true,
+      "rounded_reference_actual_gap_upper": "8.7107818625684581648620984917614840422479050834002760861638643493266304680087025E-29",
+      "rounded_slope": 1.5071745904449665,
+      "train_multiset_fingerprint": "9b01d619331d39dfeedaff502f0123a6ebaa833cdd945e06919be4c63452d512",
+      "ulp_neighborhood_min_gradient_norm": 2.1589719004558815e-18,
+      "ulp_neighborhood_min_gradient_ratio": 1.5266236712035617e-08
+    },
+    {
+      "family_id": "research-l2-logistic-logit-fixed-decision-probability",
+      "hessian_condition_number": 5.14647776351907,
+      "hessian_max_eigenvalue": 0.15851781055401223,
+      "hessian_min_eigenvalue": 0.0308012232516906,
+      "measurement": "OVR",
+      "production_certificate_met_at_rounded": true,
+      "production_certificate_threshold": 1.414213562373095e-10,
+      "production_style_gradient_norm_at_rounded": 3.545332969478749e-17,
+      "reference_gap_upper_bound": "4.1441288308797169618112249295705079339213656215503224399909240978222598237434555E-28",
+      "reference_gradient_norm": "2.8789334243360741397105513669840995719720643698525680464680148501586670062512067E-17",
+      "reference_intercept": "-0.19301914338375772249865974384855805530512088417222315055238649129442564740712027",
+      "reference_iterations": 6,
+      "reference_slope": "2.5121479720927315081740904003383491856133451631859078340147820458875247186702030",
+      "reference_status": "certified",
+      "replicate": 87,
+      "rounded_intercept": -0.19301914338375772,
+      "rounded_reference_actual_gap_meets_objective_tolerance": true,
+      "rounded_reference_actual_gap_upper": "4.1441849945855462958460683321670155247648108341358027399909240978222598237434555E-28",
+      "rounded_slope": 2.5121479720927313,
+      "train_multiset_fingerprint": "882ba0155b5b76b3e9c3e0b4acf4caaaec744294ab342474a718532f7235e043",
+      "ulp_neighborhood_min_gradient_norm": 1.103893219753895e-17,
+      "ulp_neighborhood_min_gradient_ratio": 7.805703813938308e-08
+    },
+    {
+      "family_id": "research-l2-logistic-logit-fixed-decision-probability",
+      "hessian_condition_number": 6.846489755269503,
+      "hessian_max_eigenvalue": 0.17350691622326933,
+      "hessian_min_eigenvalue": 0.025342463426564998,
+      "measurement": "OVR",
+      "production_certificate_met_at_rounded": true,
+      "production_certificate_threshold": 1.414213562373095e-10,
+      "production_style_gradient_norm_at_rounded": 1.1156592027439667e-17,
+      "reference_gap_upper_bound": "5.163886023805314363384393257194895275048632419636273835466687985739862681246385E-30",
+      "reference_gradient_norm": "3.2136851195489935128687062631318529313506632551900378823961047953963369030071627E-18",
+      "reference_intercept": "-0.15944818958035286410608395752520008019738865995344930315693317309142101151123994",
+      "reference_iterations": 6,
+      "reference_slope": "2.5327021387580251366799597537251776215871799413453397389778896535332778191285831",
+      "reference_status": "certified",
+      "replicate": 253,
+      "rounded_intercept": -0.15944818958035287,
+      "rounded_reference_actual_gap_meets_objective_tolerance": true,
+      "rounded_reference_actual_gap_upper": "5.164115985345107206803542380753916130000718410307223835466687985739862681246385E-30",
+      "rounded_slope": 2.532702138758025,
+      "train_multiset_fingerprint": "aa284440a307f4b9c37aee88dd48d6307783a938a177e74a1bf2bb397802161c",
+      "ulp_neighborhood_min_gradient_norm": 2.710752143664069e-18,
+      "ulp_neighborhood_min_gradient_ratio": 1.9167912229008336e-08
+    },
+    {
+      "family_id": "research-l2-logistic-logit-fixed-decision-probability",
+      "hessian_condition_number": 4.9097643483666795,
+      "hessian_max_eigenvalue": 0.145178098352309,
+      "hessian_min_eigenvalue": 0.029569259958597622,
+      "measurement": "OVR",
+      "production_certificate_met_at_rounded": true,
+      "production_certificate_threshold": 1.414213562373095e-10,
+      "production_style_gradient_norm_at_rounded": 7.858700374521618e-18,
+      "reference_gap_upper_bound": "2.0627956567585074913780395836851092080918075206283112616240354842085794999817510E-30",
+      "reference_gradient_norm": "2.0311551672673889989628208179636034236371401934161318799660152070487007583985193E-18",
+      "reference_intercept": "-0.80920036731180498335203037530913282069426227296578419878488109776229289723253309",
+      "reference_iterations": 6,
+      "reference_slope": "1.9021204206696744126958905294491937656940522921272154977429773314638996928765521",
+      "reference_status": "certified",
+      "replicate": 427,
+      "rounded_intercept": -0.809200367311805,
+      "rounded_reference_actual_gap_meets_objective_tolerance": true,
+      "rounded_reference_actual_gap_upper": "2.0627814366044066568527416826518613414380818709320812616240354842085794999817510E-30",
+      "rounded_slope": 1.9021204206696745,
+      "train_multiset_fingerprint": "c186adbaee71595a7378bb56d3e37ca4d3a8124fd98e9db7c60ba950bae0046c",
+      "ulp_neighborhood_min_gradient_norm": 3.551539478542536e-18,
+      "ulp_neighborhood_min_gradient_ratio": 2.5113176489291617e-08
+    }
+  ],
+  "failed_fit_set_verification": {
+    "expected_count": 15,
+    "matches_frozen_r2c": true,
+    "recomputed_failures": [
+      {
+        "family_id": "research-l2-logistic-fixed-decision-probability",
+        "measurement": "CAT",
+        "replicate": 452
+      },
+      {
+        "family_id": "research-l2-logistic-fixed-decision-probability",
+        "measurement": "OVR",
+        "replicate": 169
+      },
+      {
+        "family_id": "research-l2-logistic-logit-fixed-decision-probability",
+        "measurement": "CAT",
+        "replicate": 125
+      },
+      {
+        "family_id": "research-l2-logistic-logit-fixed-decision-probability",
+        "measurement": "CAT",
+        "replicate": 308
+      },
+      {
+        "family_id": "research-l2-logistic-logit-fixed-decision-probability",
+        "measurement": "CAT",
+        "replicate": 444
+      },
+      {
+        "family_id": "research-l2-logistic-logit-fixed-decision-probability",
+        "measurement": "CAT",
+        "replicate": 497
+      },
+      {
+        "family_id": "research-l2-logistic-logit-fixed-decision-probability",
+        "measurement": "CAT",
+        "replicate": 549
+      },
+      {
+        "family_id": "research-l2-logistic-logit-fixed-decision-probability",
+        "measurement": "CAT",
+        "replicate": 571
+      },
+      {
+        "family_id": "research-l2-logistic-logit-fixed-decision-probability",
+        "measurement": "CAT",
+        "replicate": 936
+      },
+      {
+        "family_id": "research-l2-logistic-logit-fixed-decision-probability",
+        "measurement": "CAT",
+        "replicate": 960
+      },
+      {
+        "family_id": "research-l2-logistic-logit-fixed-decision-probability",
+        "measurement": "CAT",
+        "replicate": 995
+      },
+      {
+        "family_id": "research-l2-logistic-logit-fixed-decision-probability",
+        "measurement": "OVR",
+        "replicate": 81
+      },
+      {
+        "family_id": "research-l2-logistic-logit-fixed-decision-probability",
+        "measurement": "OVR",
+        "replicate": 87
+      },
+      {
+        "family_id": "research-l2-logistic-logit-fixed-decision-probability",
+        "measurement": "OVR",
+        "replicate": 253
+      },
+      {
+        "family_id": "research-l2-logistic-logit-fixed-decision-probability",
+        "measurement": "OVR",
+        "replicate": 427
+      }
+    ],
+    "recomputed_float64_failure_count": 15
+  },
+  "full_n_reference_sanity": {
+    "research-l2-logistic-fixed-decision-probability:CAT": {
+      "float64_intercept": -5.284872759930809,
+      "float64_slope": 8.351575445189166,
+      "matches_r2c_artifact_point_fit": true,
+      "objective_gap_upper": "2.8225987094002095062125965888056766831751853549290704045617204076520549679244784E-28",
+      "parameter_distance": 5.368723857307761e-16,
+      "r2c_artifact_intercept": -5.284872759930809,
+      "r2c_artifact_slope": 8.351575445189166,
+      "reference_intercept": "-5.2848727599308089269530217343629830723131292542640418063844315114194725441115567",
+      "reference_slope": "8.3515754451891664829135994123764667773727129615536438697137719206409791729332920",
+      "status": "ok"
+    },
+    "research-l2-logistic-fixed-decision-probability:OVR": {
+      "float64_intercept": -5.124565813419885,
+      "float64_slope": 9.993485337572228,
+      "matches_r2c_artifact_point_fit": true,
+      "objective_gap_upper": "5.7455942491634369392900523252133441378003758947005240499710140845413931391551918E-22",
+      "parameter_distance": 8.593281713644657e-10,
+      "r2c_artifact_intercept": -5.124565813419885,
+      "r2c_artifact_slope": 9.993485337572228,
+      "reference_intercept": "-5.1245658137926033965296504458799732221211212484863755480292730544286947994588128",
+      "reference_slope": "9.9934853383465181712805199325389463378851869586536535470687640470031037926308271",
+      "status": "ok"
+    },
+    "research-l2-logistic-logit-fixed-decision-probability:CAT": {
+      "float64_intercept": -1.1522575324745041,
+      "float64_slope": 1.1660414412998923,
+      "matches_r2c_artifact_point_fit": true,
+      "objective_gap_upper": "8.4511668747401205370546447414189785633176619355127882934741652113185398122249963E-20",
+      "parameter_distance": 2.7012862359612837e-09,
+      "r2c_artifact_intercept": -1.1522575324745041,
+      "r2c_artifact_slope": 1.1660414412998923,
+      "reference_intercept": "-1.1522575349034165014030768734377184606098324888482482975252082778581605333377245",
+      "reference_slope": "1.1660414424819802843324765296821808891610471403196131408180951745019735441371650",
+      "status": "ok"
+    },
+    "research-l2-logistic-logit-fixed-decision-probability:OVR": {
+      "float64_intercept": -0.1431291901173688,
+      "float64_slope": 2.2964011391024086,
+      "matches_r2c_artifact_point_fit": true,
+      "objective_gap_upper": "5.7696395681881010100135507008411223717794522892346411059764699369601717946809709E-20",
+      "parameter_distance": 1.8569046409577017e-09,
+      "r2c_artifact_intercept": -0.1431291901173688,
+      "r2c_artifact_slope": 2.2964011391024086,
+      "reference_intercept": "-0.14312918995733361056852500570236976136374929242295516425936858242810249354970792",
+      "reference_slope": "2.2964011409524041805691571545532991111404104878709470372786634211252955915954256",
+      "status": "ok"
+    }
+  },
+  "lambda": 1e-06,
+  "limitations": {
+    "rounded_reference_note": "The rounded-reference and ULP diagnostics are local to the high-precision optimum; they do not prove that no binary64 point anywhere satisfies the frozen certificate.",
+    "statement": "R2C.1 adds no data, model, lambda, or calibration family. It only re-solves the already-frozen lambda = 1e-6 train-refit objectives with an independent high-precision reference to characterize the 15 uncertifiable fits. It selects no R3 method and authorizes no R3."
+  },
+  "no_method_change": true,
+  "no_model_rerun": true,
+  "percentile_rule": {
+    "id": "nearest-rank-percentile",
+    "version": 1
+  },
+  "provenance": {
+    "git_worktree_clean": true,
+    "r2c1_design_commit": "431b45c1a43306785d9ee6582597af84ae2b2382",
+    "r2c1_execution_commit": "0b28ed2d600361c4a13650e7a76e3a94869c5bd9"
+  },
+  "reference_fit_summary": {
+    "attempted": 4000,
+    "certified": 4000,
+    "expected": 4000,
+    "failed": 0
+  },
+  "reference_solver_contract": {
+    "arithmetic": "python-stdlib-decimal",
+    "armijo_coefficient": 0.0001,
+    "backtracking_factor": 0.5,
+    "decimal_precision": 80,
+    "id": "decimal-newton-backtracking-reference",
+    "initial_intercept": 0.0,
+    "initial_slope": 0.0,
+    "max_backtracking_steps": 200,
+    "max_newton_iterations": 500,
+    "objective_gap_tolerance": 1e-24,
+    "objective_id": "mean-bernoulli-nll-plus-l2",
+    "objective_version": 1,
+    "rounding": "ROUND_HALF_EVEN",
+    "version": 1
+  },
+  "research_spec_id": "calibration-transport-research-spec",
+  "research_spec_version": 1,
+  "round_id": "low-regularization-numerical-adequacy-closure",
+  "round_version": 1,
+  "source_r2b_raw": {
+    "file_sha256": "16a07ecd69a4ec0081f76790b7bde0b4e8bcd87172e06b7af94c06ea699967a4",
+    "model": "Qwen/Qwen3.5-2B",
+    "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+    "paired_dataset_fingerprint": "b17fd3a44747ffa1597e4b74206d79a82135ed97337b69283ef89572181a0062",
+    "path": "experiments/calibration_transport/results/r2b-stability-qwen35-2b-v1.json",
+    "plan_fingerprint": "1127ea01f01c2671de6888fcd6759db17addf340aafe64f4e182b5aa2b58ead8",
+    "r2b_run_provenance_fingerprint": "3eeab561b27453a6af80e0f1bd1fd3b8da36412ee12961d5203a2e1ead0c0683",
+    "source_case_set_fingerprint": "c0bdc31bab6db3b91605321bc70da71c8692aca3ecddc3257840e01171a333d9",
+    "source_case_set_version": "calibration-transport-r2b-v1",
+    "source_measurement_code_commit": "dd68e299c364b038c959c42bc5c264640c52f7ca"
+  },
+  "source_r2c_analysis": {
+    "design_fingerprint": "82b7b73769614f1d69bfb5bad0419d5cc855abc2ebfa617c91ad97da6a7bccc0",
+    "failed_fit_count": 15,
+    "file_sha256": "8b90dbb02c4cdb2d47ceb2e7e0933aa10be05aab3979614634cf43b9e7841018",
+    "path": "experiments/calibration_transport/results/r2c-method-adequacy-qwen35-2b-v1-analysis.json",
+    "round_id": "calibration-method-adequacy-sensitivity",
+    "round_status": "incomplete",
+    "round_version": 1
+  },
+  "successful_float64_agreement": {
+    "gate_objective_gap_upper": 2e-14,
+    "overall_max_objective_gap_upper": 7.925353096307048e-16,
+    "pass_count": 3985,
+    "per_group": {
+      "research-l2-logistic-fixed-decision-probability:CAT": {
+        "max_objective_gap_upper": 8.501110448164609e-17,
+        "max_parameter_distance": 3.603501341687468e-06,
+        "median_objective_gap_upper": 1.3413955818358986e-25,
+        "median_parameter_distance": 1.3806452148103717e-11,
+        "n": 999,
+        "p95_objective_gap_upper": 2.0067881001237927e-18,
+        "p95_parameter_distance": 5.685645757551922e-07
+      },
+      "research-l2-logistic-fixed-decision-probability:OVR": {
+        "max_objective_gap_upper": 4.9518098968112164e-18,
+        "max_parameter_distance": 1.1701261509922725e-07,
+        "median_objective_gap_upper": 8.422791182722252e-25,
+        "median_parameter_distance": 3.1063834640346494e-11,
+        "n": 999,
+        "p95_objective_gap_upper": 6.207912810011706e-19,
+        "p95_parameter_distance": 3.246299171847949e-08
+      },
+      "research-l2-logistic-logit-fixed-decision-probability:CAT": {
+        "max_objective_gap_upper": 7.925353096307048e-16,
+        "max_parameter_distance": 1.411211974413347e-05,
+        "median_objective_gap_upper": 7.755281055912491e-24,
+        "median_parameter_distance": 2.2659780377223765e-10,
+        "n": 991,
+        "p95_objective_gap_upper": 1.7641510849799214e-19,
+        "p95_parameter_distance": 1.5323805131351904e-07
+      },
+      "research-l2-logistic-logit-fixed-decision-probability:OVR": {
+        "max_objective_gap_upper": 6.264645565999218e-19,
+        "max_parameter_distance": 1.0594561157882667e-08,
+        "median_objective_gap_upper": 2.6788893026459265e-25,
+        "median_parameter_distance": 2.4891095844285122e-12,
+        "n": 996,
+        "p95_objective_gap_upper": 1.137681829957502e-19,
+        "p95_parameter_distance": 2.773206369749971e-09
+      }
+    },
+    "successful_float64_fits": 3985,
+    "violation_count": 0
+  }
+}

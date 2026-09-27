@@ -11,6 +11,7 @@ from __future__ import annotations
 import importlib.util
 import math
 import sys
+from collections import Counter
 from pathlib import Path
 from typing import Any
 
@@ -357,3 +358,281 @@ class TestArtifactAssembly:
         block = payload["models"][0]
         assert len(block["native_reference"]) == 8
         assert len(block["directions"]) == 2
+
+
+_STUB_CAT_SLOPE = 2.0
+_STUB_CAT_INTERCEPT = 0.10
+_STUB_OVR_SLOPE = 3.0
+_STUB_OVR_INTERCEPT = 0.20
+
+
+def _g_cat(score: float) -> float:
+    return _STUB_CAT_SLOPE * score + _STUB_CAT_INTERCEPT
+
+
+def _g_ovr(score: float) -> float:
+    return _STUB_OVR_SLOPE * score + _STUB_OVR_INTERCEPT
+
+
+class _AffineStub:
+    """A deterministic calibrator with distinct CAT/OVR output ranges."""
+
+    def __init__(self, slope: float, intercept: float) -> None:
+        self._slope = slope
+        self._intercept = intercept
+
+    def apply(self, score: float) -> float:
+        return self._slope * score + self._intercept
+
+
+class _SpyStub:
+    """A calibrator that records the exact score it is applied to."""
+
+    def __init__(self) -> None:
+        self.calls: list[float] = []
+
+    def apply(self, score: float) -> float:
+        self.calls.append(score)
+        return 0.5
+
+
+def _stub_panel(procedures: tuple[Any, ...]) -> Any:
+    calibrators: dict[tuple[str, str], Any] = {}
+    for procedure in procedures:
+        calibrators[(procedure.label, analysis.MEASUREMENT_CAT)] = _AffineStub(
+            _STUB_CAT_SLOPE, _STUB_CAT_INTERCEPT
+        )
+        calibrators[(procedure.label, analysis.MEASUREMENT_OVR)] = _AffineStub(
+            _STUB_OVR_SLOPE, _STUB_OVR_INTERCEPT
+        )
+    return analysis.R3PanelFit(calibrators)
+
+
+def _skewed_fixture() -> tuple[list[Any], list[Any]]:
+    """Items whose CAT and OVR scores never coincide (2 subjects, 4 TEST rows)."""
+    train = [
+        _item("t0", "s1", 1.0, 0.62, 0.41),
+        _item("t1", "s1", 0.0, 0.31, 0.58),
+        _item("t2", "s2", 1.0, 0.77, 0.49),
+        _item("t3", "s2", 0.0, 0.24, 0.66),
+    ]
+    test = [
+        _item("q0", "s1", 1.0, 0.71, 0.38),
+        _item("q1", "s1", 0.0, 0.29, 0.61),
+        _item("q2", "s2", 1.0, 0.65, 0.44),
+        _item("q3", "s2", 0.0, 0.35, 0.57),
+    ]
+    return train, test
+
+
+class TestCrossApplicationSemantics:
+    """Direct oracles: cross prediction is g_SOURCE(S_TARGET), not g_SOURCE(S_SOURCE)."""
+
+    def test_cat_to_ovr_uses_target_ovr_score(self) -> None:
+        _train, test = _skewed_fixture()
+        panel = _stub_panel((PROCEDURES[0],))
+        label = PROCEDURES[0].label
+        for item in test:
+            prediction = analysis._cross_prediction(
+                item, panel, label, analysis.DIRECTION_CAT_TO_OVR
+            )
+            assert prediction == _g_cat(item.ovr_score)
+            assert prediction != _g_cat(item.cat_score)
+
+    def test_ovr_to_cat_uses_target_cat_score(self) -> None:
+        _train, test = _skewed_fixture()
+        panel = _stub_panel((PROCEDURES[0],))
+        label = PROCEDURES[0].label
+        for item in test:
+            prediction = analysis._cross_prediction(
+                item, panel, label, analysis.DIRECTION_OVR_TO_CAT
+            )
+            assert prediction == _g_ovr(item.cat_score)
+            assert prediction != _g_ovr(item.ovr_score)
+
+    def test_cross_brier_uses_target_score(self) -> None:
+        _train, test = _skewed_fixture()
+        panel = _stub_panel((PROCEDURES[0],))
+        label = PROCEDURES[0].label
+        item = test[0]
+        loss = analysis._cross_loss(
+            item, panel, label, analysis.DIRECTION_CAT_TO_OVR, analysis.brier_loss
+        )
+        assert loss == (_g_cat(item.ovr_score) - item.label) ** 2
+        assert loss != (_g_cat(item.cat_score) - item.label) ** 2
+
+    def test_cross_logloss_predictions_use_target_score(self) -> None:
+        _train, test = _skewed_fixture()
+        panel = _stub_panel((PROCEDURES[0],))
+        label = PROCEDURES[0].label
+        pairs = analysis._cross_predictions(test, panel, label, analysis.DIRECTION_CAT_TO_OVR)
+        expected = [(_g_cat(item.ovr_score), item.label) for item in test]
+        buggy = [(_g_cat(item.cat_score), item.label) for item in test]
+        assert pairs == expected
+        assert pairs != buggy
+        assert analysis.exact_logloss(pairs) == analysis.exact_logloss(expected)
+
+    def test_cross_reliability_uses_target_score(self) -> None:
+        _train, test = _skewed_fixture()
+        cat_spy = _SpyStub()
+        ovr_spy = _SpyStub()
+        label = PROCEDURES[0].label
+        panel = analysis.R3PanelFit(
+            {
+                (label, analysis.MEASUREMENT_CAT): cat_spy,
+                (label, analysis.MEASUREMENT_OVR): ovr_spy,
+            }
+        )
+        analysis.reliability_diagnostics(
+            test, panel, (PROCEDURES[0],), analysis.DIRECTION_CAT_TO_OVR
+        )
+        assert cat_spy.calls == [item.ovr_score for item in test]
+        assert cat_spy.calls != [item.cat_score for item in test]
+
+
+class TestCrossGeometrySupport:
+    def _fixture(self) -> tuple[list[Any], list[Any]]:
+        train = [
+            _item("t0", "s1", 1.0, 0.10, 0.90),
+            _item("t1", "s1", 0.0, 0.20, 0.95),
+            _item("t2", "s2", 1.0, 0.30, 0.99),
+            _item("t3", "s2", 0.0, 0.40, 0.85),
+            _item("t4", "s2", 1.0, 0.50, 0.80),
+        ]
+        test = [
+            _item("q0", "s1", 1.0, 0.60, 0.30),
+            _item("q1", "s1", 0.0, 0.70, 0.35),
+            _item("q2", "s2", 1.0, 0.80, 0.45),
+            _item("q3", "s2", 0.0, 0.90, 0.25),
+        ]
+        return train, test
+
+    def test_range_decomposition_uses_source_train_boundary_and_target_prediction(self) -> None:
+        train, test = self._fixture()
+        panel = _stub_panel((PROCEDURES[0],))
+        label = PROCEDURES[0].label
+        block = analysis.range_loss_decomposition(
+            train, test, panel, (PROCEDURES[0],), analysis.DIRECTION_CAT_TO_OVR
+        )[label]
+        assert block["source_train_min"] == 0.10
+        assert block["source_train_max"] == 0.50
+        assert block["n_in"] == 4
+        assert block["n_out"] == 0
+        expected_in = [
+            (_g_cat(item.ovr_score) - item.label) ** 2 - (item.ovr_score - item.label) ** 2
+            for item in test
+        ]
+        buggy_in = [
+            (_g_cat(item.cat_score) - item.label) ** 2 - (item.ovr_score - item.label) ** 2
+            for item in test
+        ]
+        assert math.isclose(block["mean_in"], math.fsum(expected_in) / 4, abs_tol=1e-12)
+        assert not math.isclose(block["mean_in"], math.fsum(buggy_in) / 4, abs_tol=1e-12)
+
+    def test_test_derived_boundary_would_disagree(self) -> None:
+        _train, test = self._fixture()
+        test_source = [item.cat_score for item in test]
+        assert all(not (min(test_source) <= item.ovr_score <= max(test_source)) for item in test)
+
+
+class TestScoreGeometry:
+    def _fixture(self) -> tuple[list[Any], list[Any]]:
+        train = [_item(f"t{i}", "s1", 1.0, (i + 1) / 100.0, 0.50) for i in range(40)]
+        test = [
+            _item("q0", "s2", 1.0, 0.85, 0.005),
+            _item("q1", "s2", 1.0, 0.86, 0.20),
+            _item("q2", "s2", 1.0, 0.87, 0.395),
+            _item("q3", "s2", 1.0, 0.88, 0.45),
+        ]
+        return train, test
+
+    def test_geometry_uses_source_train_and_target_test(self) -> None:
+        train, test = self._fixture()
+        geo = analysis.score_geometry(train, test, analysis.DIRECTION_CAT_TO_OVR)
+        assert geo["source_train_count"] == 40
+        assert geo["target_test_count"] == 4
+        assert geo["source_train_min"] == 0.01
+        assert geo["source_train_max"] == 0.40
+        assert geo["source_train_q2_5"] == 0.01
+        assert geo["source_train_q97_5"] == 0.39
+        assert math.isclose(geo["target_test_fraction_outside_source_train_min_max"], 0.5)
+        assert math.isclose(geo["target_test_fraction_outside_source_train_q2_5_q97_5"], 0.75)
+
+    def test_geometry_source_boundary_is_not_test_derived(self) -> None:
+        train, test = self._fixture()
+        geo = analysis.score_geometry(train, test, analysis.DIRECTION_CAT_TO_OVR)
+        assert geo["source_train_min"] == min(item.cat_score for item in train)
+        assert geo["source_train_min"] < min(item.cat_score for item in test)
+
+    def test_geometry_quantile_uses_nearest_rank_rule(self) -> None:
+        train, test = self._fixture()
+        geo = analysis.score_geometry(train, test, analysis.DIRECTION_CAT_TO_OVR)
+        ordered = sorted(item.cat_score for item in train)
+        assert geo["source_train_q2_5"] == analysis.nearest_rank_percentile(ordered, 2.5)
+        assert geo["source_train_q97_5"] == analysis.nearest_rank_percentile(ordered, 97.5)
+
+
+class TestTrainRefitDrawUnit:
+    def test_resample_draws_ten_per_subject_with_replacement(self) -> None:
+        train, _test = _skewed_fixture()
+        resampled = analysis.resample_train_multiset(train, replicate=0)
+        counts = Counter(item.subject for item in resampled)
+        assert counts == {"s1": 10, "s2": 10}
+        assert len(resampled) == 20
+
+    def test_resample_is_deterministic(self) -> None:
+        train, _test = _skewed_fixture()
+        first = analysis.resample_train_multiset(train, replicate=5)
+        second = analysis.resample_train_multiset(train, replicate=5)
+        assert [item.item_id for item in first] == [item.item_id for item in second]
+
+    def test_resample_draw_ordinals_are_zero_through_nine(self) -> None:
+        train, _test = _skewed_fixture()
+        calls: list[dict[str, Any]] = []
+        original = analysis._draw_index
+
+        def recorder(**kwargs: Any) -> int:
+            calls.append(kwargs)
+            return original(**kwargs)
+
+        analysis._draw_index = recorder
+        try:
+            analysis.resample_train_multiset(train, replicate=2)
+        finally:
+            analysis._draw_index = original
+        assert sorted({call["draw"] for call in calls}) == list(range(10))
+        assert Counter(call["subject"] for call in calls) == {"s1": 10, "s2": 10}
+        assert all(call["item_count"] == 2 for call in calls)
+        assert all(call["protocol_id"] == protocol.TRAIN_REFIT_BOOTSTRAP_ID for call in calls)
+        assert all(call["replicate"] == 2 for call in calls)
+
+    def test_same_resampled_records_feed_cat_and_ovr(self) -> None:
+        train, _test = _skewed_fixture()
+        resampled = analysis.resample_train_multiset(train, replicate=3)
+        panel = analysis.fit_panel(resampled, PROCEDURES)
+        cat_ids = panel.get(PROCEDURES[0].label, analysis.MEASUREMENT_CAT).training_item_ids
+        ovr_ids = panel.get(PROCEDURES[0].label, analysis.MEASUREMENT_OVR).training_item_ids
+        assert cat_ids == ovr_ids
+
+    def test_train_refit_stability_resamples_ten_per_subject(self) -> None:
+        train, test = _skewed_fixture()
+        calls: list[dict[str, Any]] = []
+        original = analysis._draw_index
+
+        def recorder(**kwargs: Any) -> int:
+            calls.append(kwargs)
+            return original(**kwargs)
+
+        analysis._draw_index = recorder
+        try:
+            analysis._train_refit_stability(train, test, PROCEDURES, replicates=2)
+        finally:
+            analysis._draw_index = original
+        train_calls = [
+            call for call in calls if call["protocol_id"] == protocol.TRAIN_REFIT_BOOTSTRAP_ID
+        ]
+        per_replicate_subject = Counter(
+            (call["replicate"], call["subject"]) for call in train_calls
+        )
+        assert all(count == 10 for count in per_replicate_subject.values())
+        assert sorted({call["draw"] for call in train_calls}) == list(range(10))

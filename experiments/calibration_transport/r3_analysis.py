@@ -77,6 +77,10 @@ RELIABILITY_BIN_COUNT = 10
 QUANTILE_LOWER = 2.5
 QUANTILE_UPPER = 97.5
 
+# Frozen R3_PROTOCOL.md §17 unit: within each subject, resample exactly this
+# many TRAIN item positions with replacement (the TRAIN pool itself has 8).
+TRAIN_REFIT_DRAWS_PER_SUBJECT = 10
+
 STATE_IMPROVEMENT = "NATIVE_IMPROVEMENT_SUPPORTED"
 STATE_DEGRADATION = "NATIVE_DEGRADATION_SUPPORTED"
 STATE_UNRESOLVED = "NATIVE_ADEQUACY_UNRESOLVED"
@@ -265,15 +269,53 @@ def _direction_source(direction: str) -> str:
 
 
 def direction_scores(item: R3Item, direction: str) -> tuple[float, float]:
-    """Return ``(raw_target_score, source_measurement_score)`` for a direction."""
+    """Return ``(target_measurement_score, source_measurement_score)``.
+
+    The TARGET leg ``S_B`` is the measurement a risk is evaluated on; the SOURCE
+    leg ``S_A`` is the measurement whose calibrator ``g_A`` was fitted.
+    """
     if direction == DIRECTION_CAT_TO_OVR:
         return item.ovr_score, item.cat_score
     return item.cat_score, item.ovr_score
 
 
+def _target_score(item: R3Item, direction: str) -> float:
+    return direction_scores(item, direction)[0]
+
+
+def _source_score(item: R3Item, direction: str) -> float:
+    return direction_scores(item, direction)[1]
+
+
+def _cross_prediction(
+    item: R3Item,
+    panel: R3PanelFit,
+    procedure_label: str,
+    direction: str,
+) -> float:
+    """The frozen cross application ``g_F^A(S_B)``.
+
+    ``R_cross(A->B;F) = loss(g_F^A(S_B_i), Y_i)``: the SOURCE-fitted calibrator
+    ``g_A`` is applied to the TARGET measurement score ``S_B``, never to the
+    source score ``S_A``. Every cross prediction path routes through here.
+    """
+    source = _direction_source(direction)
+    return panel.get(procedure_label, source).apply(_target_score(item, direction))
+
+
+def _cross_predictions(
+    items: Sequence[R3Item],
+    panel: R3PanelFit,
+    procedure_label: str,
+    direction: str,
+) -> list[tuple[float, float]]:
+    return [
+        (_cross_prediction(item, panel, procedure_label, direction), item.label) for item in items
+    ]
+
+
 def _raw_loss(item: R3Item, direction: str, loss: Callable[..., float]) -> float:
-    raw_score, _ = direction_scores(item, direction)
-    return loss(raw_score, item.label)
+    return loss(_target_score(item, direction), item.label)
 
 
 def _native_loss(
@@ -284,8 +326,7 @@ def _native_loss(
     loss: Callable[..., float],
 ) -> float:
     target = _direction_target(direction)
-    raw_score, _ = direction_scores(item, direction)
-    prediction = panel.get(procedure_label, target).apply(raw_score)
+    prediction = panel.get(procedure_label, target).apply(_target_score(item, direction))
     return loss(prediction, item.label)
 
 
@@ -296,10 +337,7 @@ def _cross_loss(
     direction: str,
     loss: Callable[..., float],
 ) -> float:
-    source = _direction_source(direction)
-    _, source_score = direction_scores(item, direction)
-    prediction = panel.get(procedure_label, source).apply(source_score)
-    return loss(prediction, item.label)
+    return loss(_cross_prediction(item, panel, procedure_label, direction), item.label)
 
 
 # --------------------------------------------------------------------------- #
@@ -473,7 +511,6 @@ def reliability_diagnostics(
     items: Sequence[R3Item], panel: R3PanelFit, procedures: Sequence[Any], direction: str
 ) -> dict[str, Any]:
     target = _direction_target(direction)
-    source = _direction_source(direction)
 
     def bins_of(predictor: Callable[[R3Item], float]) -> list[dict[str, Any]]:
         buckets: list[list[tuple[float, float]]] = [[] for _ in range(RELIABILITY_BIN_COUNT)]
@@ -500,19 +537,19 @@ def reliability_diagnostics(
         return result
 
     return {
-        "raw": bins_of(lambda item: _raw_target(item, direction)),
+        "raw": bins_of(lambda item: _target_score(item, direction)),
         "native": {
             procedure.label: bins_of(
                 lambda item, procedure=procedure: panel.get(procedure.label, target).apply(
-                    _raw_target(item, direction)
+                    _target_score(item, direction)
                 )
             )
             for procedure in procedures
         },
         "cross": {
             procedure.label: bins_of(
-                lambda item, procedure=procedure: panel.get(procedure.label, source).apply(
-                    direction_scores(item, direction)[1]
+                lambda item, procedure=procedure: _cross_prediction(
+                    item, panel, procedure.label, direction
                 )
             )
             for procedure in procedures
@@ -520,24 +557,39 @@ def reliability_diagnostics(
     }
 
 
-def _raw_target(item: R3Item, direction: str) -> float:
-    raw_score, _ = direction_scores(item, direction)
-    return raw_score
+def score_geometry(
+    train_items: Sequence[R3Item], test_items: Sequence[R3Item], direction: str
+) -> dict[str, Any]:
+    """Observed SOURCE TRAIN vs TARGET TEST empirical score geometry.
 
-
-def score_geometry(items: Sequence[R3Item], direction: str) -> dict[str, Any]:
-    """Observed source/target ranges and target fractions outside them."""
-    raw_scores = [_raw_target(item, direction) for item in items]
-    source_scores = [
-        item.cat_score if direction == DIRECTION_CAT_TO_OVR else item.ovr_score for item in items
-    ]
+    The SOURCE is the fitting measurement's TRAIN scores; the TARGET is the
+    other measurement's TEST scores. Source support is never inferred from TEST,
+    and the 2.5-97.5% range reuses the already-frozen R3
+    ``nearest-rank-percentile`` v1 rule. Empirical diagnostic, not a support
+    theorem.
+    """
+    source_train_scores = sorted(float(_source_score(item, direction)) for item in train_items)
+    if not source_train_scores:
+        raise AnalysisError("score geometry requires at least one SOURCE TRAIN item")
+    target_test_scores = [_target_score(item, direction) for item in test_items]
+    source_min, source_max = source_train_scores[0], source_train_scores[-1]
+    source_q2_5 = nearest_rank_percentile(source_train_scores, QUANTILE_LOWER)
+    source_q97_5 = nearest_rank_percentile(source_train_scores, QUANTILE_UPPER)
     return {
-        "target_min": min(raw_scores),
-        "target_max": max(raw_scores),
-        "source_min": min(source_scores),
-        "source_max": max(source_scores),
-        "target_fraction_outside_source_min_max": _fraction_outside(
-            raw_scores, min(source_scores), max(source_scores)
+        "direction": direction,
+        "source_measurement": _direction_source(direction),
+        "target_measurement": _direction_target(direction),
+        "source_train_count": len(source_train_scores),
+        "source_train_min": source_min,
+        "source_train_max": source_max,
+        "source_train_q2_5": source_q2_5,
+        "source_train_q97_5": source_q97_5,
+        "target_test_count": len(target_test_scores),
+        "target_test_fraction_outside_source_train_min_max": _fraction_outside(
+            target_test_scores, source_min, source_max
+        ),
+        "target_test_fraction_outside_source_train_q2_5_q97_5": _fraction_outside(
+            target_test_scores, source_q2_5, source_q97_5
         ),
     }
 
@@ -548,30 +600,42 @@ def _fraction_outside(values: Sequence[float], low: float, high: float) -> float
 
 
 def range_loss_decomposition(
-    items: Sequence[R3Item], panel: R3PanelFit, procedures: Sequence[Any], direction: str
+    train_items: Sequence[R3Item],
+    test_items: Sequence[R3Item],
+    panel: R3PanelFit,
+    procedures: Sequence[Any],
+    direction: str,
 ) -> dict[str, Any]:
-    source_scores = [
-        item.cat_score if direction == DIRECTION_CAT_TO_OVR else item.ovr_score for item in items
-    ]
-    low, high = min(source_scores), max(source_scores)
+    """Decompose the declared cross-vs-raw contrast by SOURCE TRAIN range.
+
+    The region boundary is the SOURCE TRAIN observed ``[min, max]`` and each
+    TARGET TEST row is scored with the frozen cross prediction
+    ``g_SOURCE(S_TARGET)``. The decomposed risk difference basis (cross vs raw)
+    is unchanged; only the boundary source and the cross application are brought
+    into conformance with the frozen protocol. Empirical, not causal.
+    """
+    source_train_scores = [_source_score(item, direction) for item in train_items]
+    if not source_train_scores:
+        raise AnalysisError("range decomposition requires at least one SOURCE TRAIN item")
+    low, high = min(source_train_scores), max(source_train_scores)
     result: dict[str, Any] = {}
     for procedure in procedures:
         inside: list[float] = []
         outside: list[float] = []
-        for item in items:
-            raw_score, source_score = direction_scores(item, direction)
-            prediction = panel.get(procedure.label, _direction_source(direction)).apply(
-                source_score
-            )
-            diff = brier_loss(prediction, item.label) - brier_loss(raw_score, item.label)
-            (inside if low <= raw_score <= high else outside).append(diff)
+        for item in test_items:
+            target_score = _target_score(item, direction)
+            prediction = _cross_prediction(item, panel, procedure.label, direction)
+            diff = brier_loss(prediction, item.label) - brier_loss(target_score, item.label)
+            (inside if low <= target_score <= high else outside).append(diff)
         result[procedure.label] = {
+            "source_train_min": low,
+            "source_train_max": high,
             "n_in": len(inside),
             "n_out": len(outside),
             "mean_in": (math.fsum(inside) / len(inside)) if inside else None,
             "mean_out": (math.fsum(outside) / len(outside)) if outside else None,
-            "in_contribution": math.fsum(inside) / len(items),
-            "out_contribution": math.fsum(outside) / len(items),
+            "in_contribution": math.fsum(inside) / len(test_items),
+            "out_contribution": math.fsum(outside) / len(test_items),
         }
     return result
 
@@ -645,7 +709,7 @@ def analyze_model_condition(
             "exact_logloss": {
                 "raw": loss_cell(
                     exact_logloss(
-                        [(_raw_target(item, direction), item.label) for item in test_items]
+                        [(_target_score(item, direction), item.label) for item in test_items]
                     )
                 ),
                 "native": {
@@ -654,7 +718,7 @@ def analyze_model_condition(
                             [
                                 (
                                     panel.get(label, _direction_target(direction)).apply(
-                                        _raw_target(item, direction)
+                                        _target_score(item, direction)
                                     ),
                                     item.label,
                                 )
@@ -666,17 +730,7 @@ def analyze_model_condition(
                 },
                 "cross": {
                     label: loss_cell(
-                        exact_logloss(
-                            [
-                                (
-                                    panel.get(label, _direction_source(direction)).apply(
-                                        direction_scores(item, direction)[1]
-                                    ),
-                                    item.label,
-                                )
-                                for item in test_items
-                            ]
-                        )
+                        exact_logloss(_cross_predictions(test_items, panel, label, direction))
                     )
                     for label in labels
                 },
@@ -684,9 +738,9 @@ def analyze_model_condition(
             "bootstrap_contrast_intervals": _bootstrap_contrasts(
                 test_items, panel, procedures, direction, replicates=test_replicates
             ),
-            "score_geometry": score_geometry(test_items, direction),
+            "score_geometry": score_geometry(train_items, test_items, direction),
             "range_loss_decomposition": range_loss_decomposition(
-                test_items, panel, procedures, direction
+                train_items, test_items, panel, procedures, direction
             ),
             "reliability": reliability_diagnostics(test_items, panel, procedures, direction),
         }
@@ -783,6 +837,36 @@ def _native_reference(
     return result
 
 
+def resample_train_multiset(
+    train_items: Sequence[R3Item],
+    *,
+    replicate: int,
+    draws_per_subject: int = TRAIN_REFIT_DRAWS_PER_SUBJECT,
+) -> list[R3Item]:
+    """Deterministically resample the frozen TRAIN pool for one replicate.
+
+    Within each subject, draw exactly ``draws_per_subject`` item positions with
+    replacement from that subject's frozen TRAIN members (the frozen R3 §17
+    unit). The returned multiset is the single paired record list that feeds
+    both CAT and OVR, and all four ``F`` refits, for the replicate.
+    """
+    grouped = _grouped_by_subject(train_items)
+    resampled: list[R3Item] = []
+    for subject in sorted(grouped):
+        members = grouped[subject]
+        for draw in range(draws_per_subject):
+            index = _draw_index(
+                protocol_id=_protocol.TRAIN_REFIT_BOOTSTRAP_ID,
+                protocol_version=_protocol.TRAIN_REFIT_BOOTSTRAP_VERSION,
+                replicate=replicate,
+                subject=subject,
+                draw=draw,
+                item_count=len(members),
+            )
+            resampled.append(members[index])
+    return resampled
+
+
 def _train_refit_stability(
     train_items: Sequence[R3Item],
     test_items: Sequence[R3Item],
@@ -790,39 +874,29 @@ def _train_refit_stability(
     *,
     replicates: int,
 ) -> dict[str, Any]:
-    grouped = _grouped_by_subject(train_items)
-    subjects = sorted(grouped)
-    per_subject = {subject: grouped[subject] for subject in subjects}
     reference = fit_panel(train_items, procedures)
-    result: dict[str, Any] = {}
-    for direction in _protocol.PRIMARY_DIRECTIONS:
-        samples: dict[str, list[float]] = {}
-        failures: list[dict[str, Any]] = []
-        for procedure in procedures:
-            samples[procedure.label] = []
-        for replicate in range(replicates):
-            resampled: list[R3Item] = []
-            for subject in subjects:
-                members = per_subject[subject]
-                for draw in range(len(members)):
-                    index = _draw_index(
-                        protocol_id=_protocol.TRAIN_REFIT_BOOTSTRAP_ID,
-                        protocol_version=_protocol.TRAIN_REFIT_BOOTSTRAP_VERSION,
-                        replicate=replicate,
-                        subject=subject,
-                        draw=draw,
-                        item_count=len(members),
-                    )
-                    resampled.append(members[index])
-            try:
-                refit = fit_panel(resampled, procedures)
-            except Exception as exc:  # recorded, never silently dropped
-                failures.append(
-                    {"replicate": replicate, "error_type": type(exc).__name__, "message": str(exc)}
-                )
-                continue
+    labels = [procedure.label for procedure in procedures]
+    directions = _protocol.PRIMARY_DIRECTIONS
+    samples: dict[str, dict[str, list[float]]] = {
+        direction: {label: [] for label in labels} for direction in directions
+    }
+    failures: dict[str, list[dict[str, Any]]] = {direction: [] for direction in directions}
+    for replicate in range(replicates):
+        resampled = resample_train_multiset(train_items, replicate=replicate)
+        try:
+            refit = fit_panel(resampled, procedures)
+        except Exception as exc:  # recorded, never silently dropped
+            record = {
+                "replicate": replicate,
+                "error_type": type(exc).__name__,
+                "message": str(exc),
+            }
+            for direction in directions:
+                failures[direction].append(dict(record))
+            continue
+        for direction in directions:
             for procedure in procedures:
-                samples[procedure.label].append(
+                samples[direction][procedure.label].append(
                     subject_weighted_mean(
                         test_items,
                         lambda item, procedure=procedure, refit=refit, direction=direction: (
@@ -831,12 +905,14 @@ def _train_refit_stability(
                         ),
                     )
                 )
+    result: dict[str, Any] = {}
+    for direction in directions:
         block: dict[str, Any] = {
             "replicates": replicates,
-            "failed_refits": failures,
+            "failed_refits": failures[direction],
             "reference_panel": reference.canonical_payload(),
         }
-        for label, values in samples.items():
+        for label, values in samples[direction].items():
             if values:
                 block[label] = {
                     "point": subject_weighted_mean(

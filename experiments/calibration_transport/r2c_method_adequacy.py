@@ -437,14 +437,16 @@ def _compute_config(
         training_rows=train_rows_b,
         plan_fingerprint=plan_fingerprint,
     )
-    cat_test = [g_cat.apply(p.score_a) for p in test_points]
-    ovr_test = [g_ovr.apply(p.score_b) for p in test_points]
+    cat_on_a = [g_cat.apply(p.score_a) for p in test_points]
+    ovr_on_b = [g_ovr.apply(p.score_b) for p in test_points]
+    cat_on_b = [g_cat.apply(p.score_b) for p in test_points]
+    ovr_on_a = [g_ovr.apply(p.score_a) for p in test_points]
     raw_a = [float(p.score_a) for p in test_points]
     raw_b = [float(p.score_b) for p in test_points]
-    native_cat = _per_item_native_diff(test_points, cat_test, raw_a)
-    native_ovr = _per_item_native_diff(test_points, ovr_test, raw_b)
-    transport_cat_to_ovr = _per_item_transport_diff(test_points, cat_test, ovr_test)
-    transport_ovr_to_cat = _per_item_transport_diff(test_points, ovr_test, cat_test)
+    native_cat = _per_item_native_diff(test_points, cat_on_a, raw_a)
+    native_ovr = _per_item_native_diff(test_points, ovr_on_b, raw_b)
+    transport_cat_to_ovr = _per_item_transport_diff(test_points, cat_on_b, ovr_on_b)
+    transport_ovr_to_cat = _per_item_transport_diff(test_points, ovr_on_a, cat_on_a)
     return _ConfigComputation(
         config=config,
         calibrator_cat=g_cat,
@@ -684,10 +686,22 @@ def _train_refit_bootstrap(
             bucket["native_cat"].append(_mean(_per_item_native_diff(test_points, cat_test, raw_a)))
             bucket["native_ovr"].append(_mean(_per_item_native_diff(test_points, ovr_test, raw_b)))
             bucket["transport_cat_to_ovr"].append(
-                _mean(_per_item_transport_diff(test_points, cat_test, ovr_test))
+                _mean(
+                    _per_item_transport_diff(
+                        test_points,
+                        [g_cat.apply(p.score_b) for p in test_points],
+                        ovr_test,
+                    )
+                )
             )
             bucket["transport_ovr_to_cat"].append(
-                _mean(_per_item_transport_diff(test_points, ovr_test, cat_test))
+                _mean(
+                    _per_item_transport_diff(
+                        test_points,
+                        [g_ovr.apply(p.score_a) for p in test_points],
+                        cat_test,
+                    )
+                )
             )
     per_configuration: dict[str, Any] = {}
     for label, bucket in series.items():

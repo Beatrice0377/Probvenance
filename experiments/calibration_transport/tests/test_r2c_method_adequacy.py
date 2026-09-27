@@ -344,7 +344,30 @@ def test_frozen_evidence_has_expected_shape() -> None:
         assert point.y in (0.0, 1.0)
 
 
+@pytest.mark.skipif(not R2B_RAW.exists(), reason="frozen R2B artifact is not present")
+def test_transport_point_matches_brier_matrix_delta() -> None:
+    raw = json.loads(R2B_RAW.read_text())
+    plan, _dataset, train, test = r2c.load_frozen_evidence(raw)
+    for config in r2c.method_configs():
+        computation = r2c._compute_config(
+            config, train_points=train, test_points=test, plan_fingerprint=plan.fingerprint
+        )
+        block = r2c._config_result_block(computation, train_points=train, test_points=test)
+        matrix = block["transport"]["brier_matrix"]
+        assert computation.transport_cat_to_ovr_point == pytest.approx(
+            matrix["delta_a_to_b"], abs=1e-15
+        )
+        assert computation.transport_ovr_to_cat_point == pytest.approx(
+            matrix["delta_b_to_a"], abs=1e-15
+        )
+        assert block["transport"]["transport_delta_cat_to_ovr"] == pytest.approx(
+            matrix["delta_a_to_b"], abs=1e-15
+        )
+        assert block["transport"]["transport_delta_ovr_to_cat"] == pytest.approx(
+            matrix["delta_b_to_a"], abs=1e-15
+        )
+
+
 def test_feature_transforms_keep_probabilities_interior() -> None:
-    # R2C never clips; logit only consumes strict interiors.
     assert math.isfinite(r2c._logit(1e-9))
     assert math.isfinite(r2c._logit(1 - 1e-9))

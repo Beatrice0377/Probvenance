@@ -958,7 +958,7 @@ def run_closure(
     completed = _completed_summaries(groups, draws, train_points, test_points, reference_fits)
     full_n = _full_n_reference_sanity(groups, train_points, plan.fingerprint, r2c_artifact)
 
-    classification = _classify(
+    classification_blocks = classify_failed_fits(
         reference_attempted=reference_attempted,
         reference_failed=reference_failed,
         violations=violations,
@@ -1041,31 +1041,74 @@ def run_closure(
         "agreement_violations": violations,
         "failed_fit_diagnostics": failed_diagnostics,
         "completed_train_refit_summaries": completed,
-        "classification": classification,
-        "limitations": {
-            "statement": (
-                "R2C.1 adds no data, model, lambda, or calibration family. It only "
-                "re-solves the already-frozen lambda = 1e-6 train-refit objectives "
-                "with an independent high-precision reference to characterize the 15 "
-                "uncertifiable fits. It selects no R3 method and authorizes no R3."
-            ),
-            "rounded_reference_note": (
-                "The rounded-reference and ULP diagnostics are local to the "
-                "high-precision optimum; they do not prove that no binary64 point "
-                "anywhere satisfies the frozen certificate."
-            ),
+        "predeclared_classification_result": classification_blocks[
+            "predeclared_classification_result"
+        ],
+        "observed_mechanism": classification_blocks["observed_mechanism"],
+        "limitations": _limitations(),
+    }
+
+
+OBSERVED_MECHANISM_VERSION = 1
+OBSERVED_MECHANISM_SOLVER_PATH_ID = "binary64-solver-path-stalls-before-certifiable-point"
+PREREGISTERED_A_MECHANISM_ID = "certificate-unmet-at-rounded-reference-point"
+
+_NO_EXACT_MATCH_SUMMARY = (
+    "the observed result does not exactly match any preregistered A/B/C/D category. "
+    "The closest preregistered family is A (a binary64 numerical-path limitation), "
+    "but the preregistered A submechanism was falsified: every rounded high-precision "
+    "reference point satisfies both the declared objective-gap tolerance and the "
+    "frozen sufficient gradient certificate. The observed limitation is instead that "
+    "the frozen binary64 Newton/backtracking solver path fails to reach such a "
+    "certifiable point for these resamples"
+)
+_OBSERVED_MECHANISM_SUMMARY = (
+    "a certifiable binary64-representable point exists near the high-precision "
+    "optimum, but the frozen binary64 Newton/backtracking solver path is not "
+    "uniformly able to advance to such a point"
+)
+
+
+def _classification_blocks(
+    *,
+    exact_match: str | None,
+    closest_family: str | None,
+    preregistered_a_supported: bool,
+    summary: str,
+    evidence: Mapping[str, Any],
+    observed_id: str,
+    observed_summary: str,
+) -> dict[str, Any]:
+    return {
+        "predeclared_classification_result": {
+            "exact_match": exact_match,
+            "closest_family": closest_family,
+            "preregistered_a_submechanism_supported": preregistered_a_supported,
+            "summary": summary,
+            "evidence": dict(evidence),
+        },
+        "observed_mechanism": {
+            "id": observed_id,
+            "version": OBSERVED_MECHANISM_VERSION,
+            "summary": observed_summary,
         },
     }
 
 
-def _classify(
+def classify_failed_fits(
     *,
     reference_attempted: int,
     reference_failed: int,
     violations: Sequence[Mapping[str, Any]],
     failed_diagnostics: Sequence[Mapping[str, Any]],
 ) -> dict[str, Any]:
-    """PART 33 classification A/B/C/D."""
+    """Report the preregistered A/B/C/D taxonomy against the observed result.
+
+    The preregistered taxonomy is historical and is never rewritten. When the
+    observed diagnostics do not match a preregistered category's submechanism, the
+    result records ``exact_match = None`` and the closest preregistered family rather
+    than forcing an inaccurate category label.
+    """
     evidence: dict[str, Any] = {
         "reference_attempted": reference_attempted,
         "reference_failed": reference_failed,
@@ -1073,20 +1116,29 @@ def _classify(
         "failed_diagnostic_count": len(failed_diagnostics),
     }
     if reference_failed > 0:
-        return {
-            "category": "C",
-            "summary": "objective/reference pathology: a high-precision reference fit failed",
-            "evidence": evidence,
-        }
+        return _classification_blocks(
+            exact_match="C",
+            closest_family="C",
+            preregistered_a_supported=False,
+            summary="objective/reference pathology: a high-precision reference fit failed",
+            evidence=evidence,
+            observed_id="high-precision-reference-fit-failed",
+            observed_summary=("a high-precision reference fit failed to certify its objective"),
+        )
     if violations:
-        return {
-            "category": "D",
-            "summary": (
+        return _classification_blocks(
+            exact_match="D",
+            closest_family="D",
+            preregistered_a_supported=False,
+            summary=(
                 "implementation/reference mismatch: successful float64 fits disagree "
                 "with the high-precision reference"
             ),
-            "evidence": evidence,
-        }
+            evidence=evidence,
+            observed_id="reference-implementation-mismatch",
+            observed_summary=("the frozen solver and the high-precision reference disagree"),
+        )
+    total = len(failed_diagnostics)
     rounded_meets = [
         record
         for record in failed_diagnostics
@@ -1099,28 +1151,130 @@ def _classify(
     ]
     evidence["rounded_reference_meets_objective_tolerance_count"] = len(rounded_meets)
     evidence["production_certificate_met_at_rounded_count"] = len(certificate_met)
-    if rounded_meets:
-        return {
-            "category": "A",
-            "summary": (
-                "numerical precision limitation of the frozen binary64 certification "
-                "path: the high-precision reference certifies the lambda = 1e-6 "
-                "objective for every resample, the successful float64 fits agree with "
-                "it, and a binary64 point near the reference optimum already meets the "
-                "declared objective-gap tolerance, yet the frozen binary64 solver does "
-                "not reach a point it can certify for these resamples"
+    if total == 0:
+        return _classification_blocks(
+            exact_match=None,
+            closest_family=None,
+            preregistered_a_supported=False,
+            summary="no uncertifiable source fits to classify",
+            evidence=evidence,
+            observed_id="no-failed-fits",
+            observed_summary="no frozen source fit failed to certify",
+        )
+    all_meet = len(rounded_meets) == total
+    none_meet = len(rounded_meets) == 0
+    all_certificate_fail = len(certificate_met) == 0
+    if all_meet and all_certificate_fail:
+        return _classification_blocks(
+            exact_match="A",
+            closest_family="A",
+            preregistered_a_supported=True,
+            summary=(
+                "preregistered A: every rounded high-precision reference point meets "
+                "the declared objective-gap tolerance, but the frozen sufficient "
+                "gradient certificate is not met there"
             ),
-            "evidence": evidence,
-        }
+            evidence=evidence,
+            observed_id=PREREGISTERED_A_MECHANISM_ID,
+            observed_summary=(
+                "the rounded reference point meets the objective-gap tolerance but "
+                "does not meet the frozen sufficient gradient certificate"
+            ),
+        )
+    if none_meet:
+        return _classification_blocks(
+            exact_match="B",
+            closest_family="B",
+            preregistered_a_supported=False,
+            summary=(
+                "binary64 representability/conditioning limitation: the configuration "
+                "is mathematically defined, but the declared objective-gap tolerance is "
+                "below the practical binary64 resolution for these resamples"
+            ),
+            evidence=evidence,
+            observed_id="binary64-representation-below-objective-gap-tolerance",
+            observed_summary=(
+                "no binary64 point near the reference optimum meets the declared "
+                "objective-gap tolerance"
+            ),
+        )
+    return _classification_blocks(
+        exact_match=None,
+        closest_family="A",
+        preregistered_a_supported=False,
+        summary=_NO_EXACT_MATCH_SUMMARY,
+        evidence=evidence,
+        observed_id=OBSERVED_MECHANISM_SOLVER_PATH_ID,
+        observed_summary=_OBSERVED_MECHANISM_SUMMARY,
+    )
+
+
+def _limitations() -> dict[str, str]:
     return {
-        "category": "B",
-        "summary": (
-            "binary64 representability/conditioning limitation: the configuration is "
-            "mathematically defined, but the declared objective-gap tolerance is below "
-            "the practical binary64 resolution for these resamples"
+        "statement": (
+            "R2C.1 adds no data, model, lambda, or calibration family. It only "
+            "re-solves the already-frozen lambda = 1e-6 train-refit objectives "
+            "with an independent high-precision reference to characterize the 15 "
+            "uncertifiable fits. It selects no R3 method and authorizes no R3."
         ),
-        "evidence": evidence,
+        "rounded_reference_note": (
+            "The rounded-reference and ULP diagnostics are local to the "
+            "high-precision optimum; they do not prove that no binary64 point "
+            "anywhere satisfies the frozen certificate."
+        ),
+        "mechanism_note": (
+            "The observed limitation is a frozen-binary64 solver-path limitation: a "
+            "certifiable binary64 point exists, but the Newton/backtracking path does "
+            "not uniformly reach it at lambda = 1e-6. This is neither a defect of the "
+            "sufficient gradient certificate nor a claim that binary64 cannot "
+            "represent a certifiable solution."
+        ),
     }
+
+
+_CLASSIFICATION_ONLY_KEYS = (
+    "classification",
+    "predeclared_classification_result",
+    "observed_mechanism",
+    "limitations",
+)
+
+
+def numerical_projection(payload: Mapping[str, Any]) -> dict[str, Any]:
+    """Return the quantitative evidence of an artifact, excluding interpretation.
+
+    Everything that is not classification/interpretation metadata is retained,
+    including source lineage, so a classification-only re-render must leave this
+    projection exactly equal.
+    """
+    return {key: value for key, value in payload.items() if key not in _CLASSIFICATION_ONLY_KEYS}
+
+
+def reclassify_artifact(
+    artifact: Mapping[str, Any],
+    *,
+    design_path: Path | str = DEFAULT_DESIGN_PATH,
+) -> dict[str, Any]:
+    """Re-render only the classification/interpretation metadata of an artifact.
+
+    It never re-solves a fit: the classification is derived from the quantitative
+    evidence already stored in ``artifact``. The numerical projection is preserved
+    exactly.
+    """
+    design = load_design(design_path)
+    validate_design(design)
+    updated = json.loads(json.dumps(artifact))
+    blocks = classify_failed_fits(
+        reference_attempted=updated["reference_fit_summary"]["attempted"],
+        reference_failed=updated["reference_fit_summary"]["failed"],
+        violations=updated.get("agreement_violations", []),
+        failed_diagnostics=updated.get("failed_fit_diagnostics", []),
+    )
+    updated.pop("classification", None)
+    updated["predeclared_classification_result"] = blocks["predeclared_classification_result"]
+    updated["observed_mechanism"] = blocks["observed_mechanism"]
+    updated["limitations"] = _limitations()
+    return updated
 
 
 # ---------------------------------------------------------------------------
@@ -1181,6 +1335,21 @@ def analyze(
 
 
 def _main(argv: Sequence[str]) -> int:
+    if len(argv) >= 2 and argv[1] == "--reclassify":
+        if len(argv) not in (3, 4):
+            print(
+                "usage: r2c1_numerical_closure.py --reclassify <ARTIFACT> [OUT]",
+                file=sys.stderr,
+            )
+            return 2
+        artifact_path = Path(argv[2])
+        out_path = Path(argv[3]) if len(argv) == 4 else artifact_path
+        artifact = json.loads(artifact_path.read_text(encoding="utf-8"))
+        updated = reclassify_artifact(artifact)
+        text = json.dumps(updated, ensure_ascii=False, sort_keys=True, indent=2, allow_nan=False)
+        out_path.write_text(text + "\n", encoding="utf-8")
+        print(f"wrote {out_path}")
+        return 0
     if len(argv) not in (3, 4):
         print(
             "usage: r2c1_numerical_closure.py <R2B_RAW> <R2C_ANALYSIS> [OUT]",

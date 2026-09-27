@@ -14,9 +14,12 @@ import hashlib
 import importlib.util
 import json
 import math
+import subprocess
 import sys
 from pathlib import Path
 from typing import Any
+
+import pytest
 
 HARNESS_DIR = Path(__file__).resolve().parents[1]
 REPO_ROOT = HARNESS_DIR.parents[1]
@@ -200,49 +203,141 @@ def test_design_failed_set_equals_committed_r2c_artifact() -> None:
 
 
 # ---------------------------------------------------------------------------
-# PART 33: classification rules.
+# PART 33 + final closure: preregistered taxonomy vs the observed result.
 # ---------------------------------------------------------------------------
 
 
-def test_classification_rules() -> None:
-    failure_diag = [{"rounded_reference_actual_gap_meets_objective_tolerance": True}]
-    no_meet = [{"rounded_reference_actual_gap_meets_objective_tolerance": False}]
+def _diag(*, gap_meets: bool, certificate_met: bool) -> dict[str, bool]:
+    return {
+        "rounded_reference_actual_gap_meets_objective_tolerance": gap_meets,
+        "production_certificate_met_at_rounded": certificate_met,
+    }
+
+
+def test_observed_pattern_has_no_exact_match_and_falsifies_a_submechanism() -> None:
+    result = r2c1.classify_failed_fits(
+        reference_attempted=4000,
+        reference_failed=0,
+        violations=[],
+        failed_diagnostics=[_diag(gap_meets=True, certificate_met=True)] * 15,
+    )
+    block = result["predeclared_classification_result"]
+    assert block["exact_match"] is None
+    assert block["closest_family"] == "A"
+    assert block["preregistered_a_submechanism_supported"] is False
+    assert result["observed_mechanism"]["id"] == r2c1.OBSERVED_MECHANISM_SOLVER_PATH_ID
+    assert result["observed_mechanism"]["version"] == 1
+
+
+def test_preregistered_a_pattern_is_an_exact_match() -> None:
+    result = r2c1.classify_failed_fits(
+        reference_attempted=4000,
+        reference_failed=0,
+        violations=[],
+        failed_diagnostics=[_diag(gap_meets=True, certificate_met=False)] * 15,
+    )
+    block = result["predeclared_classification_result"]
+    assert block["exact_match"] == "A"
+    assert block["closest_family"] == "A"
+    assert block["preregistered_a_submechanism_supported"] is True
+    assert result["observed_mechanism"]["id"] == r2c1.PREREGISTERED_A_MECHANISM_ID
+
+
+def test_reference_failure_and_violations_stay_exact_matches() -> None:
     assert (
-        r2c1._classify(
-            reference_attempted=4000,
-            reference_failed=1,
-            violations=[],
-            failed_diagnostics=[],
-        )["category"]
+        r2c1.classify_failed_fits(
+            reference_attempted=4000, reference_failed=1, violations=[], failed_diagnostics=[]
+        )["predeclared_classification_result"]["exact_match"]
         == "C"
     )
     assert (
-        r2c1._classify(
+        r2c1.classify_failed_fits(
             reference_attempted=4000,
             reference_failed=0,
             violations=[{"x": 1}],
             failed_diagnostics=[],
-        )["category"]
+        )["predeclared_classification_result"]["exact_match"]
         == "D"
     )
     assert (
-        r2c1._classify(
+        r2c1.classify_failed_fits(
             reference_attempted=4000,
             reference_failed=0,
             violations=[],
-            failed_diagnostics=failure_diag,
-        )["category"]
-        == "A"
-    )
-    assert (
-        r2c1._classify(
-            reference_attempted=4000,
-            reference_failed=0,
-            violations=[],
-            failed_diagnostics=no_meet,
-        )["category"]
+            failed_diagnostics=[_diag(gap_meets=False, certificate_met=False)],
+        )["predeclared_classification_result"]["exact_match"]
         == "B"
     )
+
+
+def test_no_post_hoc_category_is_invented() -> None:
+    for diagnostics in (
+        [_diag(gap_meets=True, certificate_met=True)] * 3,
+        [_diag(gap_meets=True, certificate_met=False)] * 3,
+        [_diag(gap_meets=False, certificate_met=False)] * 3,
+        [],
+    ):
+        block = r2c1.classify_failed_fits(
+            reference_attempted=4000,
+            reference_failed=0,
+            violations=[],
+            failed_diagnostics=diagnostics,
+        )["predeclared_classification_result"]
+        assert block["exact_match"] in (None, "A", "B", "C", "D")
+        assert block["closest_family"] in (None, "A", "B", "C", "D")
+
+
+def test_numerical_projection_ignores_classification_metadata() -> None:
+    payload = {
+        "reference_fit_summary": {"attempted": 4000, "failed": 0},
+        "classification": {"category": "A"},
+        "predeclared_classification_result": {"exact_match": "A"},
+        "observed_mechanism": {"id": "x", "version": 1},
+        "limitations": {"statement": "a"},
+    }
+    assert r2c1.numerical_projection(payload) == {
+        "reference_fit_summary": {"attempted": 4000, "failed": 0}
+    }
+
+
+def test_reclassify_artifact_changes_only_classification_metadata() -> None:
+    artifact_path = HARNESS_DIR / "results" / "r2c1-low-reg-numerical-closure-v1-analysis.json"
+    artifact = json.loads(artifact_path.read_text(encoding="utf-8"))
+    updated = r2c1.reclassify_artifact(artifact)
+    assert r2c1.numerical_projection(updated) == r2c1.numerical_projection(artifact)
+    block = updated["predeclared_classification_result"]
+    assert block["exact_match"] is None
+    assert block["closest_family"] == "A"
+    assert block["preregistered_a_submechanism_supported"] is False
+    assert updated["observed_mechanism"]["id"] == r2c1.OBSERVED_MECHANISM_SOLVER_PATH_ID
+    assert "classification" not in updated
+
+
+def test_committed_artifact_projection_matches_parent_commit() -> None:
+    result = subprocess.run(
+        [
+            "git",
+            "show",
+            "eb69ddc:experiments/calibration_transport/results/"
+            "r2c1-low-reg-numerical-closure-v1-analysis.json",
+        ],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        pytest.skip("parent commit artifact is not available in this checkout")
+    old = json.loads(result.stdout)
+    current = json.loads(
+        (HARNESS_DIR / "results" / "r2c1-low-reg-numerical-closure-v1-analysis.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert r2c1.numerical_projection(old) == r2c1.numerical_projection(current)
+    assert old["reference_fit_summary"] == current["reference_fit_summary"]
+    assert old["failed_fit_diagnostics"] == current["failed_fit_diagnostics"]
+    assert old["completed_train_refit_summaries"] == current["completed_train_refit_summaries"]
 
 
 def test_raw_brier_is_plain_squared_error() -> None:

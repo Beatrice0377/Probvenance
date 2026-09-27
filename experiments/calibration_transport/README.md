@@ -218,10 +218,13 @@ R2C selects no method: it reports facts for a later human research gate.
 
 R2C.1 answers exactly one follow-up question about the frozen R2C evidence: were
 the 15 `lambda = 1e-6` train-refit fits that the reused binary64 solver could not
-certify a pathology of the objective, or the same objective already near its
-optimum in binary64 while the frozen sufficient gradient certificate reached a
-numerical conditioning floor? It adds NO data, model, GPU, network, lambda, or
-calibration family, and it does not modify `src/`.
+certify a pathology of the objective, or a numerical limitation of the frozen
+binary64 solver path (the objective being well-defined and high-precision solvable,
+with a certifiable binary64 point that the frozen path does not uniformly reach)?
+It resolves to the second: the predeclared A/B/C/D taxonomy had **no exact match**,
+the closest family is A, and the preregistered A submechanism was falsified. It adds
+NO data, model, GPU, network, lambda, or calibration family, and it does not modify
+`src/`.
 
 - `r2c1_numerical_closure_design.json` — the pre-analysis declaration. It pins the
   frozen R2B raw and R2C analysis artifacts by SHA256, the exact 15-failure set,
@@ -240,7 +243,8 @@ calibration family, and it does not modify `src/`.
 - `tests/test_r2c1_numerical_closure.py` — locks the exact known optimum, agreement
   with the production solver on an ordinary lambda, the exact binary64 feature
   semantics for both families, deterministic bootstrap replay, the frozen
-  15-failure set / source lineage, and the classification rules.
+  15-failure set / source lineage, the numerical-projection immutability check, and
+  the preregistered-vs-observed classification rules.
 
 R2C.1 is a **numerical reference backend, not a new calibration family, not a new
 R2C configuration, and not an R3 candidate**. It selects no method and authorizes

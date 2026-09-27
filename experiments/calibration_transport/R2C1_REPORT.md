@@ -13,10 +13,13 @@ This round only audits the numerical completeness of the predeclared
 - Source R2C analysis: `results/r2c-method-adequacy-qwen35-2b-v1-analysis.json`
   (sha256 `8b90dbb02c4cdb2d47ceb2e7e0933aa10be05aab3979614634cf43b9e7841018`, unmodified)
 - Result artifact: `results/r2c1-low-reg-numerical-closure-v1-analysis.json`
-  (sha256 `ed69ccd11a54125d4d7f835ee88e3780af4f9387ac1ce9f1cfc1094ee6911f9e`)
-- Classification: **A** — numerical precision limitation of the frozen binary64
-  certification path (see §8 for the audited mechanism, which differs from the
-  pre-registered hypothesis; this is disclosed, not hidden).
+  (sha256 `4a565f1cc97bbd3b9ebee9da0c6eabad185e82fc23c4607b2126c689f9a2220a`;
+  classification metadata corrected in the final closure without any numerical
+  recomputation)
+- Predeclared classification result: **no exact match**; the closest preregistered
+  family is **A** (a binary64 numerical-path limitation), but the preregistered A
+  submechanism was falsified (see §8).
+- Observed mechanism: `binary64-solver-path-stalls-before-certifiable-point` v1.
 
 ## 0. Why R2C.1 exists
 
@@ -160,39 +163,52 @@ already within the declared `1e-14` objective-gap tolerance.
 
 ## 8. Numerical classification and the audited mechanism
 
-**Classification A** — numerical precision limitation of the frozen binary64
-certification path.
+The predeclared A/B/C/D mechanism taxonomy had **no exact match** for the observed
+result. The closest predeclared family is **A** (a binary64 numerical-path
+limitation), but the preregistered A submechanism was **not supported**.
 
-The pre-registered hypothesis for A was: "a binary64 point near the optimum meets
-the objective-gap tolerance, while the frozen sufficient gradient certificate
-cannot certify it." **The diagnostics do not support that specific sub-claim, and
-this is reported honestly rather than forced.** In all 15 cases the
-production-style gradient norm at the rounded reference is `~1e-18` to `~4e-17`,
-which is *below* the production threshold `1.4142e-10`: the frozen gradient
-certificate *would* certify the rounded reference point.
+The preregistered A submechanism was: "a binary64 point near the optimum meets the
+objective-gap tolerance, while the frozen sufficient gradient certificate cannot
+certify it." **Contrary to that submechanism, all 15 rounded high-precision
+reference points satisfy both the declared `1e-14` objective-gap tolerance and the
+frozen sufficient gradient certificate.** In all 15 cases the production-style
+gradient norm at the rounded reference is `~1e-18` to `~4e-17`, *below* the
+production threshold `1.4142e-10`.
 
-A direct trace of the frozen solver on failing fits (P OVR rep 169 and L CAT rep
-125) shows the actual mechanism:
+The observed limitation is instead that the frozen binary64 Newton/backtracking
+solver path fails to reach such a certifiable point for these resamples. A trace of
+the frozen solver on two failing fits (P OVR rep 169 and L CAT rep 125) is
+consistent with a binary64 solver-advancement / line-search precision floor:
 
 - The frozen binary64 Newton solver converges to a point `~6e-9` to `~3e-8` in
   parameter distance from the high-precision optimum, then its iterates stop
-  changing (the Armijo line search can no longer make a representable objective
-  decrease along the low-curvature direction, whose objective differences fall
-  below the binary64 resolution of the objective).
+  changing (no representable objective decrease remains along the low-curvature
+  direction, whose objective differences fall below the binary64 resolution of the
+  objective).
 - At that stalled iterate the float64 gradient norm is `~2.0e-10` (P OVR 169) and
   `~2.3e-10` (L CAT 125), just *above* the `1.4142e-10` threshold, so the frozen
-  certificate is not reached within the iteration budget.
+  certificate is not established within the iteration budget.
+- Only two fits were traced in detail; this is **not** an individually proven
+  Armijo-failure diagnosis for all 15. It is the minimal common conclusion the
+  frozen evidence supports.
 
-So the objective is well-defined and certifiable at `lambda = 1e-6`; the
-limitation is that the frozen binary64 *solving/certification procedure* does not
-advance to a certifiable point for these resamples. This is a numerical precision
-limitation of the frozen certification path (the A family), realized through the
-solver's advancement floor rather than through the certificate threshold being
-unmet at the optimum. The ULP-neighbourhood diagnostic is consistent with this:
-the minimum gradient norm within 2 ULP of the reference (ratio `0.0000` of the
-threshold) is many orders of magnitude below the threshold. That neighbourhood
-result is local only; it does not prove that no binary64 point anywhere satisfies
-the certificate.
+So the objective is mathematically well-defined and high-precision solvable at
+`lambda = 1e-6`, and a certifiable binary64 representation exists; the limitation
+is a **solver-path numerical limitation** (the frozen binary64 Newton/backtracking
+path does not uniformly advance to a certifiable point). The sufficient gradient
+certificate itself is not defective, and there is no claim that binary64 cannot
+represent a certifiable solution. The ULP-neighbourhood diagnostic is consistent
+with this: the minimum gradient norm within 2 ULP of the reference (ratio `0.0000`
+of the threshold) is many orders of magnitude below the threshold. That
+neighbourhood result is local only; it does not prove that no binary64 point
+anywhere fails the certificate.
+
+The result artifact records this as `predeclared_classification_result`
+(`exact_match = null`, `closest_family = "A"`,
+`preregistered_a_submechanism_supported = false`) together with
+`observed_mechanism = {id: "binary64-solver-path-stalls-before-certifiable-point",
+version: 1}`. It does not store a bare `classification = A`, so the falsified
+submechanism is not misrepresented as an exact match.
 
 ## 9. Completed `P:1e-6` train-refit summaries (reference-only)
 
@@ -252,13 +268,22 @@ pre-declared configuration with a documented numerical-operational limitation.
 
 ## 13. Determinism
 
-The closure was run three times (two to a scratch path with a clean tree, then the
-identical output placed at the result path). All runs are byte-identical:
+The numerical closure was run three times (two to a scratch path with a clean tree,
+then the identical output placed at the result path). All numerical runs were
+byte-identical at:
 
-- run 1 sha256: `ed69ccd11a54125d4d7f835ee88e3780af4f9387ac1ce9f1cfc1094ee6911f9e`
-- run 2 sha256: `ed69ccd11a54125d4d7f835ee88e3780af4f9387ac1ce9f1cfc1094ee6911f9e`
+- run sha256: `ed69ccd11a54125d4d7f835ee88e3780af4f9387ac1ce9f1cfc1094ee6911f9e`
 
-The artifact contains no timestamp, UUID, or wall-clock field.
+The final closure then re-rendered only the classification/interpretation metadata
+of that artifact via `reclassify_artifact` (no refit, no numerical recomputation),
+producing the committed artifact:
+
+- committed sha256: `4a565f1cc97bbd3b9ebee9da0c6eabad185e82fc23c4607b2126c689f9a2220a`
+
+The re-render is deterministic, and the numerical projection (all quantitative
+evidence, source lineage, failure identities, reference diagnostics, and bootstrap
+summaries) is exactly equal to the pre-correction artifact. The artifact contains
+no timestamp, UUID, or wall-clock field.
 
 ## 14. Scope
 
@@ -279,13 +304,18 @@ It is not confirmatory evidence. Human Research Gate decision: **PENDING**.
    failed before). The first (buggy) artifact was deleted and regenerated. No
    version or identity impact; `src/` untouched.
 
-2. **Hypothesis/mechanism correction.** The pre-registered classification-A
-   sub-claim (frozen gradient certificate unmet at a tolerance-meeting point) was
-   not observed: the rounded reference meets the frozen gradient certificate
-   (`production_certificate_met_at_rounded_count = 15`). The audited mechanism is
-   the frozen solver stalling just short of the certifiable region (§8). The
-   classification is reported as A (numerical precision limitation) with this
-   correction stated explicitly, rather than asserting the unsupported sub-claim.
+2. **Hypothesis/mechanism correction (final closure).** The preregistered
+   classification-A sub-claim (frozen gradient certificate unmet at a
+   tolerance-meeting point) was not observed: the rounded reference meets the
+   frozen gradient certificate
+   (`production_certificate_met_at_rounded_count = 15`). The preregistered taxonomy
+   therefore has **no exact match**; the closest family is A, and the A submechanism
+   is recorded as unsupported. The observed mechanism is
+   `binary64-solver-path-stalls-before-certifiable-point` v1 (§8). The
+   classification metadata was corrected from a bare "A" to this honest
+   predeclared-vs-observed structure by a classification-only re-render
+   (`reclassify_artifact`), with **no numerical recomputation**: the fitted values,
+   intervals, sign fractions, and failure identities are unchanged.
 
 ## Appendix B — Provenance
 
@@ -298,7 +328,7 @@ r2c1_execution_commit          = 0b28ed2d600361c4a13650e7a76e3a94869c5bd9
 git_worktree_clean             = true
 source R2B raw sha256          = 16a07ecd69a4ec0081f76790b7bde0b4e8bcd87172e06b7af94c06ea699967a4
 source R2C analysis sha256     = 8b90dbb02c4cdb2d47ceb2e7e0933aa10be05aab3979614634cf43b9e7841018
-R2C.1 analysis artifact sha256 = ed69ccd11a54125d4d7f835ee88e3780af4f9387ac1ce9f1cfc1094ee6911f9e
+R2C.1 analysis artifact sha256 = 4a565f1cc97bbd3b9ebee9da0c6eabad185e82fc23c4607b2126c689f9a2220a
 ```
 
 Human Research Gate decision: **PENDING**. No push performed.

@@ -2,18 +2,6 @@
   "agreement_violations": [],
   "artifact_type": "calibration-transport-r2c1-numerical-closure-analysis",
   "artifact_version": 1,
-  "classification": {
-    "category": "A",
-    "evidence": {
-      "agreement_violations": 0,
-      "failed_diagnostic_count": 15,
-      "production_certificate_met_at_rounded_count": 15,
-      "reference_attempted": 4000,
-      "reference_failed": 0,
-      "rounded_reference_meets_objective_tolerance_count": 15
-    },
-    "summary": "numerical precision limitation of the frozen binary64 certification path: the high-precision reference certifies the lambda = 1e-6 objective for every resample, the successful float64 fits agree with it, and a binary64 point near the reference optimum already meets the declared objective-gap tolerance, yet the frozen binary64 solver does not reach a point it can certify for these resamples"
-  },
   "completed_train_refit_summaries": {
     "L:1e-06": {
       "family_id": "research-l2-logistic-logit-fixed-decision-probability",
@@ -643,14 +631,34 @@
   },
   "lambda": 1e-06,
   "limitations": {
+    "mechanism_note": "The observed limitation is a frozen-binary64 solver-path limitation: a certifiable binary64 point exists, but the Newton/backtracking path does not uniformly reach it at lambda = 1e-6. This is neither a defect of the sufficient gradient certificate nor a claim that binary64 cannot represent a certifiable solution.",
     "rounded_reference_note": "The rounded-reference and ULP diagnostics are local to the high-precision optimum; they do not prove that no binary64 point anywhere satisfies the frozen certificate.",
     "statement": "R2C.1 adds no data, model, lambda, or calibration family. It only re-solves the already-frozen lambda = 1e-6 train-refit objectives with an independent high-precision reference to characterize the 15 uncertifiable fits. It selects no R3 method and authorizes no R3."
   },
   "no_method_change": true,
   "no_model_rerun": true,
+  "observed_mechanism": {
+    "id": "binary64-solver-path-stalls-before-certifiable-point",
+    "summary": "a certifiable binary64-representable point exists near the high-precision optimum, but the frozen binary64 Newton/backtracking solver path is not uniformly able to advance to such a point",
+    "version": 1
+  },
   "percentile_rule": {
     "id": "nearest-rank-percentile",
     "version": 1
+  },
+  "predeclared_classification_result": {
+    "closest_family": "A",
+    "evidence": {
+      "agreement_violations": 0,
+      "failed_diagnostic_count": 15,
+      "production_certificate_met_at_rounded_count": 15,
+      "reference_attempted": 4000,
+      "reference_failed": 0,
+      "rounded_reference_meets_objective_tolerance_count": 15
+    },
+    "exact_match": null,
+    "preregistered_a_submechanism_supported": false,
+    "summary": "the observed result does not exactly match any preregistered A/B/C/D category. The closest preregistered family is A (a binary64 numerical-path limitation), but the preregistered A submechanism was falsified: every rounded high-precision reference point satisfies both the declared objective-gap tolerance and the frozen sufficient gradient certificate. The observed limitation is instead that the frozen binary64 Newton/backtracking solver path fails to reach such a certifiable point for these resamples"
   },
   "provenance": {
     "git_worktree_clean": true,

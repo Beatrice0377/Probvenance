@@ -281,7 +281,7 @@ These are directions under consideration, not current commitments. None of them
 is guaranteed to reach 1.0, and whether each is pursued must be decided by
 actual experimental results rather than by design intuition.
 
-### Calibration Transportability (research spec v1 frozen; R1 implemented, R2 implemented — empirical pilot and gate pending)
+### Calibration Transportability (research spec v1 frozen; R1 implemented, R2 empirical pilot executed — human research gate pending)
 
 `docs/research/calibration-transport-research-spec-v1.md` freezes the problem
 definition, measurement semantics, experimental separation, estimands, metrics,
@@ -297,13 +297,17 @@ R1 (a paired experiment-integrity harness) is implemented in
 `experiments/calibration_transport/`; it defines the research-only
 `PairedFixedDecisionPlan` and `PairedFixedDecisionDataset` artifacts and their
 deterministic fingerprints, but performs no fitting, no transport metric, and no
-audit. R2 (a tiny frozen-decision CAT<->OVR pilot) is **implemented** in the same
-directory (plan, CAT/OVR measurement adapters, research-only L2 logistic
-calibrator, 2x2 Brier/LogLoss matrices, diagnostics). R2 is **not complete**: its
-empirical evidence requires an actual local-model run, which is pending, so the
-research gate is pending human review. No empirical transport result or
-compatibility claim exists yet, and R2 must precede any investment in R3/R4
-(transport benchmark, evidence-aware transport
+audit. R2 (a tiny frozen-decision CAT<->OVR pilot) is **implemented and executed**
+in the same directory (plan, CAT/OVR measurement adapters, research-only L2
+logistic calibrator, 2x2 Brier/LogLoss matrices, diagnostics). The first
+empirical pilot ran once against the exact pinned `Qwen/Qwen3.5-2B` revision
+(`15852e8c16360a2fea060d615a32b45270f8a8fc`), producing a raw artifact, a
+reproducible analysis artifact, and an exploratory `REPORT.md`; the two
+calibration directions show opposite-signed exploratory transport excess risk.
+This is **exploratory pilot evidence, not confirmatory evidence**, and no
+compatibility claim is authorized by it. The human research gate is **pending**,
+so R2 must still precede any investment in R3/R4 (transport benchmark,
+evidence-aware transport
 audit). Declared measurement identity remains the
 default fail-closed authorization boundary; empirical compatibility is a
 research result, not a runtime entitlement.

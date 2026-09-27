@@ -1,0 +1,193 @@
+{
+  "artifact_type": "calibration-transport-frozen-decision-pilot-analysis",
+  "artifact_version": 1,
+  "brier_matrix": {
+    "delta_a_to_b": -0.05436366811274182,
+    "delta_b_to_a": 0.04376229228090794,
+    "fit_a_eval_a": 0.03183804781645835,
+    "fit_a_eval_b": 0.17254841981045524,
+    "fit_b_eval_a": 0.07560034009736628,
+    "fit_b_eval_b": 0.22691208792319706,
+    "raw_a": 0.02489555803298782,
+    "raw_b": 0.16301864056888113
+  },
+  "calibrator_a": {
+    "artifact": "pilot-fitted-calibrator",
+    "fingerprint_version": 1,
+    "input_score_id": "fixed-decision-semantic-probability",
+    "input_score_version": 1,
+    "intercept": -2.249787497465592,
+    "l2_strength": 0.01,
+    "method_id": "research-l2-logistic-fixed-decision-probability",
+    "method_version": 1,
+    "plan_fingerprint": "37aeb0862f89931207d2c60bcb9f41fac9ad6e05a254e94dd17822c232e6571e",
+    "research_spec_id": "calibration-transport-research-spec",
+    "research_spec_version": 1,
+    "slope": 4.186955863991465,
+    "source_measurement": {
+      "measurement_id": "direct-categorical-anchor-probability",
+      "measurement_version": 1
+    },
+    "target_id": "fixed-decision-correctness",
+    "target_version": 1,
+    "training_item_ids": [
+      "3w-billing-01",
+      "3w-billing-02",
+      "3w-billing-03",
+      "3w-shipping-01",
+      "3w-shipping-02",
+      "3w-shipping-03",
+      "3w-technical-01",
+      "3w-technical-02",
+      "3w-technical-03"
+    ]
+  },
+  "calibrator_a_fingerprint": "a7e1840ff0602d86b315b83bed841a9c3d7837bcd06414d0aa3ffcc4e574856e",
+  "calibrator_b": {
+    "artifact": "pilot-fitted-calibrator",
+    "fingerprint_version": 1,
+    "input_score_id": "fixed-decision-semantic-probability",
+    "input_score_version": 1,
+    "intercept": -1.8157659296084625,
+    "l2_strength": 0.01,
+    "method_id": "research-l2-logistic-fixed-decision-probability",
+    "method_version": 1,
+    "plan_fingerprint": "37aeb0862f89931207d2c60bcb9f41fac9ad6e05a254e94dd17822c232e6571e",
+    "research_spec_id": "calibration-transport-research-spec",
+    "research_spec_version": 1,
+    "slope": 2.747840821278629,
+    "source_measurement": {
+      "measurement_id": "independent-binary-anchor-probability",
+      "measurement_version": 1
+    },
+    "target_id": "fixed-decision-correctness",
+    "target_version": 1,
+    "training_item_ids": [
+      "3w-billing-01",
+      "3w-billing-02",
+      "3w-billing-03",
+      "3w-shipping-01",
+      "3w-shipping-02",
+      "3w-shipping-03",
+      "3w-technical-01",
+      "3w-technical-02",
+      "3w-technical-03"
+    ]
+  },
+  "calibrator_b_fingerprint": "a15a44529001f48e26ae2d00184a629204ad39e4f096577871d7986380f91ec8",
+  "completeness": {
+    "cat_scored": 15,
+    "ovr_scored": 15,
+    "paired_scored_test_n": 6,
+    "paired_scored_train_n": 9,
+    "planned_n": 15,
+    "test_planned_n": 6,
+    "test_y0": 2,
+    "test_y1": 4,
+    "train_planned_n": 9,
+    "train_y0": 6,
+    "train_y1": 3
+  },
+  "l2_strength": 0.01,
+  "logloss_matrix": {
+    "fit_a_eval_a": {
+      "state": "finite",
+      "value": 0.18552362757017724
+    },
+    "fit_a_eval_b": {
+      "state": "finite",
+      "value": 0.5321254310258411
+    },
+    "fit_b_eval_a": {
+      "state": "finite",
+      "value": 0.3205240096444196
+    },
+    "fit_b_eval_b": {
+      "state": "finite",
+      "value": 0.64532152272775
+    },
+    "raw_a": {
+      "state": "finite",
+      "value": 0.10564630312111169
+    },
+    "raw_b": {
+      "state": "finite",
+      "value": 0.5103659760780112
+    }
+  },
+  "measurement_a": "direct-categorical-anchor-probability",
+  "measurement_b": "independent-binary-anchor-probability",
+  "observed_range_diagnostics": {
+    "test_a": {
+      "max": 0.9989097477762737,
+      "median": 0.9963141572055663,
+      "min": 0.19619870436465017,
+      "n": 6,
+      "q25": 0.49869665126516305,
+      "q75": 0.9975671116319408
+    },
+    "test_a_outside_train_b_range_fraction": 0.8333333333333334,
+    "test_b": {
+      "max": 0.7549149868676283,
+      "median": 0.5154835637560209,
+      "min": 0.4073334000459302,
+      "n": 6,
+      "q25": 0.4455652809922124,
+      "q75": 0.6698828960992079
+    },
+    "test_b_outside_train_a_range_fraction": 0.0,
+    "train_a": {
+      "max": 0.9985519097711956,
+      "median": 0.0027983823201401777,
+      "min": 0.000801835555531046,
+      "n": 9,
+      "q25": 0.0021435418019423984,
+      "q75": 0.9978743620699899
+    },
+    "train_b": {
+      "max": 0.6224593312018546,
+      "median": 0.4073334000459302,
+      "min": 0.2689414213699951,
+      "n": 9,
+      "q25": 0.37754066879814546,
+      "q75": 0.46879062662624377
+    }
+  },
+  "ovr_non_simplex_diagnostics": {
+    "candidate_score_sum_max": 2.075751488965772,
+    "candidate_score_sum_mean": 1.367145957070238,
+    "candidate_score_sum_min": 0.9118015288669297,
+    "items_with_multiple_candidates_over_half": 2,
+    "n": 15
+  },
+  "paired_dataset_fingerprint": "46c9ed1353d71b87b21ded8cb81fb8f06bc6c1d6ab832fbbc1b5ffdb24b3582c",
+  "plan_fingerprint": "37aeb0862f89931207d2c60bcb9f41fac9ad6e05a254e94dd17822c232e6571e",
+  "research_spec_id": "calibration-transport-research-spec",
+  "research_spec_version": 1,
+  "source_case_set_fingerprint": "9ceb36cf8974680224d767206d107fb6bfc44225e25498978ca7dca10938e2a2",
+  "test_item_ids": [
+    "3w-billing-04",
+    "3w-billing-05",
+    "3w-shipping-04",
+    "3w-shipping-05",
+    "3w-technical-04",
+    "3w-technical-05"
+  ],
+  "train_item_ids": [
+    "3w-billing-01",
+    "3w-billing-02",
+    "3w-billing-03",
+    "3w-shipping-01",
+    "3w-shipping-02",
+    "3w-shipping-03",
+    "3w-technical-01",
+    "3w-technical-02",
+    "3w-technical-03"
+  ],
+  "winner_diagnostics": {
+    "n": 6,
+    "winner_a_accuracy": 1.0,
+    "winner_agreement_fraction": 0.6666666666666666,
+    "winner_b_accuracy": 0.6666666666666666
+  }
+}

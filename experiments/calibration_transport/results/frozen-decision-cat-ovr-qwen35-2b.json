@@ -1,0 +1,2357 @@
+{
+  "artifact_type": "calibration-transport-frozen-decision-pilot-raw",
+  "artifact_version": 1,
+  "cat_raw_records": [
+    {
+      "anchor": "billing",
+      "anchor_score": 0.9980389748228164,
+      "candidate_order": [
+        "billing",
+        "shipping",
+        "technical"
+      ],
+      "case_id": "3w-billing-01",
+      "decision_fingerprint": "9f406c08ccb5882caada2a88d0a2c1c49ae57cea2e1c6075f54f226654944f64",
+      "dtype": "bfloat16",
+      "execution_fingerprint": "b3a744e27f756e51b21c898dbc2eb45769f87e63ef0ad7b207037592e82d1a42",
+      "item_id": "3w-billing-01",
+      "labels": [
+        "A",
+        "B",
+        "C"
+      ],
+      "mapping": {
+        "billing": "A",
+        "shipping": "B",
+        "technical": "C"
+      },
+      "model": "Qwen/Qwen3.5-2B",
+      "plan_fingerprint": "93615a1e14eb847d1f9ca445ae2fc22e4a645dc27809f8e3309e547c6a15f552",
+      "probabilities": {
+        "billing": 0.9980389748228164,
+        "shipping": 0.0017002789544906568,
+        "technical": 0.0002607462226930443
+      },
+      "protocol": "direct-categorical-anchor-probability",
+      "protocol_version": 1,
+      "rendering_config": {
+        "enable_thinking": false
+      },
+      "resolved_token_ids": {
+        "A": 32,
+        "B": 33,
+        "C": 34
+      },
+      "revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "scoring_label_mass": 0.9921084654934266,
+      "scoring_label_token_probabilities": [
+        0.990162915814097,
+        0.0016868611444504932,
+        0.00025868853487920346
+      ],
+      "trace_id": "be67c751-fc48-49b0-a5ad-9f5ade0217d0",
+      "winner": "billing"
+    },
+    {
+      "anchor": "billing",
+      "anchor_score": 0.9985519097711956,
+      "candidate_order": [
+        "billing",
+        "shipping",
+        "technical"
+      ],
+      "case_id": "3w-billing-02",
+      "decision_fingerprint": "edcf39fd84529b4187b41c9537cb3c662cdec77d6383a12c079a0ef2569b54bd",
+      "dtype": "bfloat16",
+      "execution_fingerprint": "d2302b8af1dbd44fa8aa56a6cede4a96e5ed541bd4f83b8c5547ecba3f329be4",
+      "item_id": "3w-billing-02",
+      "labels": [
+        "A",
+        "B",
+        "C"
+      ],
+      "mapping": {
+        "billing": "A",
+        "shipping": "B",
+        "technical": "C"
+      },
+      "model": "Qwen/Qwen3.5-2B",
+      "plan_fingerprint": "12035009df922581202cb1a4d9bcb01d9ece50941120949c2e8ea489e027ceb8",
+      "probabilities": {
+        "billing": 0.9985519097711956,
+        "shipping": 0.0013248591332490523,
+        "technical": 0.00012323109555524296
+      },
+      "protocol": "direct-categorical-anchor-probability",
+      "protocol_version": 1,
+      "rendering_config": {
+        "enable_thinking": false
+      },
+      "resolved_token_ids": {
+        "A": 32,
+        "B": 33,
+        "C": 34
+      },
+      "revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "scoring_label_mass": 0.9935052345908308,
+      "scoring_label_token_probabilities": [
+        0.9920665493683537,
+        0.0013162544839784044,
+        0.00012243073849849674
+      ],
+      "trace_id": "23790e3c-33d7-46f0-969e-9798df64c943",
+      "winner": "billing"
+    },
+    {
+      "anchor": "shipping",
+      "anchor_score": 0.0021807322154514756,
+      "candidate_order": [
+        "billing",
+        "shipping",
+        "technical"
+      ],
+      "case_id": "3w-billing-03",
+      "decision_fingerprint": "423183e811a8e6bde8accf67439ea7aea0896fb7d33920decc2a9a2e8f887fe7",
+      "dtype": "bfloat16",
+      "execution_fingerprint": "4500e2feb5fba39c472096622c68f9f975cba151b8c1fbe6581b8b63a08bf34f",
+      "item_id": "3w-billing-03",
+      "labels": [
+        "A",
+        "B",
+        "C"
+      ],
+      "mapping": {
+        "billing": "A",
+        "shipping": "B",
+        "technical": "C"
+      },
+      "model": "Qwen/Qwen3.5-2B",
+      "plan_fingerprint": "ee0a6ba7382478bc0583def9d663795009abc703c0bd092ad8818ffba88ad812",
+      "probabilities": {
+        "billing": 0.9969102033488374,
+        "shipping": 0.0021807322154514756,
+        "technical": 0.0009090644357110904
+      },
+      "protocol": "direct-categorical-anchor-probability",
+      "protocol_version": 1,
+      "rendering_config": {
+        "enable_thinking": false
+      },
+      "resolved_token_ids": {
+        "A": 32,
+        "B": 33,
+        "C": 34
+      },
+      "revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "scoring_label_mass": 0.9910688145842103,
+      "scoring_label_token_probabilities": [
+        0.9880066134798348,
+        0.0021612556916930895,
+        0.0009009454126808529
+      ],
+      "trace_id": "4ed88cff-b04c-4339-8da9-c3fdb04ea02f",
+      "winner": "billing"
+    },
+    {
+      "anchor": "billing",
+      "anchor_score": 0.9959789286177262,
+      "candidate_order": [
+        "billing",
+        "shipping",
+        "technical"
+      ],
+      "case_id": "3w-billing-04",
+      "decision_fingerprint": "77548929e1b59197150d1834916e58423b995a7d699d0ee148fec15ef7673ea6",
+      "dtype": "bfloat16",
+      "execution_fingerprint": "4c21236e7c72222d77a1b0bd79c61b2ee70355bc197d88d5e44af636420f305d",
+      "item_id": "3w-billing-04",
+      "labels": [
+        "A",
+        "B",
+        "C"
+      ],
+      "mapping": {
+        "billing": "A",
+        "shipping": "B",
+        "technical": "C"
+      },
+      "model": "Qwen/Qwen3.5-2B",
+      "plan_fingerprint": "e77e3d7fa829f8be1d6a241dc9f3c50884a23af299806aab940a9aa9f7ccc2f9",
+      "probabilities": {
+        "billing": 0.9959789286177262,
+        "shipping": 0.003592060888201134,
+        "technical": 0.0004290104940726507
+      },
+      "protocol": "direct-categorical-anchor-probability",
+      "protocol_version": 1,
+      "rendering_config": {
+        "enable_thinking": false
+      },
+      "resolved_token_ids": {
+        "A": 32,
+        "B": 33,
+        "C": 34
+      },
+      "revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "scoring_label_mass": 0.9884390994740931,
+      "scoring_label_token_probabilities": [
+        0.9844645152980774,
+        0.0035505334295896406,
+        0.0004240507464261067
+      ],
+      "trace_id": "d3d157f3-e7eb-457f-8092-49c1c6bff142",
+      "winner": "billing"
+    },
+    {
+      "anchor": "billing",
+      "anchor_score": 0.9978730202447856,
+      "candidate_order": [
+        "billing",
+        "shipping",
+        "technical"
+      ],
+      "case_id": "3w-billing-05",
+      "decision_fingerprint": "efd1389d497a0e4e6d5d1ec6c85bfceb363ffc598fa7457e7c15e63a39c4755d",
+      "dtype": "bfloat16",
+      "execution_fingerprint": "2dd7ad1c512d5506b58b9f8ac026bc58209284df614be7e1e7854db716a967f6",
+      "item_id": "3w-billing-05",
+      "labels": [
+        "A",
+        "B",
+        "C"
+      ],
+      "mapping": {
+        "billing": "A",
+        "shipping": "B",
+        "technical": "C"
+      },
+      "model": "Qwen/Qwen3.5-2B",
+      "plan_fingerprint": "70fd93b2a48d25d281e81b48409fe4d74f76774be1d71d22a9f035ead9c8ccea",
+      "probabilities": {
+        "billing": 0.9978730202447856,
+        "shipping": 0.0013239583959105824,
+        "technical": 0.0008030213593037255
+      },
+      "protocol": "direct-categorical-anchor-probability",
+      "protocol_version": 1,
+      "rendering_config": {
+        "enable_thinking": false
+      },
+      "resolved_token_ids": {
+        "A": 32,
+        "B": 33,
+        "C": 34
+      },
+      "revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "scoring_label_mass": 0.9956898148872922,
+      "scoring_label_token_probabilities": [
+        0.9935720028085544,
+        0.0013182518901426851,
+        0.0007995601885956688
+      ],
+      "trace_id": "54389c28-60b1-47ab-ba82-e9fb3388b274",
+      "winner": "billing"
+    },
+    {
+      "anchor": "technical",
+      "anchor_score": 0.000801835555531046,
+      "candidate_order": [
+        "billing",
+        "shipping",
+        "technical"
+      ],
+      "case_id": "3w-shipping-01",
+      "decision_fingerprint": "47157b8e4b4feb7c76f5aa4d64ada4730a6b6e031711ed92a74c88dc11114a9c",
+      "dtype": "bfloat16",
+      "execution_fingerprint": "66b34f3dc4c3618e97cfc4da66cbe445a8b999b5bb807357bfac7fdb4c1bd2af",
+      "item_id": "3w-shipping-01",
+      "labels": [
+        "A",
+        "B",
+        "C"
+      ],
+      "mapping": {
+        "billing": "A",
+        "shipping": "B",
+        "technical": "C"
+      },
+      "model": "Qwen/Qwen3.5-2B",
+      "plan_fingerprint": "12eef703db4a050240e242c6958f8754d438fe187f5798d16e80cee428a74a92",
+      "probabilities": {
+        "billing": 0.00279868108429029,
+        "shipping": 0.9963994833601786,
+        "technical": 0.000801835555531046
+      },
+      "protocol": "direct-categorical-anchor-probability",
+      "protocol_version": 1,
+      "rendering_config": {
+        "enable_thinking": false
+      },
+      "resolved_token_ids": {
+        "A": 32,
+        "B": 33,
+        "C": 34
+      },
+      "revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "scoring_label_mass": 0.9955241803212314,
+      "scoring_label_token_probabilities": [
+        0.002786154692418625,
+        0.9919397789446399,
+        0.0007982466841724635
+      ],
+      "trace_id": "1141c3d9-4c19-402c-b1fc-aeb1ae520756",
+      "winner": "shipping"
+    },
+    {
+      "anchor": "shipping",
+      "anchor_score": 0.9978743620699899,
+      "candidate_order": [
+        "billing",
+        "shipping",
+        "technical"
+      ],
+      "case_id": "3w-shipping-02",
+      "decision_fingerprint": "471e2809a3101875ceb631154a012c7a8df4b8d4f69b1111895646a5c0d768f8",
+      "dtype": "bfloat16",
+      "execution_fingerprint": "989285ae5af9d3ed5f0ea22a62768ff88328b8b628a2d3ea4ceb72c99c45a99c",
+      "item_id": "3w-shipping-02",
+      "labels": [
+        "A",
+        "B",
+        "C"
+      ],
+      "mapping": {
+        "billing": "A",
+        "shipping": "B",
+        "technical": "C"
+      },
+      "model": "Qwen/Qwen3.5-2B",
+      "plan_fingerprint": "eb9517f90b9465e3848a66574809cd4f9a700874233b80c19c73834e5f9db2f8",
+      "probabilities": {
+        "billing": 0.0015002434256035154,
+        "shipping": 0.9978743620699899,
+        "technical": 0.0006253945044064856
+      },
+      "protocol": "direct-categorical-anchor-probability",
+      "protocol_version": 1,
+      "rendering_config": {
+        "enable_thinking": false
+      },
+      "resolved_token_ids": {
+        "A": 32,
+        "B": 33,
+        "C": 34
+      },
+      "revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "scoring_label_mass": 0.9969978333275824,
+      "scoring_label_token_probabilities": [
+        0.0014957394447906536,
+        0.9948785769169225,
+        0.0006235169658682427
+      ],
+      "trace_id": "765cce16-7df5-400f-bca1-2a80bccc16f1",
+      "winner": "shipping"
+    },
+    {
+      "anchor": "billing",
+      "anchor_score": 0.0027983823201401777,
+      "candidate_order": [
+        "billing",
+        "shipping",
+        "technical"
+      ],
+      "case_id": "3w-shipping-03",
+      "decision_fingerprint": "a33254e45749ebfd87f56b0837661ff2f65ea24e2f3a2ed6da3f1a4cdf61ae73",
+      "dtype": "bfloat16",
+      "execution_fingerprint": "81cf58e7d18a2203a69e3f7bd8f07294002d94a200781c777d9241c4d73f0b0d",
+      "item_id": "3w-shipping-03",
+      "labels": [
+        "A",
+        "B",
+        "C"
+      ],
+      "mapping": {
+        "billing": "A",
+        "shipping": "B",
+        "technical": "C"
+      },
+      "model": "Qwen/Qwen3.5-2B",
+      "plan_fingerprint": "9d973aad010a85c4f0cdd3c516012bf3a34ac618ce7d1252f9a092ec3678b587",
+      "probabilities": {
+        "billing": 0.0027983823201401777,
+        "shipping": 0.9962931159550142,
+        "technical": 0.0009085017248454919
+      },
+      "protocol": "direct-categorical-anchor-probability",
+      "protocol_version": 1,
+      "rendering_config": {
+        "enable_thinking": false
+      },
+      "resolved_token_ids": {
+        "A": 32,
+        "B": 33,
+        "C": 34
+      },
+      "revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "scoring_label_mass": 0.995731118483373,
+      "scoring_label_token_probabilities": [
+        0.0027864363575772766,
+        0.9920400586871716,
+        0.0009046234386244757
+      ],
+      "trace_id": "c7f465cf-0429-4ee0-87a9-6c92ba822f17",
+      "winner": "shipping"
+    },
+    {
+      "anchor": "shipping",
+      "anchor_score": 0.9989097477762737,
+      "candidate_order": [
+        "billing",
+        "shipping",
+        "technical"
+      ],
+      "case_id": "3w-shipping-04",
+      "decision_fingerprint": "80aad423e35dfcebec32142cb109c8530632af251dbc85c5dbb3937b76c771df",
+      "dtype": "bfloat16",
+      "execution_fingerprint": "df4f47c488330a5f0fcfe054f5083dfff80d011b9545d26ac5b86cd624ef835b",
+      "item_id": "3w-shipping-04",
+      "labels": [
+        "A",
+        "B",
+        "C"
+      ],
+      "mapping": {
+        "billing": "A",
+        "shipping": "B",
+        "technical": "C"
+      },
+      "model": "Qwen/Qwen3.5-2B",
+      "plan_fingerprint": "1aea9fde438ac2aa98369e1fef893133d55fd1630ad5cf75f7a02de85ce310cb",
+      "probabilities": {
+        "billing": 0.0009108877842137946,
+        "shipping": 0.9989097477762737,
+        "technical": 0.00017936443951257472
+      },
+      "protocol": "direct-categorical-anchor-probability",
+      "protocol_version": 1,
+      "rendering_config": {
+        "enable_thinking": false
+      },
+      "resolved_token_ids": {
+        "A": 32,
+        "B": 33,
+        "C": 34
+      },
+      "revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "scoring_label_mass": 0.9963729381551057,
+      "scoring_label_token_probabilities": [
+        0.0009075839378866927,
+        0.9952866403436218,
+        0.00017871387359768786
+      ],
+      "trace_id": "5dec05fb-f655-4425-85ce-b1ca8231c755",
+      "winner": "shipping"
+    },
+    {
+      "anchor": "technical",
+      "anchor_score": 0.332935892147642,
+      "candidate_order": [
+        "billing",
+        "shipping",
+        "technical"
+      ],
+      "case_id": "3w-shipping-05",
+      "decision_fingerprint": "9cbeacaf202046df0059f527676db07c8ee6043e7e0dc4afffe6f2cad6da66ff",
+      "dtype": "bfloat16",
+      "execution_fingerprint": "1637733a829399c456a20d724c1bc1dda49f806304dd9ad0fbd71a5647a5ada6",
+      "item_id": "3w-shipping-05",
+      "labels": [
+        "A",
+        "B",
+        "C"
+      ],
+      "mapping": {
+        "billing": "A",
+        "shipping": "B",
+        "technical": "C"
+      },
+      "model": "Qwen/Qwen3.5-2B",
+      "plan_fingerprint": "eb0a55b9d31f84ccd5707e7681bb33f712193907f36023b374c7c4308b8be937",
+      "probabilities": {
+        "billing": 0.04505797326343546,
+        "shipping": 0.6220061345889225,
+        "technical": 0.332935892147642
+      },
+      "protocol": "direct-categorical-anchor-probability",
+      "protocol_version": 1,
+      "rendering_config": {
+        "enable_thinking": false
+      },
+      "resolved_token_ids": {
+        "A": 32,
+        "B": 33,
+        "C": 34
+      },
+      "revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "scoring_label_mass": 0.989571461848903,
+      "scoring_label_token_probabilities": [
+        0.044588084470246564,
+        0.6155195198841449,
+        0.3294638574945104
+      ],
+      "trace_id": "830023fd-b34a-42aa-a88f-ec28c40f9743",
+      "winner": "shipping"
+    },
+    {
+      "anchor": "billing",
+      "anchor_score": 0.001926389426909321,
+      "candidate_order": [
+        "billing",
+        "shipping",
+        "technical"
+      ],
+      "case_id": "3w-technical-01",
+      "decision_fingerprint": "181747c4b7314d9946b924768c4846a1e82b5919cafb417d4bb4c5ff28034882",
+      "dtype": "bfloat16",
+      "execution_fingerprint": "43ca1fa85e980896cdb6abfc7bf8e1902b8369f00929f38184ae3aeac88c4447",
+      "item_id": "3w-technical-01",
+      "labels": [
+        "A",
+        "B",
+        "C"
+      ],
+      "mapping": {
+        "billing": "A",
+        "shipping": "B",
+        "technical": "C"
+      },
+      "model": "Qwen/Qwen3.5-2B",
+      "plan_fingerprint": "d0c98b786e8d0b879aabfa6d547624b72344ad7f7a14d2a1ddccbaa9e535dfdd",
+      "probabilities": {
+        "billing": 0.001926389426909321,
+        "shipping": 0.00017918212856479326,
+        "technical": 0.9978944284445259
+      },
+      "protocol": "direct-categorical-anchor-probability",
+      "protocol_version": 1,
+      "rendering_config": {
+        "enable_thinking": false
+      },
+      "resolved_token_ids": {
+        "A": 32,
+        "B": 33,
+        "C": 34
+      },
+      "revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "scoring_label_mass": 0.9971679615400058,
+      "scoring_label_token_probabilities": [
+        0.0019209338179633905,
+        0.0001786746778853544,
+        0.9950683530441586
+      ],
+      "trace_id": "245427e6-eb74-402c-bc5a-7b1c9e1d01c6",
+      "winner": "technical"
+    },
+    {
+      "anchor": "shipping",
+      "anchor_score": 0.0021435418019423984,
+      "candidate_order": [
+        "billing",
+        "shipping",
+        "technical"
+      ],
+      "case_id": "3w-technical-02",
+      "decision_fingerprint": "23110dc03db9a124eb1913f708f0e42b0c207aa652895810dc9430f5abc89987",
+      "dtype": "bfloat16",
+      "execution_fingerprint": "ff17c721c597eec692a21c7cdc78e176ddc59aed469c4d316461ec59615a0fe8",
+      "item_id": "3w-technical-02",
+      "labels": [
+        "A",
+        "B",
+        "C"
+      ],
+      "mapping": {
+        "billing": "A",
+        "shipping": "B",
+        "technical": "C"
+      },
+      "model": "Qwen/Qwen3.5-2B",
+      "plan_fingerprint": "dc7859aea9436ee74298642064cd56b0762359796e2de83abade5c7e17ad1e94",
+      "probabilities": {
+        "billing": 0.0179476557691793,
+        "shipping": 0.0021435418019423984,
+        "technical": 0.9799088024288782
+      },
+      "protocol": "direct-categorical-anchor-probability",
+      "protocol_version": 1,
+      "rendering_config": {
+        "enable_thinking": false
+      },
+      "resolved_token_ids": {
+        "A": 32,
+        "B": 33,
+        "C": 34
+      },
+      "revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "scoring_label_mass": 0.9963936737525355,
+      "scoring_label_token_probabilities": [
+        0.01788293066709842,
+        0.002135811490879513,
+        0.9763749315945558
+      ],
+      "trace_id": "ee954bf1-ce77-40aa-870f-3f8e72c0afcc",
+      "winner": "technical"
+    },
+    {
+      "anchor": "shipping",
+      "anchor_score": 0.01913402643769323,
+      "candidate_order": [
+        "billing",
+        "shipping",
+        "technical"
+      ],
+      "case_id": "3w-technical-03",
+      "decision_fingerprint": "3c05d1f9807ddc5d8bdd99f96c524263eb4e6f2f672986b4f0286d8adf286d96",
+      "dtype": "bfloat16",
+      "execution_fingerprint": "291d2ca7f346af3e64bf23067797f3e6afed547b30c140cee2d3ac9febcb9eda",
+      "item_id": "3w-technical-03",
+      "labels": [
+        "A",
+        "B",
+        "C"
+      ],
+      "mapping": {
+        "billing": "A",
+        "shipping": "B",
+        "technical": "C"
+      },
+      "model": "Qwen/Qwen3.5-2B",
+      "plan_fingerprint": "c3d99e6094f52a74b8b6f8dec911463d092c46a3821ba78cf5a6a87e9b21320f",
+      "probabilities": {
+        "billing": 0.05893695062102574,
+        "shipping": 0.01913402643769323,
+        "technical": 0.9219290229412811
+      },
+      "protocol": "direct-categorical-anchor-probability",
+      "protocol_version": 1,
+      "rendering_config": {
+        "enable_thinking": false
+      },
+      "resolved_token_ids": {
+        "A": 32,
+        "B": 33,
+        "C": 34
+      },
+      "revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "scoring_label_mass": 0.9933025950080964,
+      "scoring_label_token_probabilities": [
+        0.05854222599372895,
+        0.01900587811351422,
+        0.915754490900854
+      ],
+      "trace_id": "31342a92-cd82-4ddf-8179-9427e9f19baf",
+      "winner": "technical"
+    },
+    {
+      "anchor": "billing",
+      "anchor_score": 0.19619870436465017,
+      "candidate_order": [
+        "billing",
+        "shipping",
+        "technical"
+      ],
+      "case_id": "3w-technical-04",
+      "decision_fingerprint": "b2130e7b5c2647485a51f369c29f9aca9aea7078765f63fac526e14f60431f8a",
+      "dtype": "bfloat16",
+      "execution_fingerprint": "b6429f5ac46431e9e4b2618797d3fc0a5b6396527729fef8a3046916ae82a3ba",
+      "item_id": "3w-technical-04",
+      "labels": [
+        "A",
+        "B",
+        "C"
+      ],
+      "mapping": {
+        "billing": "A",
+        "shipping": "B",
+        "technical": "C"
+      },
+      "model": "Qwen/Qwen3.5-2B",
+      "plan_fingerprint": "01c6a4422c5d6707666d8abfff0bf26f8691a587ab412cde73851307a5b26bb2",
+      "probabilities": {
+        "billing": 0.19619870436465017,
+        "shipping": 0.11900052959305522,
+        "technical": 0.6848007660422947
+      },
+      "protocol": "direct-categorical-anchor-probability",
+      "protocol_version": 1,
+      "rendering_config": {
+        "enable_thinking": false
+      },
+      "resolved_token_ids": {
+        "A": 32,
+        "B": 33,
+        "C": 34
+      },
+      "revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "scoring_label_mass": 0.9858714951045598,
+      "scoring_label_token_probabilities": [
+        0.1934267100095555,
+        0.11731923002813992,
+        0.6751255550668659
+      ],
+      "trace_id": "f6760656-7a54-4965-b2e8-3cd3c5da3dd7",
+      "winner": "technical"
+    },
+    {
+      "anchor": "technical",
+      "anchor_score": 0.9966493857934062,
+      "candidate_order": [
+        "billing",
+        "shipping",
+        "technical"
+      ],
+      "case_id": "3w-technical-05",
+      "decision_fingerprint": "0b4db82df05fa8137a9127310dc658733100966c60542bf7cd39fca49a5bc37d",
+      "dtype": "bfloat16",
+      "execution_fingerprint": "68d7188dc131f31ee02e621d911afa839d11fdaacfd43f4e5b83523ddae69bb8",
+      "item_id": "3w-technical-05",
+      "labels": [
+        "A",
+        "B",
+        "C"
+      ],
+      "mapping": {
+        "billing": "A",
+        "shipping": "B",
+        "technical": "C"
+      },
+      "model": "Qwen/Qwen3.5-2B",
+      "plan_fingerprint": "b61f50584a4e5c08f0cdfdfc3f9dbb1a0c22fd8a8548b657cf41cfc455f97ef8",
+      "probabilities": {
+        "billing": 0.0027993830087939373,
+        "shipping": 0.0005512311977997714,
+        "technical": 0.9966493857934062
+      },
+      "protocol": "direct-categorical-anchor-probability",
+      "protocol_version": 1,
+      "rendering_config": {
+        "enable_thinking": false
+      },
+      "resolved_token_ids": {
+        "A": 32,
+        "B": 33,
+        "C": 34
+      },
+      "revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "scoring_label_mass": 0.9962469825758611,
+      "scoring_label_token_probabilities": [
+        0.0027888768755850997,
+        0.0005491624175097006,
+        0.9929089432827678
+      ],
+      "trace_id": "c7d3443f-2fd1-4cd7-89f0-f842ce88d412",
+      "winner": "technical"
+    }
+  ],
+  "duration_s": 7.763,
+  "evaluation_count": 60,
+  "model_configuration": {
+    "device": "auto",
+    "dtype": "bfloat16",
+    "local_files_only": true,
+    "model": "Qwen/Qwen3.5-2B",
+    "revision": "15852e8c16360a2fea060d615a32b45270f8a8fc"
+  },
+  "ovr_raw_records": [
+    {
+      "anchor": "billing",
+      "anchor_score": 0.5926665999540697,
+      "candidate_score_sum": 1.408030767866417,
+      "candidates": [
+        {
+          "candidate": "billing",
+          "decision_fingerprint": "bfa8e2ed3320bce8b8bfe873550cbc5e5f694800e306fd47efb8a51fb1408613",
+          "execution_fingerprint": "9fdd0f40f3cf561552d7ce401d1a85c60704a28bb622bddab386f7ca72a44456",
+          "negative_token_id": 2083,
+          "negative_token_probability": 0.4011339859906195,
+          "plan_fingerprint": "021b8e96c363c65b5b1e64413cdf0b44ba3dc43ac3cc1f160ba627f906de4cbd",
+          "positive_token_id": 9405,
+          "positive_token_probability": 0.5836465057279292,
+          "probability_true": 0.5926665999540697,
+          "probability_true_ge_half": true,
+          "trace_id": "dd02c012-5d32-431c-8b50-1d5828a8b023",
+          "verbalizer_mass": 0.9847804917185493
+        },
+        {
+          "candidate": "shipping",
+          "decision_fingerprint": "18951c31c0828ad7f55e9b590b229a59293d0e80af0989d9b735a5471294763f",
+          "execution_fingerprint": "3d3582bc8fce66d240cfcce37cf80c23f833ec8c8085df80e2400da132df3067",
+          "negative_token_id": 2083,
+          "negative_token_probability": 0.5530904890541477,
+          "plan_fingerprint": "4590e3bd30d18319fd0a24061789ff249a11dbac4128b4cd0c57ba6f2d75113b",
+          "positive_token_id": 9405,
+          "positive_token_probability": 0.43074730598471656,
+          "probability_true": 0.4378234991142019,
+          "probability_true_ge_half": false,
+          "trace_id": "685b0623-ea36-437a-ae5e-f9fdb591ace5",
+          "verbalizer_mass": 0.9838377950388635
+        },
+        {
+          "candidate": "technical",
+          "decision_fingerprint": "522ab5241ca12a44bbf5de4bad827a335ef62787ef436eec9039a053ceed0da2",
+          "execution_fingerprint": "000b60b3b4c90d194c3e3e6ca534945e011503ef656af27626f0496493d80e05",
+          "negative_token_id": 2083,
+          "negative_token_probability": 0.6123882083266312,
+          "plan_fingerprint": "36c95ae4123805c38950132a0f8a27bffe7e043eaf5f7808abeaf5510f33fce5",
+          "positive_token_id": 9405,
+          "positive_token_probability": 0.3714322239965892,
+          "probability_true": 0.37754066879814546,
+          "probability_true_ge_half": false,
+          "trace_id": "f7237a8d-9498-4f06-af73-8f7c5b8a4606",
+          "verbalizer_mass": 0.983820432323222
+        }
+      ],
+      "case_id": "3w-billing-01",
+      "dtype": "bfloat16",
+      "item_id": "3w-billing-01",
+      "model": "Qwen/Qwen3.5-2B",
+      "proposition_id": "choice-candidate-correctness-binary-judgment",
+      "proposition_version": 1,
+      "protocol": "independent-binary-anchor-probability",
+      "protocol_version": 1,
+      "rendering_config": {
+        "enable_thinking": false
+      },
+      "revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "winner": "billing"
+    },
+    {
+      "anchor": "billing",
+      "anchor_score": 0.46879062662624377,
+      "candidate_score_sum": 1.2536646954703194,
+      "candidates": [
+        {
+          "candidate": "billing",
+          "decision_fingerprint": "9e6fe9e427124fc6c7dd9d7a8f943dcf564f40d14df91ce276aa22cf034f27bb",
+          "execution_fingerprint": "9615dbb0afc23d00e8ba8961cfff2cd444ffdf86616a9e7983a4361c5fb2c7de",
+          "negative_token_id": 2083,
+          "negative_token_probability": 0.524831449848667,
+          "plan_fingerprint": "20342dc59741422e8134cf37de26b1984082c2af617d2b0d7491feb2b03e804a",
+          "positive_token_id": 9405,
+          "positive_token_probability": 0.46316212887043107,
+          "probability_true": 0.46879062662624377,
+          "probability_true_ge_half": false,
+          "trace_id": "ea81c1ce-a30d-4279-a14e-ee3c3df22657",
+          "verbalizer_mass": 0.9879935787190994
+        },
+        {
+          "candidate": "shipping",
+          "decision_fingerprint": "5a547df41e9f4a30e3d4aef74304b4d240728183b2e1a5a98acf9397b9f6c109",
+          "execution_fingerprint": "42cec7e8947adb580561745ec6e77e8c937299c2dd0263a5553df9a10fcc8880",
+          "negative_token_id": 2083,
+          "negative_token_probability": 0.5847395942877578,
+          "plan_fingerprint": "6344ee5d0ed859a6e236532d7a06e6876f3a80e067b3602e70ea9a488d9d9ca4",
+          "positive_token_id": 9405,
+          "positive_token_probability": 0.40188525403855874,
+          "probability_true": 0.4073334000459302,
+          "probability_true_ge_half": false,
+          "trace_id": "450adf78-7aa6-4747-bb9e-ca488a9f38ba",
+          "verbalizer_mass": 0.9866248483263171
+        },
+        {
+          "candidate": "technical",
+          "decision_fingerprint": "d269ff284df37bdb083c9308a9bf973cdfab3892bfa6ac318ff81374483a78b8",
+          "execution_fingerprint": "36e412595cb20a1e64b3270c36e999afe9b730e82f414b99617dea2627cbf0f5",
+          "negative_token_id": 2083,
+          "negative_token_probability": 0.6142868709546107,
+          "plan_fingerprint": "08bf6ee28edb0a5cdab3a52a7f45c5fb41b92f12cc0f46ec525df0234e10af15",
+          "positive_token_id": 9405,
+          "positive_token_probability": 0.37258382109290933,
+          "probability_true": 0.37754066879814546,
+          "probability_true_ge_half": false,
+          "trace_id": "a60499f1-6583-47f1-95cc-40d2ea564f34",
+          "verbalizer_mass": 0.9868706920475215
+        }
+      ],
+      "case_id": "3w-billing-02",
+      "dtype": "bfloat16",
+      "item_id": "3w-billing-02",
+      "model": "Qwen/Qwen3.5-2B",
+      "proposition_id": "choice-candidate-correctness-binary-judgment",
+      "proposition_version": 1,
+      "protocol": "independent-binary-anchor-probability",
+      "protocol_version": 1,
+      "rendering_config": {
+        "enable_thinking": false
+      },
+      "revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "winner": "billing"
+    },
+    {
+      "anchor": "shipping",
+      "anchor_score": 0.37754066879814546,
+      "candidate_score_sum": 1.3775406687981455,
+      "candidates": [
+        {
+          "candidate": "billing",
+          "decision_fingerprint": "f9b02849e76c8d9d360272be2a039c3e5432e8dbc00e051a2aca630ba83940d8",
+          "execution_fingerprint": "5c66f5d51149bb6bfcacf17ed185e6efc3bbe3f10d9582dd6fdeea7a3078b816",
+          "negative_token_id": 2083,
+          "negative_token_probability": 0.46311266045979305,
+          "plan_fingerprint": "b0337a2e8a0784d6db9d1a182a22a37175ede3a0c4a52b1dee7bb5540028062f",
+          "positive_token_id": 9405,
+          "positive_token_probability": 0.5247753947956769,
+          "probability_true": 0.5312093733737563,
+          "probability_true_ge_half": true,
+          "trace_id": "168b79d0-5ce4-4883-bd08-3d29e5971162",
+          "verbalizer_mass": 0.9878880552554713
+        },
+        {
+          "candidate": "shipping",
+          "decision_fingerprint": "f87a9641a568647908c1f26a908a58364699993f33ec2e91b2d07a10e78d5fe2",
+          "execution_fingerprint": "dc2fa74a78e1061a7d95549fdd7404abdf31e96c8a15e02d4435e52a05b4aecb",
+          "negative_token_id": 2083,
+          "negative_token_probability": 0.6151768043181031,
+          "plan_fingerprint": "db7e21ccf01c62bd55dde07b2ef047873b9985b0cd13562817feba93c0a81918",
+          "positive_token_id": 9405,
+          "positive_token_probability": 0.37312359296296865,
+          "probability_true": 0.37754066879814546,
+          "probability_true_ge_half": false,
+          "trace_id": "60e1c0af-edd0-4a23-b806-ed00762b7121",
+          "verbalizer_mass": 0.9883003972810732
+        },
+        {
+          "candidate": "technical",
+          "decision_fingerprint": "74338dcad3d1a48ceeea8d8b5fdaf59d050436e3553f1722111e9ed383c857c6",
+          "execution_fingerprint": "a94f24667cf4b8402994de0e90294b7703f73e0962f0aff75b2b54e8fd155afd",
+          "negative_token_id": 2083,
+          "negative_token_probability": 0.5241211949277328,
+          "plan_fingerprint": "0084fc9d6a29c7d6984c8ffe7298a496e40c10667fc9155189c324672cd10485",
+          "positive_token_id": 9405,
+          "positive_token_probability": 0.46253533110266115,
+          "probability_true": 0.46879062662624377,
+          "probability_true_ge_half": false,
+          "trace_id": "16eb9843-9712-41fc-b466-ad388f668332",
+          "verbalizer_mass": 0.9866565260303952
+        }
+      ],
+      "case_id": "3w-billing-03",
+      "dtype": "bfloat16",
+      "item_id": "3w-billing-03",
+      "model": "Qwen/Qwen3.5-2B",
+      "proposition_id": "choice-candidate-correctness-binary-judgment",
+      "proposition_version": 1,
+      "protocol": "independent-binary-anchor-probability",
+      "protocol_version": 1,
+      "rendering_config": {
+        "enable_thinking": false
+      },
+      "revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "winner": "billing"
+    },
+    {
+      "anchor": "billing",
+      "anchor_score": 0.5621765008857981,
+      "candidate_score_sum": 1.40733340004593,
+      "candidates": [
+        {
+          "candidate": "billing",
+          "decision_fingerprint": "8836eb7c83f70a22e1fe0e65bb1cf3064bc2923954a461304d174eefc07d8ef5",
+          "execution_fingerprint": "3d9a648f31d7e127361d1c4ce82a73b5577edc30be19e01966c3fc708d4b867c",
+          "negative_token_id": 2083,
+          "negative_token_probability": 0.4323202203149512,
+          "plan_fingerprint": "67a010e6822a2601d804a434ba56542617589fe1e1bade4de492f53600a55e41",
+          "positive_token_id": 9405,
+          "positive_token_probability": 0.5551101510324414,
+          "probability_true": 0.5621765008857981,
+          "probability_true_ge_half": true,
+          "trace_id": "ec3910b1-bc9c-42d1-92bd-d2b0efa8d1f8",
+          "verbalizer_mass": 0.9874303713473919
+        },
+        {
+          "candidate": "shipping",
+          "decision_fingerprint": "56611f0d6f0b30dff8ca47d4647c2d808cfe27ef7d51332cf1592b16427bc40e",
+          "execution_fingerprint": "9a6d247dcb8eca9b397406053b8e6d3c6b1d8d9457d9eaca842ff2f2caa4d5fd",
+          "negative_token_id": 2083,
+          "negative_token_probability": 0.5555264109396084,
+          "plan_fingerprint": "96eaffac9bc7ac3ae816acec5b1268a4b9b6b2fbc9dc0bc521cb9b23ab676c83",
+          "positive_token_id": 9405,
+          "positive_token_probability": 0.43264440385661407,
+          "probability_true": 0.4378234991142019,
+          "probability_true_ge_half": false,
+          "trace_id": "e8e707e8-cf80-4bfc-819d-05a9303cb61d",
+          "verbalizer_mass": 0.9881708147962217
+        },
+        {
+          "candidate": "technical",
+          "decision_fingerprint": "1f16c73a3ddb2627f5172369c98e068630ebe87ce7d62b271f992e4e457a2b60",
+          "execution_fingerprint": "f27d7a9ab7955a708009710acd48daf98358258e869a15527768ac674a4da5b1",
+          "negative_token_id": 2083,
+          "negative_token_probability": 0.5860683113378822,
+          "plan_fingerprint": "2c7f1a840f2ac33dc347d012247dae5ba71e69c1f31c9fc7835f7458e03cb2b4",
+          "positive_token_id": 9405,
+          "positive_token_probability": 0.402798467021656,
+          "probability_true": 0.4073334000459302,
+          "probability_true_ge_half": false,
+          "trace_id": "f4833a73-26f0-4bd9-bcb3-a03e3e79490e",
+          "verbalizer_mass": 0.9888667783595388
+        }
+      ],
+      "case_id": "3w-billing-04",
+      "dtype": "bfloat16",
+      "item_id": "3w-billing-04",
+      "model": "Qwen/Qwen3.5-2B",
+      "proposition_id": "choice-candidate-correctness-binary-judgment",
+      "proposition_version": 1,
+      "protocol": "independent-binary-anchor-probability",
+      "protocol_version": 1,
+      "rendering_config": {
+        "enable_thinking": false
+      },
+      "revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "winner": "billing"
+    },
+    {
+      "anchor": "billing",
+      "anchor_score": 0.46879062662624377,
+      "candidate_score_sum": 0.9589606528909872,
+      "candidates": [
+        {
+          "candidate": "billing",
+          "decision_fingerprint": "8310d94777e0e5ee88e1dde9c0693a62eca95faed577c073ed1e1e3fbe92529f",
+          "execution_fingerprint": "4ade761506d0ba40fbc1f1061bc284510fc3cfe5d714ee5531e948bc292e5aaa",
+          "negative_token_id": 2083,
+          "negative_token_probability": 0.5231514021791638,
+          "plan_fingerprint": "bf1331ae8dc58a25a4c252c8fcc4f35cbcc641e59cd2d44f4bf50999849dc9f0",
+          "positive_token_id": 9405,
+          "positive_token_probability": 0.46167949200589997,
+          "probability_true": 0.46879062662624377,
+          "probability_true_ge_half": false,
+          "trace_id": "cc8dd412-a10d-4159-a4af-c4bf95934f5d",
+          "verbalizer_mass": 0.9848308941850651
+        },
+        {
+          "candidate": "shipping",
+          "decision_fingerprint": "3cb5918986b3c194598bb46e6bff811d6e26a1b4fe68305851c9cef5b68375ac",
+          "execution_fingerprint": "05422b2c3f3e73091e5169d6ddfebfc47d38b1e95b994e5407714c7ca1310828",
+          "negative_token_id": 2083,
+          "negative_token_probability": 0.744434971403246,
+          "plan_fingerprint": "e5850378559840497b5b5c544681ac6d39f6f23f11e2f2c1c15bd5827d3408b1",
+          "positive_token_id": 9405,
+          "positive_token_probability": 0.24168265025390634,
+          "probability_true": 0.24508501313237172,
+          "probability_true_ge_half": false,
+          "trace_id": "bb030588-c680-4ec1-888c-849d152239a2",
+          "verbalizer_mass": 0.9861176216571518
+        },
+        {
+          "candidate": "technical",
+          "decision_fingerprint": "e13ae515db8a0fd6d08283f082adc03a83df051d6ee2a59c5786eefac8015a85",
+          "execution_fingerprint": "f2847570287a92e416f8cfbb399864d85e8dd6e27f3b06a67be381d6cae607cd",
+          "negative_token_id": 2083,
+          "negative_token_probability": 0.7431014639849021,
+          "plan_fingerprint": "ed2cbd9c75c1be71e31be7f2b89ee66d3d444dc053084962cb4ce03731383ab8",
+          "positive_token_id": 9405,
+          "positive_token_probability": 0.2412497237803003,
+          "probability_true": 0.24508501313237172,
+          "probability_true_ge_half": false,
+          "trace_id": "2c08957b-452c-4fef-bb66-56cc6c7577df",
+          "verbalizer_mass": 0.9843511877652017
+        }
+      ],
+      "case_id": "3w-billing-05",
+      "dtype": "bfloat16",
+      "item_id": "3w-billing-05",
+      "model": "Qwen/Qwen3.5-2B",
+      "proposition_id": "choice-candidate-correctness-binary-judgment",
+      "proposition_version": 1,
+      "protocol": "independent-binary-anchor-probability",
+      "protocol_version": 1,
+      "rendering_config": {
+        "enable_thinking": false
+      },
+      "revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "winner": "billing"
+    },
+    {
+      "anchor": "technical",
+      "anchor_score": 0.4378234991142019,
+      "candidate_score_sum": 1.6688820777442068,
+      "candidates": [
+        {
+          "candidate": "billing",
+          "decision_fingerprint": "828aaaf94717116565bf182a34f59ee59f428a1fb20ff7d5232595c6e1b9b83d",
+          "execution_fingerprint": "9743f5e2356a7db46a308dd90becac3916cbf39bac3ab5cebf99c094b17d5fea",
+          "negative_token_id": 2083,
+          "negative_token_probability": 0.49293384883735053,
+          "plan_fingerprint": "98e9aa033362c0f736e5537c2e1a7a6b7bb6a0cfccb028451fbd1a1599697db4",
+          "positive_token_id": 9405,
+          "positive_token_probability": 0.49293384883735053,
+          "probability_true": 0.5,
+          "probability_true_ge_half": true,
+          "trace_id": "7354a4e2-ed4c-499a-9f7e-2fcbeca9725e",
+          "verbalizer_mass": 0.9858676976746994
+        },
+        {
+          "candidate": "shipping",
+          "decision_fingerprint": "97ec53b9a3321844f8fbbc6bf8c157fdfb98badf9458c5668c4e061e87f03227",
+          "execution_fingerprint": "2598648025a4ec0435d72254a76bdaee9787a8cfc59020328996296514f6a612",
+          "negative_token_id": 2083,
+          "negative_token_probability": 0.266357969866303,
+          "plan_fingerprint": "023ff82c1570fc131fbf2c9f1fd476770204d7b1b72cc21e7b082ecb9939c4d2",
+          "positive_token_id": 9405,
+          "positive_token_probability": 0.7240360293528134,
+          "probability_true": 0.7310585786300049,
+          "probability_true_ge_half": true,
+          "trace_id": "075c68c5-efec-4568-a9c8-a77261a384d7",
+          "verbalizer_mass": 0.990393999219118
+        },
+        {
+          "candidate": "technical",
+          "decision_fingerprint": "9e03211ce27bdfb70f16a49b64b044912bbedce8a149cfffb9d11c36a0a2b9ec",
+          "execution_fingerprint": "604d65a608b4d31bebbf1342c100908cc9f2386a81f37c17005b532fcadb3e3b",
+          "negative_token_id": 2083,
+          "negative_token_probability": 0.5547545120381975,
+          "plan_fingerprint": "68f4eb984cd92c352053ec47961f9cb83d7cb42134be8564e7fed1fc5974a9f7",
+          "positive_token_id": 9405,
+          "positive_token_probability": 0.43204324838774333,
+          "probability_true": 0.4378234991142019,
+          "probability_true_ge_half": false,
+          "trace_id": "ad712779-da5a-43df-951b-0e1f7ce1ca42",
+          "verbalizer_mass": 0.98679776042594
+        }
+      ],
+      "case_id": "3w-shipping-01",
+      "dtype": "bfloat16",
+      "item_id": "3w-shipping-01",
+      "model": "Qwen/Qwen3.5-2B",
+      "proposition_id": "choice-candidate-correctness-binary-judgment",
+      "proposition_version": 1,
+      "protocol": "independent-binary-anchor-probability",
+      "protocol_version": 1,
+      "rendering_config": {
+        "enable_thinking": false
+      },
+      "revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "winner": "shipping"
+    },
+    {
+      "anchor": "shipping",
+      "anchor_score": 0.6224593312018546,
+      "candidate_score_sum": 1.5914922036898127,
+      "candidates": [
+        {
+          "candidate": "billing",
+          "decision_fingerprint": "cdc325b9d4afa87a6d4022baadc099fc67f034c2af6ce2d7a27a2952ac3a4961",
+          "execution_fingerprint": "54e65c3c78a2ea3db8b61addf2614a62f7322f61bce727057ed739ea516b4971",
+          "negative_token_id": 2083,
+          "negative_token_probability": 0.5536203207345115,
+          "plan_fingerprint": "61d816a787b019bba1335518eafd7ac5137424d0e862f8b10854f8b76f33b976",
+          "positive_token_id": 9405,
+          "positive_token_probability": 0.4311599393122799,
+          "probability_true": 0.4378234991142019,
+          "probability_true_ge_half": false,
+          "trace_id": "20256dae-1b89-4762-87b0-55093726e164",
+          "verbalizer_mass": 0.9847802600467906
+        },
+        {
+          "candidate": "shipping",
+          "decision_fingerprint": "0a90bf713cc399b2fc5b5ebfffc0305e77900f91f90decae3e786e94b9da87c1",
+          "execution_fingerprint": "3cee28780b11605337a9d0ca3c3c7fc9c5ed1d0569e342f3a0591ff2d6c47732",
+          "negative_token_id": 2083,
+          "negative_token_probability": 0.3726122480669693,
+          "plan_fingerprint": "2c785889e64d3cf75c85b10a6aa6d5b8aca5bde839f410b2cd0eb5f10f1ea046",
+          "positive_token_id": 9405,
+          "positive_token_probability": 0.614333739111405,
+          "probability_true": 0.6224593312018546,
+          "probability_true_ge_half": true,
+          "trace_id": "ac41a625-02fa-457e-96e8-e1607d99ec80",
+          "verbalizer_mass": 0.9869459871783759
+        },
+        {
+          "candidate": "technical",
+          "decision_fingerprint": "dcc703e1d43f275408e85f86d59e46b1b30b3c4a6c680290298443d4d1a6ac74",
+          "execution_fingerprint": "ee73db007988cd3b707c3e8c2a2968b98d092dcd206d3ba7726bf6e39d9a00a8",
+          "negative_token_id": 2083,
+          "negative_token_probability": 0.46226897855044474,
+          "plan_fingerprint": "2289757dac7603bf36ee2bc9055815023f21fe5887732d4a4ef976a5d2b8ffc6",
+          "positive_token_id": 9405,
+          "positive_token_probability": 0.5238193779452184,
+          "probability_true": 0.5312093733737563,
+          "probability_true_ge_half": true,
+          "trace_id": "534bf6a4-9121-4851-ba30-d36c22a21417",
+          "verbalizer_mass": 0.9860883564956644
+        }
+      ],
+      "case_id": "3w-shipping-02",
+      "dtype": "bfloat16",
+      "item_id": "3w-shipping-02",
+      "model": "Qwen/Qwen3.5-2B",
+      "proposition_id": "choice-candidate-correctness-binary-judgment",
+      "proposition_version": 1,
+      "protocol": "independent-binary-anchor-probability",
+      "protocol_version": 1,
+      "rendering_config": {
+        "enable_thinking": false
+      },
+      "revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "winner": "shipping"
+    },
+    {
+      "anchor": "billing",
+      "anchor_score": 0.37754066879814546,
+      "candidate_score_sum": 1.2295713429965087,
+      "candidates": [
+        {
+          "candidate": "billing",
+          "decision_fingerprint": "4994cd8b488e73abfedfccdd6352d95b96d99492754f90394d84d8b01685d4ba",
+          "execution_fingerprint": "b10be551dcda9bc7a61b7129f204ff596830ee9cbaca56bda8d8620a19d5a6be",
+          "negative_token_id": 2083,
+          "negative_token_probability": 0.61325667565412,
+          "plan_fingerprint": "e45689582f389e8bb6d3ea367151bf8e7707fd9818b3ce92e76f3b0e34f13f8e",
+          "positive_token_id": 9405,
+          "positive_token_probability": 0.3719589760576699,
+          "probability_true": 0.37754066879814546,
+          "probability_true_ge_half": false,
+          "trace_id": "42e2cd76-8f4c-4aad-9a43-c01ffab0f649",
+          "verbalizer_mass": 0.9852156517117915
+        },
+        {
+          "candidate": "shipping",
+          "decision_fingerprint": "10188e42bd2eae58313788c83c4c9b26d25c24a411c337fdc2735dbc371b5d26",
+          "execution_fingerprint": "6dd7b15d84a545602cf1a2291c31ec0d81b19a9e0ba013c672f75ad5eb753805",
+          "negative_token_id": 2083,
+          "negative_token_probability": 0.462970468208069,
+          "plan_fingerprint": "8174b55e0e23cded116802cd1bd5fb8f04d45e3f3e595d36849fc36ccfae0e00",
+          "positive_token_id": 9405,
+          "positive_token_probability": 0.5246142698655977,
+          "probability_true": 0.5312093733737563,
+          "probability_true_ge_half": true,
+          "trace_id": "a1939feb-49b0-48c9-8cac-c0884d803da9",
+          "verbalizer_mass": 0.987584738073668
+        },
+        {
+          "candidate": "technical",
+          "decision_fingerprint": "449f52277ff6a99516568d54a5d24501cb879cf77ac83c860f4c615fde237bc9",
+          "execution_fingerprint": "f84fc2ac8d638ada27a04a5147b23d367e7bdebd7bee811671317a75c7e5887d",
+          "negative_token_id": 2083,
+          "negative_token_probability": 0.6698985181083553,
+          "plan_fingerprint": "dae32a8e8df882ca2baf3208862eb8dddfabb0f727c9f05441c0f95e07ac358b",
+          "positive_token_id": 9405,
+          "positive_token_probability": 0.316437653685158,
+          "probability_true": 0.32082130082460697,
+          "probability_true_ge_half": false,
+          "trace_id": "4dbc92ce-6e14-4d90-a3a3-4c94f843c2c9",
+          "verbalizer_mass": 0.986336171793515
+        }
+      ],
+      "case_id": "3w-shipping-03",
+      "dtype": "bfloat16",
+      "item_id": "3w-shipping-03",
+      "model": "Qwen/Qwen3.5-2B",
+      "proposition_id": "choice-candidate-correctness-binary-judgment",
+      "proposition_version": 1,
+      "protocol": "independent-binary-anchor-probability",
+      "protocol_version": 1,
+      "rendering_config": {
+        "enable_thinking": false
+      },
+      "revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "winner": "shipping"
+    },
+    {
+      "anchor": "shipping",
+      "anchor_score": 0.7549149868676283,
+      "candidate_score_sum": 1.4830696877381655,
+      "candidates": [
+        {
+          "candidate": "billing",
+          "decision_fingerprint": "96d87894562d22cd9e79d84568f43f943484bc4d0d6d2f0f31859212c119e779",
+          "execution_fingerprint": "e7ff7e06077e2289e0a1100d483ddc3e334def536f5c76530cc14ad29339b6d3",
+          "negative_token_id": 2083,
+          "negative_token_probability": 0.6679744696134636,
+          "plan_fingerprint": "76d36708728a969a3953507907af06729ce29fd059095cef71b4ef1a88362427",
+          "positive_token_id": 9405,
+          "positive_token_probability": 0.3155287975303195,
+          "probability_true": 0.32082130082460697,
+          "probability_true_ge_half": false,
+          "trace_id": "cd7d4ccb-8f8e-4eb1-bd94-72fd82d3f386",
+          "verbalizer_mass": 0.9835032671437849
+        },
+        {
+          "candidate": "shipping",
+          "decision_fingerprint": "758830ebc1f63ae94b5fce727ba00449cbb529c64733e81351e09c06eed9a921",
+          "execution_fingerprint": "35d642d749dfd508fc63914636e6a014caf9abb66950e1d772fc17e7b40e79c3",
+          "negative_token_id": 2083,
+          "negative_token_probability": 0.24245647731729614,
+          "plan_fingerprint": "4b1853e478ee1e50e3ad724f9a7028318bc5d12c969be6255ee3114572dbfe0b",
+          "positive_token_id": 9405,
+          "positive_token_probability": 0.7468185265620481,
+          "probability_true": 0.7549149868676283,
+          "probability_true_ge_half": true,
+          "trace_id": "c12858a3-9468-41b9-9659-e3555a3dfcfe",
+          "verbalizer_mass": 0.9892750038793436
+        },
+        {
+          "candidate": "technical",
+          "decision_fingerprint": "0a55c617994b6a68b33613c65ae91c672fd6c7d77c98b723629bb686c73615ad",
+          "execution_fingerprint": "990adbc24972be5e12a34aea77b12e88b7452ee632d99518437a5ba3019fb42d",
+          "negative_token_id": 2083,
+          "negative_token_probability": 0.5831635693040103,
+          "plan_fingerprint": "d58f1a36c812ff0843b7c6443e3ed001fe9aa33a5b851d3b281374471b40a828",
+          "positive_token_id": 9405,
+          "positive_token_probability": 0.40080206896412235,
+          "probability_true": 0.4073334000459302,
+          "probability_true_ge_half": false,
+          "trace_id": "ed0f78c3-483d-475d-b8e9-6596c36b5607",
+          "verbalizer_mass": 0.9839656382681333
+        }
+      ],
+      "case_id": "3w-shipping-04",
+      "dtype": "bfloat16",
+      "item_id": "3w-shipping-04",
+      "model": "Qwen/Qwen3.5-2B",
+      "proposition_id": "choice-candidate-correctness-binary-judgment",
+      "proposition_version": 1,
+      "protocol": "independent-binary-anchor-probability",
+      "protocol_version": 1,
+      "rendering_config": {
+        "enable_thinking": false
+      },
+      "revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "winner": "shipping"
+    },
+    {
+      "anchor": "technical",
+      "anchor_score": 0.4378234991142019,
+      "candidate_score_sum": 1.282980398274334,
+      "candidates": [
+        {
+          "candidate": "billing",
+          "decision_fingerprint": "04d632cb898c074563e9523046a7aab9305924c6319dac6e3b220b9e2f5b20a2",
+          "execution_fingerprint": "63936dc6a68bc9c43e09f72d4ade2a71ff955c75260bcfa617af0f42c8ab25ed",
+          "negative_token_id": 2083,
+          "negative_token_probability": 0.5838948060023877,
+          "plan_fingerprint": "aa599c77bd728d005d1de94a9924b37e3259f2abb5ee42db66703a7b32c23e1f",
+          "positive_token_id": 9405,
+          "positive_token_probability": 0.4013046401071757,
+          "probability_true": 0.4073334000459302,
+          "probability_true_ge_half": false,
+          "trace_id": "ebe6c36c-d17a-4738-a807-e4d855fbdfa8",
+          "verbalizer_mass": 0.985199446109564
+        },
+        {
+          "candidate": "shipping",
+          "decision_fingerprint": "f7c5bd58413c4b146ba9dd80dd3a1de49edaef5b08fa2c245e96121e5ec3a988",
+          "execution_fingerprint": "ddd55ab88265141e5fb37c180b6b7a70a8d4a7842ed2a613618ae8777268e733",
+          "negative_token_id": 2083,
+          "negative_token_probability": 0.5553685555730004,
+          "plan_fingerprint": "4e62dd86317fd9a0d7bc49a2460c9b949f0c43c7805d7b396f8329f4ef3dbc7e",
+          "positive_token_id": 9405,
+          "positive_token_probability": 0.43252146597348773,
+          "probability_true": 0.4378234991142019,
+          "probability_true_ge_half": false,
+          "trace_id": "680101ca-a989-4c3d-afa1-5423cb717f5f",
+          "verbalizer_mass": 0.9878900215464874
+        },
+        {
+          "candidate": "technical",
+          "decision_fingerprint": "b5eebfcdbaf262160762282fbebce52d2bc6e55b8a78c3990611fc172d0648ba",
+          "execution_fingerprint": "f9283077a89cdc1950665532b255e717ec8a55bf6ba304593b4d4c2205a9a61b",
+          "negative_token_id": 2083,
+          "negative_token_probability": 0.5545968760101875,
+          "plan_fingerprint": "b07782baf854630a4d7df910748425f1de35577fae47b41a54caed9c3bcaefad",
+          "positive_token_id": 9405,
+          "positive_token_probability": 0.4319204813256888,
+          "probability_true": 0.4378234991142019,
+          "probability_true_ge_half": false,
+          "trace_id": "83f40d8b-59bc-41e9-82b4-44d601d34929",
+          "verbalizer_mass": 0.9865173573358754
+        }
+      ],
+      "case_id": "3w-shipping-05",
+      "dtype": "bfloat16",
+      "item_id": "3w-shipping-05",
+      "model": "Qwen/Qwen3.5-2B",
+      "proposition_id": "choice-candidate-correctness-binary-judgment",
+      "proposition_version": 1,
+      "protocol": "independent-binary-anchor-probability",
+      "protocol_version": 1,
+      "rendering_config": {
+        "enable_thinking": false
+      },
+      "revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "winner": "shipping"
+    },
+    {
+      "anchor": "billing",
+      "anchor_score": 0.34864513533394575,
+      "candidate_score_sum": 1.2883623050178894,
+      "candidates": [
+        {
+          "candidate": "billing",
+          "decision_fingerprint": "e39777b429a6f925d29cb6468643dacca6cb04e58fd1312e9486c8622707968d",
+          "execution_fingerprint": "4c3b404dcc17e7f9942307169099fa8092fa237342f41886b1269e74a55bb90a",
+          "negative_token_id": 2083,
+          "negative_token_probability": 0.6419193425784626,
+          "plan_fingerprint": "d4aad96be4216216e8bd50bf6c47d45c574bfa0c063c3d9bafa6e1ad03a9b355",
+          "positive_token_id": 9405,
+          "positive_token_probability": 0.34359466430251895,
+          "probability_true": 0.34864513533394575,
+          "probability_true_ge_half": false,
+          "trace_id": "3d35f7be-c289-4a21-a7af-568c1e10bb0c",
+          "verbalizer_mass": 0.9855140068809832
+        },
+        {
+          "candidate": "shipping",
+          "decision_fingerprint": "8731cd18e08d6ddd3dc27a5a1b4c169c1c56015dd86347bbb1579717b1d8b251",
+          "execution_fingerprint": "c72169e2ba1309708f738db75fcd866631043143cca1889e3066f0b628e37773",
+          "negative_token_id": 2083,
+          "negative_token_probability": 0.6144954617035046,
+          "plan_fingerprint": "35c83f0923952bd0703d9783ec98f724dcd5f920a71235b7ae06efd5a6662223",
+          "positive_token_id": 9405,
+          "positive_token_probability": 0.3727103377774459,
+          "probability_true": 0.37754066879814546,
+          "probability_true_ge_half": false,
+          "trace_id": "7e3a5d9c-6e24-4be5-8088-8914bdaa9b87",
+          "verbalizer_mass": 0.987205799480952
+        },
+        {
+          "candidate": "technical",
+          "decision_fingerprint": "f76921966dd44a696932936003c325c6786b653e2efd8de9b1364ebd6d71cc6b",
+          "execution_fingerprint": "1374ea893286c4107fd313015c419923fbdec85d1e8bbe0c36d1c1970d208eb8",
+          "negative_token_id": 2083,
+          "negative_token_probability": 0.43223529636291397,
+          "plan_fingerprint": "afc89f2f4f5ee0dfd0029ea9756ddcf4953586b56fbbd6eeccdbba82eae07a7b",
+          "positive_token_id": 9405,
+          "positive_token_probability": 0.55500110651954,
+          "probability_true": 0.5621765008857981,
+          "probability_true_ge_half": true,
+          "trace_id": "f353ff84-5320-490c-ba09-1296cc66cb63",
+          "verbalizer_mass": 0.9872364028824532
+        }
+      ],
+      "case_id": "3w-technical-01",
+      "dtype": "bfloat16",
+      "item_id": "3w-technical-01",
+      "model": "Qwen/Qwen3.5-2B",
+      "proposition_id": "choice-candidate-correctness-binary-judgment",
+      "proposition_version": 1,
+      "protocol": "independent-binary-anchor-probability",
+      "protocol_version": 1,
+      "rendering_config": {
+        "enable_thinking": false
+      },
+      "revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "winner": "technical"
+    },
+    {
+      "anchor": "shipping",
+      "anchor_score": 0.4073334000459302,
+      "candidate_score_sum": 1.40733340004593,
+      "candidates": [
+        {
+          "candidate": "billing",
+          "decision_fingerprint": "f4d07071a371b33ad02447e24a6a2bcc11cebc713a62afb119727e03f8c1dc7a",
+          "execution_fingerprint": "167d73d5694e0e56307169926082eecd7b616e3f7a71ab6642f2eb2e876a4490",
+          "negative_token_id": 2083,
+          "negative_token_probability": 0.5525674880358766,
+          "plan_fingerprint": "29492ba11d50e7bcc4a72c1094884642946b13bf8ca0ed06af43793f1de586cf",
+          "positive_token_id": 9405,
+          "positive_token_probability": 0.4303399923821399,
+          "probability_true": 0.4378234991142019,
+          "probability_true_ge_half": false,
+          "trace_id": "e9f97533-7d99-4bc0-8214-ff9b82a36ac2",
+          "verbalizer_mass": 0.9829074804180158
+        },
+        {
+          "candidate": "shipping",
+          "decision_fingerprint": "fb6a53b60f15bc17c89f7a309c1d2e1cca53abeb6ff8045feb5b8a2222a8fe6f",
+          "execution_fingerprint": "af3f65df100fb8f89697d608921d338c92424e02ea2f5ed69dc908c522094839",
+          "negative_token_id": 2083,
+          "negative_token_probability": 0.583933786487085,
+          "plan_fingerprint": "f5d3435a477d1ceabf979c7913a527855f61d59a5e77da7cede349f0010843b0",
+          "positive_token_id": 9405,
+          "positive_token_probability": 0.40133143097639024,
+          "probability_true": 0.4073334000459302,
+          "probability_true_ge_half": false,
+          "trace_id": "a2ee20b9-8542-4915-8da3-1810025d3334",
+          "verbalizer_mass": 0.9852652174634758
+        },
+        {
+          "candidate": "technical",
+          "decision_fingerprint": "d9bce842abb4182411cf4c9ff3dbf65dadc292aaf78a6cd7e88fda86a31164ee",
+          "execution_fingerprint": "4ea68d6fb915f6ebf059fcc8ca18a0cfbec7cca8b1eab84c8a895af290a9f992",
+          "negative_token_id": 2083,
+          "negative_token_probability": 0.4311163557822343,
+          "plan_fingerprint": "5b09285099dbb4631f2a06279510208adb2b2593cb6f80cd11c6f229f20b6dcf",
+          "positive_token_id": 9405,
+          "positive_token_probability": 0.553564358374184,
+          "probability_true": 0.5621765008857981,
+          "probability_true_ge_half": true,
+          "trace_id": "85338282-d970-4ae5-9bb5-9ce2a91be40f",
+          "verbalizer_mass": 0.9846807141564176
+        }
+      ],
+      "case_id": "3w-technical-02",
+      "dtype": "bfloat16",
+      "item_id": "3w-technical-02",
+      "model": "Qwen/Qwen3.5-2B",
+      "proposition_id": "choice-candidate-correctness-binary-judgment",
+      "proposition_version": 1,
+      "protocol": "independent-binary-anchor-probability",
+      "protocol_version": 1,
+      "rendering_config": {
+        "enable_thinking": false
+      },
+      "revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "winner": "technical"
+    },
+    {
+      "anchor": "shipping",
+      "anchor_score": 0.2689414213699951,
+      "candidate_score_sum": 0.9118015288669297,
+      "candidates": [
+        {
+          "candidate": "billing",
+          "decision_fingerprint": "513c2a581c188173498c11d4a0f6263ae240bb66aca9b59d55d4ca1767a0c9eb",
+          "execution_fingerprint": "3a227603de82d2817d5140474e4b076d0b341e7a063eb972970fe94f83871827",
+          "negative_token_id": 2083,
+          "negative_token_probability": 0.6951428435873258,
+          "plan_fingerprint": "7ef41a55ff2dba37c02a7b7ce321d4e995449746b5dea64e8af0b9ba2b4dc18c",
+          "positive_token_id": 9405,
+          "positive_token_probability": 0.2897786497428741,
+          "probability_true": 0.29421497216298875,
+          "probability_true_ge_half": false,
+          "trace_id": "666964e0-f866-476a-9c11-b9d3fb26b542",
+          "verbalizer_mass": 0.9849214933301987
+        },
+        {
+          "candidate": "shipping",
+          "decision_fingerprint": "c93d90021c514553f08cc18795d134a26d95fd8d6136fc32206a2f57e0a6ec2a",
+          "execution_fingerprint": "620f31b5bb0e7d8642f8556aad318775629a0d225509237780fea6714e86545a",
+          "negative_token_id": 2083,
+          "negative_token_probability": 0.7214045148509427,
+          "plan_fingerprint": "b83177e722fa191db6563219bd38c0d40df1654bd453cd6e78dd8aea86b231e8",
+          "positive_token_id": 9405,
+          "positive_token_probability": 0.26538988978192024,
+          "probability_true": 0.2689414213699951,
+          "probability_true_ge_half": false,
+          "trace_id": "4f90b62e-1c20-40ae-ad66-e09cc778489b",
+          "verbalizer_mass": 0.9867944046328645
+        },
+        {
+          "candidate": "technical",
+          "decision_fingerprint": "ea9912cafcc49fa327c1c04a355ccd0de53ddbb8bf4011bbad6a203137fec769",
+          "execution_fingerprint": "b6b999d8fb0db6971fc35802b1dab3f147c21ba7b372df1e6c1e78ddda39d527",
+          "negative_token_id": 2083,
+          "negative_token_probability": 0.6418140559115709,
+          "plan_fingerprint": "362ada82780252925a5231f1c03813656187c0849a9c27e95d5f327cbe9be5ee",
+          "positive_token_id": 9405,
+          "positive_token_probability": 0.3435383084107945,
+          "probability_true": 0.34864513533394575,
+          "probability_true_ge_half": false,
+          "trace_id": "5f8f48cc-3de7-4fab-87d8-e0885b1bad66",
+          "verbalizer_mass": 0.9853523643223672
+        }
+      ],
+      "case_id": "3w-technical-03",
+      "dtype": "bfloat16",
+      "item_id": "3w-technical-03",
+      "model": "Qwen/Qwen3.5-2B",
+      "proposition_id": "choice-candidate-correctness-binary-judgment",
+      "proposition_version": 1,
+      "protocol": "independent-binary-anchor-probability",
+      "protocol_version": 1,
+      "rendering_config": {
+        "enable_thinking": false
+      },
+      "revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "winner": "technical"
+    },
+    {
+      "anchor": "billing",
+      "anchor_score": 0.4073334000459302,
+      "candidate_score_sum": 1.1624147376422211,
+      "candidates": [
+        {
+          "candidate": "billing",
+          "decision_fingerprint": "0495ff6b7ebfb03e8f3f6361ad88ff7274dfdae649ccdd4fdcbba6663ce026e2",
+          "execution_fingerprint": "6006d31d9ec54e86f06b2a0accab3e32227c3597305716178c94b22389acfa81",
+          "negative_token_id": 2083,
+          "negative_token_probability": 0.5847295566535203,
+          "plan_fingerprint": "9d025283cda182ab21e67e6cff1c5610b54f86bb763c95d6cabd238aebbf84f1",
+          "positive_token_id": 9405,
+          "positive_token_probability": 0.4018783552801629,
+          "probability_true": 0.4073334000459302,
+          "probability_true_ge_half": false,
+          "trace_id": "a1af1f60-c7f1-4dde-ac76-1365aec8f778",
+          "verbalizer_mass": 0.9866079119336838
+        },
+        {
+          "candidate": "shipping",
+          "decision_fingerprint": "a7385dd0201ee53ddec6d908ca9a0dce6205ee62265620af7b679bd6ed9ede84",
+          "execution_fingerprint": "b6c084384289013c2607519b4c2da359eccd46a24c0abb01a56a38d3ec6bfdef",
+          "negative_token_id": 2083,
+          "negative_token_probability": 0.615303539887775,
+          "plan_fingerprint": "6c81a9ad56a38dd367839aef0ea716d52265f18dc7a3ed02300881202576db96",
+          "positive_token_id": 9405,
+          "positive_token_probability": 0.3732004619716508,
+          "probability_true": 0.37754066879814546,
+          "probability_true_ge_half": false,
+          "trace_id": "d3bb65ec-6856-4cf7-93ce-73aa4ad799c8",
+          "verbalizer_mass": 0.9885040018594273
+        },
+        {
+          "candidate": "technical",
+          "decision_fingerprint": "9d29191a053851059e764324b5b656594d17886b1b14ea1ad03c343db539e8fc",
+          "execution_fingerprint": "ab495a86a2970d613f03a815d32d4aa43c0ae1df2846c924e289060c24891db3",
+          "negative_token_id": 2083,
+          "negative_token_probability": 0.6150805965976618,
+          "plan_fingerprint": "232e41030d02227260d4a1aa76e07b630de41aaa7455dd6052a968e2d28d06b3",
+          "positive_token_id": 9405,
+          "positive_token_probability": 0.3730652400308199,
+          "probability_true": 0.37754066879814546,
+          "probability_true_ge_half": false,
+          "trace_id": "c60389c5-8fe9-419e-8b89-f6090cc579a7",
+          "verbalizer_mass": 0.9881458366284832
+        }
+      ],
+      "case_id": "3w-technical-04",
+      "dtype": "bfloat16",
+      "item_id": "3w-technical-04",
+      "model": "Qwen/Qwen3.5-2B",
+      "proposition_id": "choice-candidate-correctness-binary-judgment",
+      "proposition_version": 1,
+      "protocol": "independent-binary-anchor-probability",
+      "protocol_version": 1,
+      "rendering_config": {
+        "enable_thinking": false
+      },
+      "revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "winner": "billing"
+    },
+    {
+      "anchor": "technical",
+      "anchor_score": 0.7057850278370112,
+      "candidate_score_sum": 2.075751488965772,
+      "candidates": [
+        {
+          "candidate": "billing",
+          "decision_fingerprint": "416f1a5a787d2a5e11aac8c41aa6ae49fdd3fd16e1f74162a9aac72b01d72739",
+          "execution_fingerprint": "e0fc2a3a4021f5033fbc2a0340267b562788801775b75b80eceba5466711c7d1",
+          "negative_token_id": 2083,
+          "negative_token_probability": 0.40246286980808127,
+          "plan_fingerprint": "0ce10a4bbe11e00554a802a569247d4d138672c9cf338ddf9e8b6e206d5aae4a",
+          "positive_token_id": 9405,
+          "positive_token_probability": 0.5855800202733612,
+          "probability_true": 0.5926665999540697,
+          "probability_true_ge_half": true,
+          "trace_id": "69d0274b-a503-4616-b6dd-5279d616bebd",
+          "verbalizer_mass": 0.9880428900814431
+        },
+        {
+          "candidate": "shipping",
+          "decision_fingerprint": "e1e843ebe49bc7f22ec1ab7daf954a72fe6d9e76fcebfe6a1576f2649783bd5d",
+          "execution_fingerprint": "d5eaa42462b2df45e24d0411d2435da01ab73972657580fca1d44775953cf81b",
+          "negative_token_id": 2083,
+          "negative_token_probability": 0.22093942402353078,
+          "plan_fingerprint": "57b44f48a9bba2bd05e0afd1780bde2867a922aa811d53465e310a9740ff2697",
+          "positive_token_id": 9405,
+          "positive_token_probability": 0.7711543626662062,
+          "probability_true": 0.7772998611746911,
+          "probability_true_ge_half": true,
+          "trace_id": "a38fd1e2-f527-4b4b-a0f9-c40f110b6faf",
+          "verbalizer_mass": 0.9920937866897377
+        },
+        {
+          "candidate": "technical",
+          "decision_fingerprint": "d8a9b9c182f6b0862daee131ad93313ca8b469b8608e2fa0d5c105a9ea8e15e8",
+          "execution_fingerprint": "c2fa97f22d0fb22b070fa793f83ae85d727d79e7a4c2c287cb3ea066bd1b273b",
+          "negative_token_id": 2083,
+          "negative_token_probability": 0.29159054356105907,
+          "plan_fingerprint": "fbb0e52d080ce2ee8b13a547627c32c3d40e802885867098f08a6792f81b09d3",
+          "positive_token_id": 9405,
+          "positive_token_probability": 0.6994893509030614,
+          "probability_true": 0.7057850278370112,
+          "probability_true_ge_half": true,
+          "trace_id": "91da699e-96ec-4010-930d-0af88583321c",
+          "verbalizer_mass": 0.9910798944641194
+        }
+      ],
+      "case_id": "3w-technical-05",
+      "dtype": "bfloat16",
+      "item_id": "3w-technical-05",
+      "model": "Qwen/Qwen3.5-2B",
+      "proposition_id": "choice-candidate-correctness-binary-judgment",
+      "proposition_version": 1,
+      "protocol": "independent-binary-anchor-probability",
+      "protocol_version": 1,
+      "rendering_config": {
+        "enable_thinking": false
+      },
+      "revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "winner": "shipping"
+    }
+  ],
+  "paired_dataset_canonical_payload": {
+    "artifact": "paired-fixed-decision-dataset",
+    "fingerprint_version": 1,
+    "plan": {
+      "anchor_selection_id": "sha256-case-id-candidate-set-anchor",
+      "anchor_selection_version": 1,
+      "artifact": "paired-fixed-decision-plan",
+      "fingerprint_version": 1,
+      "ground_truth_semantics_fingerprint": "46c347f27e3c189a1a5a24875b3e31569840f97da9f3d7ffa020361d1b8e3162",
+      "ground_truth_semantics_fingerprint_version": 1,
+      "input_score_id": "fixed-decision-semantic-probability",
+      "input_score_version": 1,
+      "items": [
+        {
+          "anchor_correct": true,
+          "anchor_value": "billing",
+          "ground_truth_value": "billing",
+          "item_id": "3w-billing-01",
+          "split": "train"
+        },
+        {
+          "anchor_correct": true,
+          "anchor_value": "billing",
+          "ground_truth_value": "billing",
+          "item_id": "3w-billing-02",
+          "split": "train"
+        },
+        {
+          "anchor_correct": false,
+          "anchor_value": "shipping",
+          "ground_truth_value": "billing",
+          "item_id": "3w-billing-03",
+          "split": "train"
+        },
+        {
+          "anchor_correct": true,
+          "anchor_value": "billing",
+          "ground_truth_value": "billing",
+          "item_id": "3w-billing-04",
+          "split": "test"
+        },
+        {
+          "anchor_correct": true,
+          "anchor_value": "billing",
+          "ground_truth_value": "billing",
+          "item_id": "3w-billing-05",
+          "split": "test"
+        },
+        {
+          "anchor_correct": false,
+          "anchor_value": "technical",
+          "ground_truth_value": "shipping",
+          "item_id": "3w-shipping-01",
+          "split": "train"
+        },
+        {
+          "anchor_correct": true,
+          "anchor_value": "shipping",
+          "ground_truth_value": "shipping",
+          "item_id": "3w-shipping-02",
+          "split": "train"
+        },
+        {
+          "anchor_correct": false,
+          "anchor_value": "billing",
+          "ground_truth_value": "shipping",
+          "item_id": "3w-shipping-03",
+          "split": "train"
+        },
+        {
+          "anchor_correct": true,
+          "anchor_value": "shipping",
+          "ground_truth_value": "shipping",
+          "item_id": "3w-shipping-04",
+          "split": "test"
+        },
+        {
+          "anchor_correct": false,
+          "anchor_value": "technical",
+          "ground_truth_value": "shipping",
+          "item_id": "3w-shipping-05",
+          "split": "test"
+        },
+        {
+          "anchor_correct": false,
+          "anchor_value": "billing",
+          "ground_truth_value": "technical",
+          "item_id": "3w-technical-01",
+          "split": "train"
+        },
+        {
+          "anchor_correct": false,
+          "anchor_value": "shipping",
+          "ground_truth_value": "technical",
+          "item_id": "3w-technical-02",
+          "split": "train"
+        },
+        {
+          "anchor_correct": false,
+          "anchor_value": "shipping",
+          "ground_truth_value": "technical",
+          "item_id": "3w-technical-03",
+          "split": "train"
+        },
+        {
+          "anchor_correct": false,
+          "anchor_value": "billing",
+          "ground_truth_value": "technical",
+          "item_id": "3w-technical-04",
+          "split": "test"
+        },
+        {
+          "anchor_correct": true,
+          "anchor_value": "technical",
+          "ground_truth_value": "technical",
+          "item_id": "3w-technical-05",
+          "split": "test"
+        }
+      ],
+      "measurement_a": {
+        "measurement_id": "direct-categorical-anchor-probability",
+        "measurement_version": 1
+      },
+      "measurement_b": {
+        "measurement_id": "independent-binary-anchor-probability",
+        "measurement_version": 1
+      },
+      "model_id": "Qwen/Qwen3.5-2B",
+      "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "population_id": "choice-signal-three-way-frozen-decision-pilot",
+      "population_version": 1,
+      "research_spec_id": "calibration-transport-research-spec",
+      "research_spec_version": 1,
+      "split_protocol_id": "three-way-synthetic-3-train-2-test-per-category",
+      "split_protocol_version": 1,
+      "target_id": "fixed-decision-correctness",
+      "target_version": 1
+    },
+    "rows": [
+      {
+        "a": {
+          "anchor_score": 0.9980389748228164,
+          "item_id": "3w-billing-01",
+          "reason": null,
+          "source_record_id": "dd247f10701f078a3726f285fd4a5c794b633555287a784fa2bcb79c50258b2f",
+          "status": "scored",
+          "winner_value": "billing"
+        },
+        "b": {
+          "anchor_score": 0.5926665999540697,
+          "item_id": "3w-billing-01",
+          "reason": null,
+          "source_record_id": "32753db3b3ed9c592bd8ba2a0ae4ac18c5cc64b7a6b57f2629f91de580b3129d",
+          "status": "scored",
+          "winner_value": "billing"
+        },
+        "item": {
+          "anchor_correct": true,
+          "anchor_value": "billing",
+          "ground_truth_value": "billing",
+          "item_id": "3w-billing-01",
+          "split": "train"
+        }
+      },
+      {
+        "a": {
+          "anchor_score": 0.9985519097711956,
+          "item_id": "3w-billing-02",
+          "reason": null,
+          "source_record_id": "d0c62da044c581ae100948bc2b8905630f6a69ebe8cd5147d2049e9104414b51",
+          "status": "scored",
+          "winner_value": "billing"
+        },
+        "b": {
+          "anchor_score": 0.46879062662624377,
+          "item_id": "3w-billing-02",
+          "reason": null,
+          "source_record_id": "e018c97809f5fead55e0f32d9645d0bba6fd7846e176363fac13df072c64e95c",
+          "status": "scored",
+          "winner_value": "billing"
+        },
+        "item": {
+          "anchor_correct": true,
+          "anchor_value": "billing",
+          "ground_truth_value": "billing",
+          "item_id": "3w-billing-02",
+          "split": "train"
+        }
+      },
+      {
+        "a": {
+          "anchor_score": 0.0021807322154514756,
+          "item_id": "3w-billing-03",
+          "reason": null,
+          "source_record_id": "4c161be76c9c59c27679c6acf4b7db5d85ed756394cdd471f9e23eeabacd496a",
+          "status": "scored",
+          "winner_value": "billing"
+        },
+        "b": {
+          "anchor_score": 0.37754066879814546,
+          "item_id": "3w-billing-03",
+          "reason": null,
+          "source_record_id": "2432e21436e7720d8408ef1624476686abccf755357904ea4ca53bce8dad2e10",
+          "status": "scored",
+          "winner_value": "billing"
+        },
+        "item": {
+          "anchor_correct": false,
+          "anchor_value": "shipping",
+          "ground_truth_value": "billing",
+          "item_id": "3w-billing-03",
+          "split": "train"
+        }
+      },
+      {
+        "a": {
+          "anchor_score": 0.9959789286177262,
+          "item_id": "3w-billing-04",
+          "reason": null,
+          "source_record_id": "b2df856355aef27628a2170d3dbf74ba0775bef8cd966166f32b1f6cfa7decf7",
+          "status": "scored",
+          "winner_value": "billing"
+        },
+        "b": {
+          "anchor_score": 0.5621765008857981,
+          "item_id": "3w-billing-04",
+          "reason": null,
+          "source_record_id": "383df127d7ae392e894f8e06d9e4e98659c6aa623cce2d898b8338018fc90eb5",
+          "status": "scored",
+          "winner_value": "billing"
+        },
+        "item": {
+          "anchor_correct": true,
+          "anchor_value": "billing",
+          "ground_truth_value": "billing",
+          "item_id": "3w-billing-04",
+          "split": "test"
+        }
+      },
+      {
+        "a": {
+          "anchor_score": 0.9978730202447856,
+          "item_id": "3w-billing-05",
+          "reason": null,
+          "source_record_id": "a1b20ab56686ec34e575b31a21ed9002440980f25a6436b02763d45432f2b731",
+          "status": "scored",
+          "winner_value": "billing"
+        },
+        "b": {
+          "anchor_score": 0.46879062662624377,
+          "item_id": "3w-billing-05",
+          "reason": null,
+          "source_record_id": "3860e8edb30af20082f7409d60e3be9f7b12add0d4111ad17c16e2026c16c3a0",
+          "status": "scored",
+          "winner_value": "billing"
+        },
+        "item": {
+          "anchor_correct": true,
+          "anchor_value": "billing",
+          "ground_truth_value": "billing",
+          "item_id": "3w-billing-05",
+          "split": "test"
+        }
+      },
+      {
+        "a": {
+          "anchor_score": 0.000801835555531046,
+          "item_id": "3w-shipping-01",
+          "reason": null,
+          "source_record_id": "0f59a1c1df51232ca07c3f888bc62315d83a21bde3871a5e7751e04702ac4745",
+          "status": "scored",
+          "winner_value": "shipping"
+        },
+        "b": {
+          "anchor_score": 0.4378234991142019,
+          "item_id": "3w-shipping-01",
+          "reason": null,
+          "source_record_id": "8f1d877f2d770a187e8e7cbc08485ecb2d04b8fa4daa78ded71839d90cbc7f6e",
+          "status": "scored",
+          "winner_value": "shipping"
+        },
+        "item": {
+          "anchor_correct": false,
+          "anchor_value": "technical",
+          "ground_truth_value": "shipping",
+          "item_id": "3w-shipping-01",
+          "split": "train"
+        }
+      },
+      {
+        "a": {
+          "anchor_score": 0.9978743620699899,
+          "item_id": "3w-shipping-02",
+          "reason": null,
+          "source_record_id": "980c84797f42c3e709912b160e33258d50438b1ad684ba9109ad26828a430bea",
+          "status": "scored",
+          "winner_value": "shipping"
+        },
+        "b": {
+          "anchor_score": 0.6224593312018546,
+          "item_id": "3w-shipping-02",
+          "reason": null,
+          "source_record_id": "14cdb6d4f524ff1e915010f3acde484342dbd8393b03661a8f5ed0e1fda02e01",
+          "status": "scored",
+          "winner_value": "shipping"
+        },
+        "item": {
+          "anchor_correct": true,
+          "anchor_value": "shipping",
+          "ground_truth_value": "shipping",
+          "item_id": "3w-shipping-02",
+          "split": "train"
+        }
+      },
+      {
+        "a": {
+          "anchor_score": 0.0027983823201401777,
+          "item_id": "3w-shipping-03",
+          "reason": null,
+          "source_record_id": "817ba813e195f09dfb1d1b658098e0d7ea621262c99f416e63500e4e19c54427",
+          "status": "scored",
+          "winner_value": "shipping"
+        },
+        "b": {
+          "anchor_score": 0.37754066879814546,
+          "item_id": "3w-shipping-03",
+          "reason": null,
+          "source_record_id": "af23d272386ecaee173e93def120ff9150491a6a86f1d67e32743d01b8e9f88f",
+          "status": "scored",
+          "winner_value": "shipping"
+        },
+        "item": {
+          "anchor_correct": false,
+          "anchor_value": "billing",
+          "ground_truth_value": "shipping",
+          "item_id": "3w-shipping-03",
+          "split": "train"
+        }
+      },
+      {
+        "a": {
+          "anchor_score": 0.9989097477762737,
+          "item_id": "3w-shipping-04",
+          "reason": null,
+          "source_record_id": "1e7e75ac5b7606d46464d5925572bcf746a2250a5fe6320aae00291a5e8b24cc",
+          "status": "scored",
+          "winner_value": "shipping"
+        },
+        "b": {
+          "anchor_score": 0.7549149868676283,
+          "item_id": "3w-shipping-04",
+          "reason": null,
+          "source_record_id": "b48a6a924b96d5da7a8e3a165545848f651355b17fccff64e5edfa2ee9ad9e9a",
+          "status": "scored",
+          "winner_value": "shipping"
+        },
+        "item": {
+          "anchor_correct": true,
+          "anchor_value": "shipping",
+          "ground_truth_value": "shipping",
+          "item_id": "3w-shipping-04",
+          "split": "test"
+        }
+      },
+      {
+        "a": {
+          "anchor_score": 0.332935892147642,
+          "item_id": "3w-shipping-05",
+          "reason": null,
+          "source_record_id": "0b394011c8170186d4779f6d9c058526a2a218f347ae6f1a1e278d5a0b5be6af",
+          "status": "scored",
+          "winner_value": "shipping"
+        },
+        "b": {
+          "anchor_score": 0.4378234991142019,
+          "item_id": "3w-shipping-05",
+          "reason": null,
+          "source_record_id": "669279965564386d334e66bdca7799fcfb8346f525f47ce07d419a3175bb5ee4",
+          "status": "scored",
+          "winner_value": "shipping"
+        },
+        "item": {
+          "anchor_correct": false,
+          "anchor_value": "technical",
+          "ground_truth_value": "shipping",
+          "item_id": "3w-shipping-05",
+          "split": "test"
+        }
+      },
+      {
+        "a": {
+          "anchor_score": 0.001926389426909321,
+          "item_id": "3w-technical-01",
+          "reason": null,
+          "source_record_id": "809fb3394e4f5fee6661808fc8b5e220744c0f273a37a51f9f01087860f98f24",
+          "status": "scored",
+          "winner_value": "technical"
+        },
+        "b": {
+          "anchor_score": 0.34864513533394575,
+          "item_id": "3w-technical-01",
+          "reason": null,
+          "source_record_id": "7f38fe372d9e0406dfac838c68f14495f6f796b26b1e377441a17c949d33bb93",
+          "status": "scored",
+          "winner_value": "technical"
+        },
+        "item": {
+          "anchor_correct": false,
+          "anchor_value": "billing",
+          "ground_truth_value": "technical",
+          "item_id": "3w-technical-01",
+          "split": "train"
+        }
+      },
+      {
+        "a": {
+          "anchor_score": 0.0021435418019423984,
+          "item_id": "3w-technical-02",
+          "reason": null,
+          "source_record_id": "23f69bd850a2f8d8cf0c863348330cfe2f2706054ae75d6659ff86330b86448f",
+          "status": "scored",
+          "winner_value": "technical"
+        },
+        "b": {
+          "anchor_score": 0.4073334000459302,
+          "item_id": "3w-technical-02",
+          "reason": null,
+          "source_record_id": "d461690ee35907af3bbe1b42a906f5edea7c1c80b02834a0b670eea9da2c6abe",
+          "status": "scored",
+          "winner_value": "technical"
+        },
+        "item": {
+          "anchor_correct": false,
+          "anchor_value": "shipping",
+          "ground_truth_value": "technical",
+          "item_id": "3w-technical-02",
+          "split": "train"
+        }
+      },
+      {
+        "a": {
+          "anchor_score": 0.01913402643769323,
+          "item_id": "3w-technical-03",
+          "reason": null,
+          "source_record_id": "0e7e362e8dbbb9d4b18b3b8cf8e56c3e2e616055c691c605f12196ba1801927a",
+          "status": "scored",
+          "winner_value": "technical"
+        },
+        "b": {
+          "anchor_score": 0.2689414213699951,
+          "item_id": "3w-technical-03",
+          "reason": null,
+          "source_record_id": "b9d3e2a164f778443c09c376d07f77f64d105e621d4f269e7c771d100c2723e4",
+          "status": "scored",
+          "winner_value": "technical"
+        },
+        "item": {
+          "anchor_correct": false,
+          "anchor_value": "shipping",
+          "ground_truth_value": "technical",
+          "item_id": "3w-technical-03",
+          "split": "train"
+        }
+      },
+      {
+        "a": {
+          "anchor_score": 0.19619870436465017,
+          "item_id": "3w-technical-04",
+          "reason": null,
+          "source_record_id": "91778e7c573fe94d96478501d160bc38fe3d168df14cd09f9f3e8d24c5561118",
+          "status": "scored",
+          "winner_value": "technical"
+        },
+        "b": {
+          "anchor_score": 0.4073334000459302,
+          "item_id": "3w-technical-04",
+          "reason": null,
+          "source_record_id": "3999513d0a9b8804c08e2434f10e82026d88afc8ed621e70931b2bf0224d5eb1",
+          "status": "scored",
+          "winner_value": "billing"
+        },
+        "item": {
+          "anchor_correct": false,
+          "anchor_value": "billing",
+          "ground_truth_value": "technical",
+          "item_id": "3w-technical-04",
+          "split": "test"
+        }
+      },
+      {
+        "a": {
+          "anchor_score": 0.9966493857934062,
+          "item_id": "3w-technical-05",
+          "reason": null,
+          "source_record_id": "8adcf4cc83a2753a75779adfee3b4df7a1d6e1ec1f4a01f568c8bc2ad4e9e454",
+          "status": "scored",
+          "winner_value": "technical"
+        },
+        "b": {
+          "anchor_score": 0.7057850278370112,
+          "item_id": "3w-technical-05",
+          "reason": null,
+          "source_record_id": "5db37e91a89321f099a1343ced009483af01dfe1b26ac65890db5ab25fcec987",
+          "status": "scored",
+          "winner_value": "shipping"
+        },
+        "item": {
+          "anchor_correct": true,
+          "anchor_value": "technical",
+          "ground_truth_value": "technical",
+          "item_id": "3w-technical-05",
+          "split": "test"
+        }
+      }
+    ]
+  },
+  "paired_dataset_fingerprint": "46c9ed1353d71b87b21ded8cb81fb8f06bc6c1d6ab832fbbc1b5ffdb24b3582c",
+  "plan_canonical_payload": {
+    "anchor_selection_id": "sha256-case-id-candidate-set-anchor",
+    "anchor_selection_version": 1,
+    "artifact": "paired-fixed-decision-plan",
+    "fingerprint_version": 1,
+    "ground_truth_semantics_fingerprint": "46c347f27e3c189a1a5a24875b3e31569840f97da9f3d7ffa020361d1b8e3162",
+    "ground_truth_semantics_fingerprint_version": 1,
+    "input_score_id": "fixed-decision-semantic-probability",
+    "input_score_version": 1,
+    "items": [
+      {
+        "anchor_correct": true,
+        "anchor_value": "billing",
+        "ground_truth_value": "billing",
+        "item_id": "3w-billing-01",
+        "split": "train"
+      },
+      {
+        "anchor_correct": true,
+        "anchor_value": "billing",
+        "ground_truth_value": "billing",
+        "item_id": "3w-billing-02",
+        "split": "train"
+      },
+      {
+        "anchor_correct": false,
+        "anchor_value": "shipping",
+        "ground_truth_value": "billing",
+        "item_id": "3w-billing-03",
+        "split": "train"
+      },
+      {
+        "anchor_correct": true,
+        "anchor_value": "billing",
+        "ground_truth_value": "billing",
+        "item_id": "3w-billing-04",
+        "split": "test"
+      },
+      {
+        "anchor_correct": true,
+        "anchor_value": "billing",
+        "ground_truth_value": "billing",
+        "item_id": "3w-billing-05",
+        "split": "test"
+      },
+      {
+        "anchor_correct": false,
+        "anchor_value": "technical",
+        "ground_truth_value": "shipping",
+        "item_id": "3w-shipping-01",
+        "split": "train"
+      },
+      {
+        "anchor_correct": true,
+        "anchor_value": "shipping",
+        "ground_truth_value": "shipping",
+        "item_id": "3w-shipping-02",
+        "split": "train"
+      },
+      {
+        "anchor_correct": false,
+        "anchor_value": "billing",
+        "ground_truth_value": "shipping",
+        "item_id": "3w-shipping-03",
+        "split": "train"
+      },
+      {
+        "anchor_correct": true,
+        "anchor_value": "shipping",
+        "ground_truth_value": "shipping",
+        "item_id": "3w-shipping-04",
+        "split": "test"
+      },
+      {
+        "anchor_correct": false,
+        "anchor_value": "technical",
+        "ground_truth_value": "shipping",
+        "item_id": "3w-shipping-05",
+        "split": "test"
+      },
+      {
+        "anchor_correct": false,
+        "anchor_value": "billing",
+        "ground_truth_value": "technical",
+        "item_id": "3w-technical-01",
+        "split": "train"
+      },
+      {
+        "anchor_correct": false,
+        "anchor_value": "shipping",
+        "ground_truth_value": "technical",
+        "item_id": "3w-technical-02",
+        "split": "train"
+      },
+      {
+        "anchor_correct": false,
+        "anchor_value": "shipping",
+        "ground_truth_value": "technical",
+        "item_id": "3w-technical-03",
+        "split": "train"
+      },
+      {
+        "anchor_correct": false,
+        "anchor_value": "billing",
+        "ground_truth_value": "technical",
+        "item_id": "3w-technical-04",
+        "split": "test"
+      },
+      {
+        "anchor_correct": true,
+        "anchor_value": "technical",
+        "ground_truth_value": "technical",
+        "item_id": "3w-technical-05",
+        "split": "test"
+      }
+    ],
+    "measurement_a": {
+      "measurement_id": "direct-categorical-anchor-probability",
+      "measurement_version": 1
+    },
+    "measurement_b": {
+      "measurement_id": "independent-binary-anchor-probability",
+      "measurement_version": 1
+    },
+    "model_id": "Qwen/Qwen3.5-2B",
+    "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+    "population_id": "choice-signal-three-way-frozen-decision-pilot",
+    "population_version": 1,
+    "research_spec_id": "calibration-transport-research-spec",
+    "research_spec_version": 1,
+    "split_protocol_id": "three-way-synthetic-3-train-2-test-per-category",
+    "split_protocol_version": 1,
+    "target_id": "fixed-decision-correctness",
+    "target_version": 1
+  },
+  "plan_fingerprint": "37aeb0862f89931207d2c60bcb9f41fac9ad6e05a254e94dd17822c232e6571e",
+  "rendering_configuration": {
+    "enable_thinking": false
+  },
+  "research_spec_id": "calibration-transport-research-spec",
+  "research_spec_version": 1,
+  "source_case_set_fingerprint": "9ceb36cf8974680224d767206d107fb6bfc44225e25498978ca7dca10938e2a2",
+  "source_case_set_version": "choice-signal-v1"
+}

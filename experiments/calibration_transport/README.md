@@ -98,10 +98,52 @@ before constructing the plan. R1 cannot prove a caller's independence.
 
 ## 10. Status
 
-R1 only. R2 (the tiny frozen-decision CAT↔OVR pilot) is **not implemented**, and
-nothing beyond the research gate is started here.
+R1 is complete and unchanged. R2 (the tiny frozen-decision CAT↔OVR pilot) is
+**implemented** in this directory but its exploratory evidence is produced only
+by an actual local-model run; until that run is recorded, no empirical result
+and no compatibility claim exists. Nothing beyond the research gate is started
+here.
 
-## 11. Running the tests
+## 11. R2 — the minimal Frozen-Decision CAT↔OVR pilot
+
+R2 is an **exploratory pilot**, not a benchmark and not confirmatory evidence.
+It answers no question about which protocol is better.
+
+Modules:
+
+- `pilot_plan.py` — loads the frozen `choice_signal` three-way fixture, applies
+  the pre-declared 9 TRAIN / 6 TEST / 0 AUDIT split, computes the deterministic
+  `sha256-case-id-candidate-set-anchor` anchors, declares the synthetic
+  ground-truth semantics, and builds the R1 plan. It never runs a model.
+- `measurements.py` — the two frozen research measurement adapters and the OVR
+  proposition transformation.
+- `analysis.py` — research-only eligibility, the L2 logistic calibrator, the
+  2×2 Brier/LogLoss matrices, empirical transport excess risk, and descriptive
+  diagnostics.
+- `run_pilot.py` — the fixed orchestration pipeline (`--plan-only` prints the
+  plan without a model).
+
+Frozen measurement identities:
+
+- `direct-categorical-anchor-probability` v1 (CAT): ``S_CAT =
+  probabilities[anchor]``, never the categorical winner's mass.
+- `independent-binary-anchor-probability` v1 (OVR): ``S_OVR = p_true(anchor)``
+  from one independent binary judgment per candidate. The OVR scores are **never
+  renormalized**: they are not a categorical distribution and need not sum to 1.
+
+Both scores are for the SAME pre-frozen anchor ``D_i``; neither is that
+measurement's own winner score. The research target/inputs are
+`fixed-decision-correctness` v1 and `fixed-decision-semantic-probability` v1,
+which are deliberately NOT `winner_correctness` or
+`uncalibrated-selected-probability`.
+
+Paired-fit eligibility is frozen before results: a row is eligible iff BOTH
+measurements are `SCORED`. Winner agreement, anchor/winner equality, score
+magnitude, label mass, and ground-truth class never affect inclusion. The pilot
+uses one model (`Qwen/Qwen3.5-2B`), one pre-declared `l2_strength = 0.01`, one
+split, and one anchor protocol, with no sweep and no fallback.
+
+## 12. Running the tests
 
 No model, no GPU, and no network are required:
 

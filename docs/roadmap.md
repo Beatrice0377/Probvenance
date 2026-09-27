@@ -281,14 +281,15 @@ These are directions under consideration, not current commitments. None of them
 is guaranteed to reach 1.0, and whether each is pursued must be decided by
 actual experimental results rather than by design intuition.
 
-### Calibration Transportability (research spec v1 frozen; R1 implemented, R2 not started)
+### Calibration Transportability (research spec v1 frozen; R1 implemented, R2 implemented — empirical pilot and gate pending)
 
 `docs/research/calibration-transport-research-spec-v1.md` freezes the problem
 definition, measurement semantics, experimental separation, estimands, metrics,
 evidence discipline, research questions, pilot gate, and scope boundaries for a
 future cross-measurement calibration-transport research track. It is a research
-specification only: no part of it is implemented, and the frozen Phase 4C
-runtime is unchanged by it. Its object is deliberately distinct from the frozen
+specification only: the research track is implemented solely in the experiment
+layer, and the frozen Phase 4C runtime is unchanged by it. Its object is
+deliberately distinct from the frozen
 Phase 4C object (a measurement chooses its own winner, scores it, and is labeled
 by winner correctness): the research frozen-decision condition fixes an external
 anchor decision and scores that same anchor under each compared measurement.
@@ -296,8 +297,13 @@ R1 (a paired experiment-integrity harness) is implemented in
 `experiments/calibration_transport/`; it defines the research-only
 `PairedFixedDecisionPlan` and `PairedFixedDecisionDataset` artifacts and their
 deterministic fingerprints, but performs no fitting, no transport metric, and no
-audit. R2 (a tiny frozen-decision CAT<->OVR pilot) is **not started** and must
-precede any investment in R3/R4 (transport benchmark, evidence-aware transport
+audit. R2 (a tiny frozen-decision CAT<->OVR pilot) is **implemented** in the same
+directory (plan, CAT/OVR measurement adapters, research-only L2 logistic
+calibrator, 2x2 Brier/LogLoss matrices, diagnostics). R2 is **not complete**: its
+empirical evidence requires an actual local-model run, which is pending, so the
+research gate is pending human review. No empirical transport result or
+compatibility claim exists yet, and R2 must precede any investment in R3/R4
+(transport benchmark, evidence-aware transport
 audit). Declared measurement identity remains the
 default fail-closed authorization boundary; empirical compatibility is a
 research result, not a runtime entitlement.

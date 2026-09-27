@@ -121,7 +121,9 @@ Modules:
   2×2 Brier/LogLoss matrices, empirical transport excess risk, and descriptive
   diagnostics.
 - `run_pilot.py` — the fixed orchestration pipeline (`--plan-only` prints the
-  plan without a model).
+  plan without a model). The official run pins `Qwen/Qwen3.5-2B` to revision
+  `15852e8c16360a2fea060d615a32b45270f8a8fc` and loads it offline
+  (`local_files_only=True`); an unpinned revision is rejected.
 
 Frozen measurement identities:
 
@@ -140,7 +142,8 @@ which are deliberately NOT `winner_correctness` or
 Paired-fit eligibility is frozen before results: a row is eligible iff BOTH
 measurements are `SCORED`. Winner agreement, anchor/winner equality, score
 magnitude, label mass, and ground-truth class never affect inclusion. The pilot
-uses one model (`Qwen/Qwen3.5-2B`), one pre-declared `l2_strength = 0.01`, one
+uses one model (`Qwen/Qwen3.5-2B` pinned to revision
+`15852e8c16360a2fea060d615a32b45270f8a8fc`), one pre-declared `l2_strength = 0.01`, one
 split, and one anchor protocol, with no sweep and no fallback.
 
 ## 12. Running the tests

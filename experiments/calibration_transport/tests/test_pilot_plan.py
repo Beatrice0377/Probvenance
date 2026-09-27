@@ -182,3 +182,26 @@ def test_plan_rejects_a_mutated_fixture() -> None:
         pass
     else:  # pragma: no cover
         raise AssertionError("a mutated fixture must be rejected")
+
+
+def test_pinned_model_revision_is_fixed_and_used_by_default() -> None:
+    run_pilot = _load("run_pilot")
+    assert run_pilot.PINNED_MODEL_REVISION == "15852e8c16360a2fea060d615a32b45270f8a8fc"
+    assert run_pilot.parse_args([]).revision == run_pilot.PINNED_MODEL_REVISION
+    try:
+        run_pilot.main(["--revision", ""])
+    except SystemExit:
+        pass
+    else:  # pragma: no cover
+        raise AssertionError("an unpinned revision must be rejected")
+
+
+def test_pinned_revision_changes_plan_fingerprint_not_schema() -> None:
+    run_pilot = _load("run_pilot")
+    payload = _payload()
+    unpinned = pilot_plan.build_plan(payload, model_id="m", model_revision=None)
+    pinned = pilot_plan.build_plan(
+        payload, model_id="m", model_revision=run_pilot.PINNED_MODEL_REVISION
+    )
+    assert pinned.fingerprint != unpinned.fingerprint
+    assert pilot_plan._integrity.PAIRED_FIXED_DECISION_PLAN_FINGERPRINT_VERSION == 1

@@ -54,6 +54,12 @@ MeasurementOutcome = _integrity.MeasurementOutcome
 PairedFixedDecisionDataset = _integrity.PairedFixedDecisionDataset
 
 DEFAULT_MODEL = "Qwen/Qwen3.5-2B"
+# Exact commit the first empirical pilot is frozen at. The previous environment
+# failure resolved ``main`` to this commit before any measurement ran, so the
+# pilot pins it and never silently follows a newer ``main``. ``model_revision``
+# is part of plan identity: pinning changes the plan fingerprint as a value
+# change, not an R1 schema change.
+PINNED_MODEL_REVISION = "15852e8c16360a2fea060d615a32b45270f8a8fc"
 DEFAULT_DTYPE = "bfloat16"
 DEFAULT_RENDERING_CONFIG: dict[str, Any] = {"enable_thinking": False}
 DEFAULT_TAG = "frozen-decision-cat-ovr-qwen35-2b"
@@ -64,7 +70,7 @@ PILOT_ARTIFACT_VERSION = 1
 
 
 def load_backend(model: str, revision: str | None, dtype: str, device: str | None) -> Any:
-    """Load the experiment-side Qwen3.5 text-tower backend, offline and unpinned."""
+    """Load the experiment-side Qwen3.5 text-tower backend, offline at a pinned revision."""
     loader_path = _HARNESS_DIR.parent / "semantic_signal" / "qwen35_loader.py"
     spec = importlib.util.spec_from_file_location("qwen35_loader", loader_path)
     if spec is None or spec.loader is None:  # pragma: no cover - defensive
@@ -190,7 +196,7 @@ def _winner_by_item(records: Sequence[Mapping[str, Any]]) -> dict[str, str]:
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--model", default=DEFAULT_MODEL)
-    parser.add_argument("--revision", default=None)
+    parser.add_argument("--revision", default=PINNED_MODEL_REVISION)
     parser.add_argument("--dtype", default=DEFAULT_DTYPE)
     parser.add_argument("--device", default=None)
     parser.add_argument("--cases", default=str(pilot_plan.DEFAULT_CASES_PATH))
@@ -206,6 +212,8 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(argv)
+    if not args.revision:
+        raise SystemExit("frozen pilot requires an explicit --revision (never an unpinned main)")
     payload = pilot_plan.load_case_set(args.cases)
     case_set_fingerprint = pilot_plan.case_set_fingerprint(payload)
     cases = pilot_plan.pilot_cases(payload)

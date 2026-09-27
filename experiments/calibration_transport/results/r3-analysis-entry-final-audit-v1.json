@@ -1,0 +1,77 @@
+{
+  "analysis_entry_authorized": false,
+  "artifact_type": "r3-analysis-entry-final-audit",
+  "artifact_version": 1,
+  "audit_scope": "final pre-analysis static semantic audit; not an outcome review",
+  "closure_record_commits": [
+    "fa97d6f548c2d1b820f076225e28527fde3c669a",
+    "1fdd373a6bbc0359d79aa17f2b1ca097c9bd132d"
+  ],
+  "conformance_fix_commits": [
+    "5829a8650c826c2521ce3287764d3f83b582f015",
+    "8996e6760a7c5d424edbd5747ee5c6caffca4283",
+    "b4afae24b1a8b84f65fa7c842850a225c35ef376"
+  ],
+  "final_audit_fingerprint": "dd7d3a6fbdf60713c1e39b93e8b846b4ee04fbdf475bd5e56ae1f2107d405c28",
+  "fingerprint_version": 1,
+  "fisher_combination_wording": {
+    "analysis_outcome_impact": "NONE",
+    "corrected_meaning": "six primary factorial contrasts",
+    "prior_wording": "Fisher combination / six primary factorial contrasts",
+    "prior_wording_location": "results/r3-analysis-entry-reaudit-v1.json",
+    "prior_wording_present": true,
+    "reason": "provenance wording correction only; Fisher combination was never part of frozen R3",
+    "scientific_design_impact": "NONE"
+  },
+  "frozen_scientific_design_changed": false,
+  "historical_analysis_code_commit": "3a929a6931762a518498ad9df2e5f82cf6e6deed",
+  "implementation_files": [
+    "experiments/calibration_transport/r3_analysis.py",
+    "experiments/calibration_transport/tests/test_r3_analysis.py"
+  ],
+  "measurement_code_commit": "8b1ea40aee0e7518c2ab3b25a8cc6d4ec2d0f800",
+  "model_rerun_required": false,
+  "official_analysis_absence_evidentiary_basis": "No committed R3 confirmatory statistical analysis artifact and no committed post-outcome analysis-code change existed before this correction; the project's recorded gate state was analysis NOT RUN / LOCKED. This statement is bounded by the committed record and does not claim filesystem history beyond it.",
+  "official_confirmatory_statistical_outcome_computed": false,
+  "population_manifest_fingerprint": "40cc9753a711314ff3b25ed6e234d0cbda11f3f60cd87f1d3915195a3d1780b8",
+  "population_rebuild_required": false,
+  "protocol_fingerprint": "3ef63056ae16b18ad65d9c87d1fbec5b43550873a0e3e25ec0a323f954ee974d",
+  "raw_artifacts": {
+    "index": {
+      "filename": "results/r3-raw-evidence-index-v1.json",
+      "index_fingerprint": "25fa4086e67a1cbd48cb8d857337092b132790ceb04925407649629c35d1bc51",
+      "sha256": "b04351acd878161d21022f3e5f5f08da1443977a484f62c8ba465adba051c461"
+    },
+    "primary_minicpm": {
+      "evidence_fingerprint": "726bb8340aecfa0c98e4d4b7fe1548278f3cc8ff391b9f6d14aa5215e84d7c71",
+      "filename": "results/r3-raw-minicpm5-2b-mmlu-v1.json",
+      "sha256": "e7b45e921d35523f9fb6aabaefe10e585f43f35f25e5e4159bb2211cec8b999b"
+    },
+    "replication_qwen": {
+      "evidence_fingerprint": "378b2676dad4b12be4d57c9030c9d44823df921dc62f4d9b7f73acf79f0d4887",
+      "filename": "results/r3-raw-qwen35-2b-mmlu-v1.json",
+      "sha256": "00a1d04e6cb308cf609ccf3cde69b761497c4a3a110704ea069f3e933cf9248a"
+    }
+  },
+  "raw_artifacts_byte_frozen": true,
+  "raw_artifacts_rewritten": false,
+  "raw_evidence_commit": "ba90a6c325b764347feaa5ba9cc5b8956d36cb21",
+  "secondary_path_census": {
+    "end_to_end_winner_diagnostics": "PASS_AFTER_FIX",
+    "exact_logloss": "PASS",
+    "native_reference": "PASS",
+    "primary_test_bootstrap": "PASS",
+    "range_loss_decomposition": "PASS",
+    "reliability_10_bin": "PASS",
+    "score_geometry": "PASS",
+    "train_refit_stability": "PASS"
+  },
+  "winner_diagnostic_fix_commit": "b4afae24b1a8b84f65fa7c842850a225c35ef376",
+  "winner_diagnostic_semantics": {
+    "agreement": "CAT recorded winner == OVR recorded winner",
+    "anchor_probability_threshold": "FORBIDDEN",
+    "cat": "recorded native CAT winner vs ground truth",
+    "ingestion": "cat.record.winner / ovr.record.winner / ground_truth_value (verbatim)",
+    "ovr": "recorded native OVR winner vs ground truth"
+  }
+}

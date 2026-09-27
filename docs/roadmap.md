@@ -281,7 +281,7 @@ These are directions under consideration, not current commitments. None of them
 is guaranteed to reach 1.0, and whether each is pursued must be decided by
 actual experimental results rather than by design intuition.
 
-### Calibration Transportability (research spec v1 frozen; R1 implemented, R2A pilot and R2B stability round executed — human research gate pending)
+### Calibration Transportability (research spec v1 frozen; R1 implemented, R2A pilot, R2B stability round and R2C method-adequacy sensitivity executed — human research gate pending)
 
 `docs/research/calibration-transport-research-spec-v1.md` freezes the problem
 definition, measurement semantics, experimental separation, estimands, metrics,
@@ -310,9 +310,17 @@ same directory; it adds a paired test bootstrap, a paired train-refit calibrator
 stability bootstrap, and a train/test empirical-range loss decomposition, and
 records its evidence in `R2B_REPORT.md`. R2B is still **exploratory**, not
 confirmatory.
+R2C (a calibration-method adequacy sensitivity study) is **implemented and
+executed** in the same directory. It is offline and analysis-only over the frozen
+R2B raw artifact (no model rerun, no GPU, no network): it re-fits a pre-declared
+2x5 method/lambda grid plus a RAW identity baseline on the same 90 paired
+training items and evaluates on the same 60 held-out items, and reports native
+adequacy, transport sensitivity, exact LogLoss, paired TEST and train-refit
+bootstraps, and parameter stability in `R2C_REPORT.md`. It selects no method and
+authorizes no R3 work.
 This is **exploratory pilot evidence, not confirmatory evidence**, and no
 compatibility claim is authorized by it. The human research gate is **pending**,
-so R2A/R2B must still precede any investment in R3/R4 (transport benchmark,
+so R2A/R2B/R2C must still precede any investment in R3/R4 (transport benchmark,
 evidence-aware transport
 audit). Declared measurement identity remains the
 default fail-closed authorization boundary; empirical compatibility is a

@@ -146,7 +146,44 @@ uses one model (`Qwen/Qwen3.5-2B` pinned to revision
 `15852e8c16360a2fea060d615a32b45270f8a8fc`), one pre-declared `l2_strength = 0.01`, one
 split, and one anchor protocol, with no sweep and no fallback.
 
-## 12. Running the tests
+## 12. R2B — the stability / deconfounding round
+
+R2B asks whether the directional transport structure R2A saw was mostly an
+artifact of fitting two calibrators on nine rows and evaluating them on six. It
+is still exploratory: it was designed after R2A, so it is not confirmatory
+evidence.
+
+- `r2b_cases.json` — 150 hand-written three-way cases: 3 categories x 5 declared
+  strata x 10 items, with opaque `r2b-0001..r2b-0150` ids. The 5 strata are
+  declared synthesis styles, not a difficulty score; no case is intentionally
+  ambiguous.
+- `r2b_plan.py` — loads and structurally validates the fixture, applies the
+  pre-declared 6-train/4-test-per-cell split (90/60/0), reuses the SAME R2A
+  anchor function, and reuses the R2A ground-truth semantics. It never rebalances
+  the anchor or the split.
+- `r2b_provenance.py` — the run-level parent identity: it commits the source
+  case-set content fingerprint (so question/context/description changes change
+  the run identity), the plan, the model, both measurement identities, the
+  protocols, the research target/input-score ids, and the pre-measurement git
+  commit + clean tree. No wall-clock timestamp is part of the identity.
+- `r2b_stability.py` — full-N 2x2 Brier/LogLoss, raw-relative changes, the
+  observed-range diagnostics and loss decomposition, descriptive per-stratum
+  summaries, and two pre-declared DETERMINISTIC bootstraps: a paired test
+  bootstrap (2000 replicates, exploratory percentile intervals — not confidence
+  intervals, no p-values) and a paired train-refit bootstrap (1000 replicates,
+  the same resampled training multiset for both calibrators, fail-closed on
+  solver failure).
+- `run_r2b.py` — the fixed orchestration pipeline. The official run pins
+  `Qwen/Qwen3.5-2B` to revision `15852e8c16360a2fea060d615a32b45270f8a8fc`, loads
+  it offline (`local_files_only=True`), and FAILS CLOSED if the git working tree
+  is dirty before the first score.
+
+R2B inherits every frozen R2A dimension unchanged: model, revision, dtype,
+rendering (`enable_thinking=false`), CAT v1, OVR v1, the OVR proposition, the
+anchor protocol, the research L2-logistic method, and `l2_strength = 0.01`. It
+adds no method sweep, no second model, and no second measurement axis.
+
+## 13. Running the tests
 
 No model, no GPU, and no network are required:
 

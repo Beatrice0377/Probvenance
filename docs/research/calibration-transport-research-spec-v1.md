@@ -5,6 +5,12 @@
 Status: frozen research specification v1
 Implementation status: not started
 
+> **Non-normative implementation-status note:** Statements below describing
+> implementation as "not started" or R1/R2 as unimplemented reflect the R0
+> specification freeze point. Current execution status is tracked in
+> `docs/roadmap.md` and `experiments/calibration_transport` reports. This note
+> does not revise the v1 research contract.
+
 This document is a research specification. It defines the problem, the
 measurement semantics, the experimental separation, the estimands, the metrics,
 the evidence discipline, the research questions, the pilot gate, and the scope

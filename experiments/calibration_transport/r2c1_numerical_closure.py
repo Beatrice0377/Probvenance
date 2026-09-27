@@ -772,8 +772,8 @@ def _completed_summaries(
         ovr_slope: list[float] = []
         ovr_intercept: list[float] = []
         with decimal.localcontext(_REFERENCE_CONTEXT):
-            raw_brier_a = _reference_brier(raw_a, _identity_calibrator(), labels)
-            raw_brier_b = _reference_brier(raw_b, _identity_calibrator(), labels)
+            raw_brier_a = _raw_brier(raw_a, labels)
+            raw_brier_b = _raw_brier(raw_b, labels)
             for replicate in range(len(draws)):
                 ref_cat = reference_fits[(family_id, "CAT")][replicate]
                 ref_ovr = reference_fits[(family_id, "OVR")][replicate]
@@ -820,18 +820,16 @@ def _completed_summaries(
     return summaries
 
 
-def _identity_calibrator() -> ReferenceFit:
-    zero = decimal.Decimal(0)
-    return ReferenceFit(
-        slope=decimal.Decimal(1),
-        intercept=zero,
-        gradient_norm=zero,
-        gap_upper_bound=zero,
-        iterations=0,
-        hessian_aa=zero,
-        hessian_ab=zero,
-        hessian_bb=zero,
-    )
+def _raw_brier(
+    values: Sequence[decimal.Decimal],
+    labels: Sequence[decimal.Decimal],
+) -> decimal.Decimal:
+    """Raw-score Brier: ``mean((p_i - y_i)^2)`` with NO calibrator applied."""
+    total = decimal.Decimal(0)
+    for value, label in zip(values, labels, strict=True):
+        error = value - label
+        total += error * error
+    return total / decimal.Decimal(len(values))
 
 
 def _negative_fraction(values: Sequence[float]) -> float:
@@ -1094,14 +1092,23 @@ def _classify(
         for record in failed_diagnostics
         if record.get("rounded_reference_actual_gap_meets_objective_tolerance") is True
     ]
+    certificate_met = [
+        record
+        for record in failed_diagnostics
+        if record.get("production_certificate_met_at_rounded") is True
+    ]
     evidence["rounded_reference_meets_objective_tolerance_count"] = len(rounded_meets)
+    evidence["production_certificate_met_at_rounded_count"] = len(certificate_met)
     if rounded_meets:
         return {
             "category": "A",
             "summary": (
-                "certificate precision limitation: a binary64-representable point near "
-                "the high-precision optimum meets the declared objective-gap tolerance, "
-                "while the frozen sufficient gradient certificate cannot certify it"
+                "numerical precision limitation of the frozen binary64 certification "
+                "path: the high-precision reference certifies the lambda = 1e-6 "
+                "objective for every resample, the successful float64 fits agree with "
+                "it, and a binary64 point near the reference optimum already meets the "
+                "declared objective-gap tolerance, yet the frozen binary64 solver does "
+                "not reach a point it can certify for these resamples"
             ),
             "evidence": evidence,
         }

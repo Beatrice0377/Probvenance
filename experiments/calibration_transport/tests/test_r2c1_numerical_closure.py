@@ -243,3 +243,30 @@ def test_classification_rules() -> None:
         )["category"]
         == "B"
     )
+
+
+def test_raw_brier_is_plain_squared_error() -> None:
+    assert r2c1._raw_brier([D("0.998")], [D(1)]) == (D("0.998") - D(1)) ** 2
+    assert r2c1._raw_brier([D("0.2")], [D(0)]) == (D("0.2") - D(0)) ** 2
+
+
+def test_reference_native_delta_matches_r2c_point_estimate() -> None:
+    raw = json.loads(R2B_RAW.read_text(encoding="utf-8"))
+    _plan, _dataset, train_points, test_points = r2c.load_frozen_evidence(raw)
+    artifact = json.loads(R2C_ANALYSIS.read_text(encoding="utf-8"))
+    block = next(entry for entry in artifact["configurations"] if entry["label"] == "P:0.01")
+    expected = block["native"]["cat"]["native_minus_raw_brier"]
+    cat_group = next(
+        group
+        for group in r2c1._groups()
+        if group.family_id == r2c.FAMILY_P_ID and group.measurement == "CAT"
+    )
+    reference = r2c1.reference_solve(r2c1._decimal_rows(train_points, cat_group), lam=D("0.01"))
+    labels = [r2c1._dec(point.y) for point in test_points]
+    features = [r2c1._dec(r2c1._measurement_feature(point, cat_group)) for point in test_points]
+    raw_a = [r2c1._dec(point.score_a) for point in test_points]
+    with decimal.localcontext(r2c1._REFERENCE_CONTEXT):
+        calibrated = r2c1._reference_brier(features, reference, labels)
+        baseline = r2c1._raw_brier(raw_a, labels)
+        delta = float(calibrated - baseline)
+    assert abs(delta - expected) < 1e-9

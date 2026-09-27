@@ -1,0 +1,32 @@
+{
+  "analysis_entry_authorized": false,
+  "artifact_type": "r3-analysis-entry-audit-erratum",
+  "artifact_version": 1,
+  "audit_erratum_fingerprint": "fb16bf3dfa32d02bd8d6878d9f43bd99f0292bbb5f393d1697068087a0392fb7",
+  "cross_references": {
+    "human_readable_erratum": "experiments/calibration_transport/R3_ANALYSIS_ENTRY_AUDIT_ERRATUM.md",
+    "human_readable_final_audit": "experiments/calibration_transport/R3_ANALYSIS_ENTRY_FINAL_AUDIT.md",
+    "machine_readable_final_audit": "experiments/calibration_transport/results/r3-analysis-entry-final-audit-v1.json"
+  },
+  "fingerprint_version": 1,
+  "frozen_scientific_design_changed": false,
+  "issue_class": "audit-evidence-precision",
+  "issues": [
+    {
+      "closure": "synthetic fixture now carries and asserts all four OVR candidate scores below 0.5",
+      "oracle": "OVR native winner with all candidate scores below 0.5",
+      "previous_fixture_limitation": "fixture did not literally encode all four candidate scores"
+    },
+    {
+      "closure": "synthetic fixture now asserts CAT and OVR threshold classes differ while recorded winners agree",
+      "oracle": "recorded winner agreement despite differing threshold classes",
+      "previous_fixture_limitation": "fixture did not literally encode CAT/OVR scores on opposite sides of 0.5"
+    }
+  ],
+  "official_confirmatory_statistical_outcome_computed": false,
+  "oracle_strengthening_commit": "d9ec4db6a5fed3fed65081187100a4d6dcd9efbe",
+  "previous_final_audit_commit": "b317eb11d6c7c5e73f4cd2ef660f6257c1dee4bf",
+  "production_analysis_semantics_changed": false,
+  "raw_artifacts_rewritten": false,
+  "winner_fix_commit": "b4afae24b1a8b84f65fa7c842850a225c35ef376"
+}

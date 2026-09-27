@@ -317,6 +317,12 @@ It is not confirmatory evidence. Human Research Gate decision: **PENDING**.
    (`reclassify_artifact`), with **no numerical recomputation**: the fitted values,
    intervals, sign fractions, and failure identities are unchanged.
 
+3. **Documentation consistency update (disclosed).** The final closure also updated
+   the experiment README (`experiments/calibration_transport/README.md`, section 14)
+   to keep its R2C.1 classification description consistent with the corrected result
+   artifact and report. This touched only that section of that README: it changes no
+   frozen research semantics (R0/R1/R2B/R2C) and no other round.
+
 ## Appendix B — Provenance
 
 ```

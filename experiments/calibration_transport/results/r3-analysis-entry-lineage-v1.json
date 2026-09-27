@@ -1,0 +1,56 @@
+{
+  "artifact_type": "r3-analysis-entry-lineage",
+  "artifact_version": 1,
+  "fingerprint_version": 1,
+  "historical_raw_evidence_provenance": {
+    "analysis_code_commit_omission_note": "R3_PROTOCOL.md §20 requires official raw evidence provenance to record the analysis code commit. The committed raw evidence and raw index omitted it.",
+    "analysis_code_commit_recorded_in_raw_index": null,
+    "measurement_code_commit": "8b1ea40aee0e7518c2ab3b25a8cc6d4ec2d0f800",
+    "pre_measurement_population_conformance_fix_commit": "12f602a9527f0db4b1575abe6999235a40d55ef6",
+    "protocol_design_commit": "3a929a6931762a518498ad9df2e5f82cf6e6deed",
+    "raw_artifacts": {
+      "primary": {
+        "evidence_fingerprint": "726bb8340aecfa0c98e4d4b7fe1548278f3cc8ff391b9f6d14aa5215e84d7c71",
+        "file_sha256": "e7b45e921d35523f9fb6aabaefe10e585f43f35f25e5e4159bb2211cec8b999b",
+        "model_id": "openbmb/MiniCPM5-2B",
+        "model_revision": "12a3808a956f869c767195e9266b59c4d21d92e2",
+        "model_role": "primary-confirmatory",
+        "raw_artifact_filename": "r3-raw-minicpm5-2b-mmlu-v1.json"
+      },
+      "replication": {
+        "evidence_fingerprint": "378b2676dad4b12be4d57c9030c9d44823df921dc62f4d9b7f73acf79f0d4887",
+        "file_sha256": "00a1d04e6cb308cf609ccf3cde69b761497c4a3a110704ea069f3e933cf9248a",
+        "model_id": "Qwen/Qwen3.5-2B",
+        "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+        "model_role": "preregistered-replication",
+        "raw_artifact_filename": "r3-raw-qwen35-2b-mmlu-v1.json"
+      }
+    },
+    "raw_evidence_commit": "ba90a6c325b764347feaa5ba9cc5b8956d36cb21",
+    "raw_index_filename": "r3-raw-evidence-index-v1.json",
+    "raw_index_internal_fingerprint": "25fa4086e67a1cbd48cb8d857337092b132790ceb04925407649629c35d1bc51",
+    "raw_index_sha256": "b04351acd878161d21022f3e5f5f08da1443977a484f62c8ba465adba051c461"
+  },
+  "lineage_fingerprint": "35b1b7c6a153a0308774a314e68f71e0980ef926ecd2d120afedcee020ecbd73",
+  "official_confirmatory_analysis_run_before_correction": false,
+  "official_confirmatory_analysis_run_before_correction_basis": "No committed R3 confirmatory statistical analysis artifact or committed post-outcome analysis-code change existed before this correction, and the project's recorded gate state was analysis NOT RUN / LOCKED. This is an evidence-based claim about committed and recorded state, not a claim about unrecoverable transient filesystem history.",
+  "population_manifest_fingerprint": "40cc9753a711314ff3b25ed6e234d0cbda11f3f60cd87f1d3915195a3d1780b8",
+  "post_raw_pre_analysis_conformance_correction": {
+    "analysis_code_commit": "3a929a6931762a518498ad9df2e5f82cf6e6deed",
+    "analysis_code_commit_basis": "Git blob audit across commits 3a929a6, 12f602a, 8b1ea40, ba90a6c: experiments/calibration_transport/r3_analysis.py == bf527f71160cdc5c5501cbdb27a5b8edf3bc782f and experiments/calibration_transport/tests/test_r3_analysis.py == 8c70ab202380bf61a74e6bd93b4045907503d0fa at all four commits. The pre-outcome analysis implementation existed at the R3 design freeze and was committed unchanged through measurement and the raw-evidence commit.",
+    "analysis_conformance_fix_commit": "5829a8650c826c2521ce3287764d3f83b582f015",
+    "analysis_conformance_fix_message": "fix: conform R3 analysis to frozen protocol",
+    "corrections": [
+      "cross application semantics: g_SOURCE(S_SOURCE) corrected to frozen g_SOURCE(S_TARGET)",
+      "support diagnostics: SOURCE TEST range corrected to SOURCE TRAIN range; required source TRAIN 2.5-97.5% diagnostic implemented reusing the already frozen nearest-rank-percentile v1 rule",
+      "range-loss decomposition: region boundary is SOURCE TRAIN observed min/max; cross prediction is g_SOURCE(S_TARGET)",
+      "TRAIN-refit stability: implementation draws corrected from 8/subject to the frozen protocol 10/subject with replacement"
+    ],
+    "frozen_population_changed": false,
+    "frozen_scientific_design_changed": false,
+    "official_confirmatory_statistical_outcome_computed": false,
+    "raw_artifacts_rewritten": false
+  },
+  "r3_protocol_fingerprint": "3ef63056ae16b18ad65d9c87d1fbec5b43550873a0e3e25ec0a323f954ee974d",
+  "raw_artifacts_byte_frozen": true
+}

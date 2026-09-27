@@ -1,0 +1,100 @@
+{
+  "artifact_type": "calibration-transport-r2c1-numerical-closure-design",
+  "artifact_version": 1,
+  "round_id": "low-regularization-numerical-adequacy-closure",
+  "round_version": 1,
+  "research_spec": {
+    "id": "calibration-transport-research-spec",
+    "version": 1
+  },
+  "no_method_change": true,
+  "no_model_rerun": true,
+  "lambda": 1e-06,
+  "source_r2b_raw": {
+    "path": "experiments/calibration_transport/results/r2b-stability-qwen35-2b-v1.json",
+    "file_sha256": "16a07ecd69a4ec0081f76790b7bde0b4e8bcd87172e06b7af94c06ea699967a4",
+    "source_case_set_version": "calibration-transport-r2b-v1",
+    "source_case_set_fingerprint": "c0bdc31bab6db3b91605321bc70da71c8692aca3ecddc3257840e01171a333d9",
+    "plan_fingerprint": "1127ea01f01c2671de6888fcd6759db17addf340aafe64f4e182b5aa2b58ead8",
+    "paired_dataset_fingerprint": "b17fd3a44747ffa1597e4b74206d79a82135ed97337b69283ef89572181a0062",
+    "r2b_run_provenance_fingerprint": "3eeab561b27453a6af80e0f1bd1fd3b8da36412ee12961d5203a2e1ead0c0683",
+    "source_measurement_code_commit": "dd68e299c364b038c959c42bc5c264640c52f7ca",
+    "model": "Qwen/Qwen3.5-2B",
+    "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc"
+  },
+  "source_r2c_analysis": {
+    "path": "experiments/calibration_transport/results/r2c-method-adequacy-qwen35-2b-v1-analysis.json",
+    "file_sha256": "8b90dbb02c4cdb2d47ceb2e7e0933aa10be05aab3979614634cf43b9e7841018",
+    "round_id": "calibration-method-adequacy-sensitivity",
+    "round_version": 1,
+    "design_fingerprint": "82b7b73769614f1d69bfb5bad0419d5cc855abc2ebfa617c91ad97da6a7bccc0",
+    "train_refit_protocol_id": "sha256-r2c-paired-train-refit-bootstrap",
+    "train_refit_protocol_version": 1,
+    "train_refit_replicates": 1000,
+    "round_status": "incomplete",
+    "failed_fit_count": 15
+  },
+  "exact_failed_fit_set": [
+    {"family_id": "research-l2-logistic-fixed-decision-probability", "family_version": 1, "measurement": "CAT", "replicate": 452, "error_type": "InvalidDecisionError"},
+    {"family_id": "research-l2-logistic-fixed-decision-probability", "family_version": 1, "measurement": "OVR", "replicate": 169, "error_type": "InvalidDecisionError"},
+    {"family_id": "research-l2-logistic-logit-fixed-decision-probability", "family_version": 1, "measurement": "CAT", "replicate": 125, "error_type": "InvalidDecisionError"},
+    {"family_id": "research-l2-logistic-logit-fixed-decision-probability", "family_version": 1, "measurement": "CAT", "replicate": 308, "error_type": "InvalidDecisionError"},
+    {"family_id": "research-l2-logistic-logit-fixed-decision-probability", "family_version": 1, "measurement": "CAT", "replicate": 444, "error_type": "InvalidDecisionError"},
+    {"family_id": "research-l2-logistic-logit-fixed-decision-probability", "family_version": 1, "measurement": "CAT", "replicate": 497, "error_type": "InvalidDecisionError"},
+    {"family_id": "research-l2-logistic-logit-fixed-decision-probability", "family_version": 1, "measurement": "CAT", "replicate": 549, "error_type": "InvalidDecisionError"},
+    {"family_id": "research-l2-logistic-logit-fixed-decision-probability", "family_version": 1, "measurement": "CAT", "replicate": 571, "error_type": "InvalidDecisionError"},
+    {"family_id": "research-l2-logistic-logit-fixed-decision-probability", "family_version": 1, "measurement": "CAT", "replicate": 936, "error_type": "InvalidDecisionError"},
+    {"family_id": "research-l2-logistic-logit-fixed-decision-probability", "family_version": 1, "measurement": "CAT", "replicate": 960, "error_type": "InvalidDecisionError"},
+    {"family_id": "research-l2-logistic-logit-fixed-decision-probability", "family_version": 1, "measurement": "CAT", "replicate": 995, "error_type": "InvalidDecisionError"},
+    {"family_id": "research-l2-logistic-logit-fixed-decision-probability", "family_version": 1, "measurement": "OVR", "replicate": 81, "error_type": "InvalidDecisionError"},
+    {"family_id": "research-l2-logistic-logit-fixed-decision-probability", "family_version": 1, "measurement": "OVR", "replicate": 87, "error_type": "InvalidDecisionError"},
+    {"family_id": "research-l2-logistic-logit-fixed-decision-probability", "family_version": 1, "measurement": "OVR", "replicate": 253, "error_type": "InvalidDecisionError"},
+    {"family_id": "research-l2-logistic-logit-fixed-decision-probability", "family_version": 1, "measurement": "OVR", "replicate": 427, "error_type": "InvalidDecisionError"}
+  ],
+  "reference_solver": {
+    "id": "decimal-newton-backtracking-reference",
+    "version": 1,
+    "arithmetic": "python-stdlib-decimal",
+    "decimal_precision": 80,
+    "rounding": "ROUND_HALF_EVEN",
+    "objective_id": "mean-bernoulli-nll-plus-l2",
+    "objective_version": 1,
+    "objective_gap_tolerance": 1e-24,
+    "max_newton_iterations": 500,
+    "backtracking_factor": 0.5,
+    "armijo_coefficient": 0.0001,
+    "max_backtracking_steps": 200,
+    "initial_slope": 0,
+    "initial_intercept": 0
+  },
+  "full_reference_policy": {
+    "scope": "all-lambda-1e-6-train-refit-fits",
+    "expected_reference_fits": 4000,
+    "groups": [
+      {"family_id": "research-l2-logistic-fixed-decision-probability", "measurement": "CAT", "fits": 1000},
+      {"family_id": "research-l2-logistic-fixed-decision-probability", "measurement": "OVR", "fits": 1000},
+      {"family_id": "research-l2-logistic-logit-fixed-decision-probability", "measurement": "CAT", "fits": 1000},
+      {"family_id": "research-l2-logistic-logit-fixed-decision-probability", "measurement": "OVR", "fits": 1000}
+    ]
+  },
+  "successful_fit_agreement_gate": {
+    "requirement": "float64_actual_gap_upper <= 2e-14 for every successful float64 fit",
+    "objective_gap_upper_bound": 2e-14,
+    "high_precision_reference_gap_bound": 1e-24
+  },
+  "rounded_reference_diagnostic": {
+    "enabled": true,
+    "production_certificate_threshold_formula": "sqrt(2) * sqrt(lambda) * sqrt(1e-14)",
+    "objective_gap_tolerance": 1e-14
+  },
+  "ulp_neighborhood_diagnostic": {
+    "enabled": true,
+    "radius_ulp": 2,
+    "neighborhood_side": 5,
+    "construction": "math.nextafter"
+  },
+  "percentile_rule": {
+    "id": "nearest-rank-percentile",
+    "version": 1
+  }
+}

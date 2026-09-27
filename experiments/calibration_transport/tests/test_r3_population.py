@@ -92,15 +92,19 @@ class TestCommittedManifest:
         assert len(ids) == len(set(ids))
         assert len(coordinates) == len(set(coordinates))
 
-    def test_train_and_test_are_content_disjoint(self) -> None:
+    def test_train_and_test_are_question_choices_disjoint(self) -> None:
         manifest = population.load_manifest()
         train_content = {
-            item["source_record_content_fingerprint"]
+            population.question_choices_fingerprint(
+                question=item["question"], choices=item["choices"]
+            )
             for item in manifest["items"]
             if item["split"] == "TRAIN"
         }
         test_content = {
-            item["source_record_content_fingerprint"]
+            population.question_choices_fingerprint(
+                question=item["question"], choices=item["choices"]
+            )
             for item in manifest["items"]
             if item["split"] == "TEST"
         }
@@ -187,6 +191,48 @@ class TestOverlapExclusion:
         assert len(train_rows) == 3
         assert all(item["question"] != "shared question" for item in train_rows)
         assert manifest["counts"]["overlap_excluded_train_rows"] == 1
+
+    def test_overlap_guard_uses_question_and_choices_not_answer(self) -> None:
+        test_row = ("shared question", ["a", "b", "c", "d"], 1)
+        train_duplicate = ("shared question", ["a", "b", "c", "d"], 3)
+        table = {
+            ("s", "validation"): [
+                train_duplicate,
+                *[(f"v{i}", ["a", "b", "c", "d"], 0) for i in range(11)],
+            ],
+            ("s", "test"): [test_row],
+        }
+        try:
+            population.build_manifest(
+                "unused",
+                subjects=["s"],
+                train_per_subject=3,
+                test_per_subject=1,
+                source_reader=_synthetic_reader(table),
+            )
+        except TAMPER_ERROR as exc:
+            assert "STOP FOR HUMAN REVIEW" in str(exc)
+            return
+        raise AssertionError("expected a differing-answer duplicate to stop the build")
+
+    def test_overlap_guard_requires_identical_ordered_choices(self) -> None:
+        test_row = ("shared question", ["a", "b", "c", "d"], 1)
+        same_question_different_choices = ("shared question", ["a", "b", "c", "e"], 1)
+        table = {
+            ("s", "validation"): [
+                same_question_different_choices,
+                *[(f"v{i}", ["a", "b", "c", "d"], 0) for i in range(11)],
+            ],
+            ("s", "test"): [test_row],
+        }
+        manifest = population.build_manifest(
+            "unused",
+            subjects=["s"],
+            train_per_subject=1,
+            test_per_subject=1,
+            source_reader=_synthetic_reader(table),
+        )
+        assert manifest["counts"]["overlap_excluded_train_rows"] == 0
 
 
 class TestValidationGates:

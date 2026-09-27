@@ -96,11 +96,29 @@ difficulty, or R2 similarity.
 
 ## 6. Population selection
 
-Deterministic selection, frozen id/version
-`mmlu-subject-balanced-source-index-hash-selection` v1. The selection key depends
-only on protocol id/version, dataset revision, subject, source split, and source
-row index — never on the answer, question text, choice text, ground truth, or any
-model output. No RNG, no seed.
+Selection has two stages, deliberately kept separate.
+
+**Stage A — primary deterministic rank (content-independent).** Deterministic
+selection, frozen id/version `mmlu-subject-balanced-source-index-hash-selection`
+v1. The ranking key depends only on protocol id/version, dataset revision,
+subject, source split, and source row index — never on the answer, question text,
+choice text, ground truth, or any model output. No RNG, no seed. This is the only
+stage that decides which rows are candidates.
+
+**Stage B — cross-split exact-duplicate guard (content-dependent, predeclared).**
+After TEST membership is selected and frozen, each TRAIN candidate is checked
+against the selected TEST items using the **exact question plus the exact ordered
+choices only**. A candidate that duplicates a selected TEST item is ineligible
+for TRAIN and is skipped in favour of the next-ranked validation candidate from
+the same subject. The guard never uses the answer, the anchor, the ground truth
+label, any model output, or any measurement score. If a candidate shares
+question + ordered choices with a selected TEST item but disagrees on the answer
+field, the build **stops for human review** rather than silently deduplicating.
+
+The population selection as a whole is therefore *not* content-independent: the
+primary rank is content-independent, while a separate predeclared cross-split
+contamination guard uses the question + ordered-choice content solely to prevent
+TRAIN/TEST exact duplicates.
 
 ```text
 TRAIN = 8 validation rows per subject   (456 total)
@@ -115,10 +133,12 @@ the 57 subjects cannot supply 10 validation rows (`college_chemistry` has 8,
 drafted 10/subject was infeasible; the change is not silent.
 
 **MMLU validation/test overlap (human-approved fix):** two `college_physics`
-items and one `college_medicine` item share identical question+choices content
-across the two source splits. TEST is selected first and kept pristine; TRAIN
-then excludes any validation row whose content equals a selected TEST item and
-backfills by rank. `counts.overlap_excluded_train_rows = 3` records this. No
+items and one `college_medicine` item share identical question + ordered-choices
+content across the two source splits (all three agree on the answer field, so the
+answer-consistency check does not trigger). TEST is selected first and kept
+pristine; the Stage-B guard then excludes those three validation rows and
+backfills by rank. `counts.overlap_excluded_train_rows = 3` records this. The
+frozen manifest has zero cross-split question + ordered-choices overlap. No
 silent row substitution.
 
 ## 7. Anchor / ground truth

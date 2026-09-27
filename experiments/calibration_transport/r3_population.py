@@ -11,10 +11,22 @@ Design invariants (see ``R3_PROTOCOL.md`` and Research Specification v2):
   model behaviour, difficulty, or R2 similarity.
 - ``validation`` is the calibration TRAIN source and ``test`` is the
   confirmatory TEST source. ``dev`` and ``auxiliary_train`` are unused.
-- Row selection is a deterministic fingerprint sort. The selection key depends
-  only on the selection protocol id/version, the dataset revision, the subject,
-  the source split, and the source row index. It never depends on the answer,
-  the question text, the choice text, the ground truth, or any model output.
+- Selection has two stages, kept separate:
+
+  * Stage A (primary deterministic rank). The ranking key depends only on the
+    selection protocol id/version, the dataset revision, the subject, the
+    source split, and the source row index. It is content-independent: it never
+    depends on the answer, the question text, the choice text, the ground
+    truth, or any model output.
+  * Stage B (cross-split exact-duplicate guard). After TEST is selected and
+    frozen, each TRAIN candidate is checked against the selected TEST items
+    using the exact question plus the exact ordered choices only. A candidate
+    that duplicates a selected TEST item is ineligible for TRAIN and is skipped
+    in favour of the next-ranked validation candidate from the same subject.
+    The guard never uses the answer, the anchor, the ground truth label, any
+    model output, or any measurement score. If a candidate shares question +
+    ordered choices with a selected TEST item but disagrees on the answer, the
+    build stops for human review rather than silently deduplicating.
 - Item ids are opaque with respect to the answer.
 - The manifest is frozen before any R3 model outcome exists; validation runs
   offline against the committed manifest file.
@@ -205,6 +217,15 @@ def content_fingerprint(*, question: str, choices: Sequence[str], answer_index_v
     )
 
 
+def question_choices_fingerprint(*, question: str, choices: Sequence[str]) -> str:
+    """Cross-split exact-duplicate key: exact question + exact ordered choices only.
+
+    This is the Stage-B contamination-guard key. It deliberately excludes the
+    answer, the anchor, the ground truth, and any model output.
+    """
+    return fingerprint({"question": question, "choices": list(choices)})
+
+
 # --------------------------------------------------------------------------- #
 # Source archive ingestion (standard library only)
 # --------------------------------------------------------------------------- #
@@ -300,7 +321,7 @@ def build_manifest(
     items: list[dict[str, Any]] = []
     counts = {"train": 0, "test": 0}
 
-    test_content: set[str] = set()
+    test_question_choices: dict[str, int] = {}
     test_selection: dict[str, list[tuple[int, tuple[str, list[str], int]]]] = {}
     for subject in subjects:
         test_rows = source_reader(data_tar_path, subject, R3_TEST_SOURCE_SPLIT)
@@ -312,11 +333,9 @@ def build_manifest(
         )
         test_selection[subject] = chosen
         for _, (question, choices, index_answer) in chosen:
-            test_content.add(
-                content_fingerprint(
-                    question=question, choices=choices, answer_index_value=index_answer
-                )
-            )
+            test_question_choices[
+                question_choices_fingerprint(question=question, choices=choices)
+            ] = index_answer
 
     def _append(
         r3_split: str, source_split: str, index: int, row: tuple[str, list[str], int]
@@ -354,16 +373,22 @@ def build_manifest(
         ranked = rank_rows(train_rows, subject=subject, source_split=R3_TRAIN_SOURCE_SPLIT)
         kept: list[tuple[int, tuple[str, list[str], int]]] = []
         for index, (question, choices, index_answer) in ranked:
-            content = content_fingerprint(
-                question=question, choices=choices, answer_index_value=index_answer
-            )
-            if content in test_content:
+            duplicate_key = question_choices_fingerprint(question=question, choices=choices)
+            if duplicate_key in test_question_choices:
+                if test_question_choices[duplicate_key] != index_answer:
+                    raise PopulationError(
+                        "cross-split question+choices duplicate with a differing answer "
+                        f"field (subject={subject!r}, validation row {index}); "
+                        "STOP FOR HUMAN REVIEW"
+                    )
                 overlap_excluded.append(
                     {
                         "subject": subject,
                         "source_split": R3_TRAIN_SOURCE_SPLIT,
                         "source_row_index": index,
-                        "source_record_content_fingerprint": content,
+                        "source_record_content_fingerprint": content_fingerprint(
+                            question=question, choices=choices, answer_index_value=index_answer
+                        ),
                     }
                 )
                 continue
@@ -508,15 +533,13 @@ def validate_manifest(payload: Mapping[str, Any]) -> None:
             raise PopulationError(f"item {item_identifier} answer_index out of range")
         key = (item["subject"], item["split"])
         per_subject[key] = per_subject.get(key, 0) + 1
-        content = content_fingerprint(
-            question=question, choices=choices, answer_index_value=item["answer_index"]
-        )
+        duplicate_key = question_choices_fingerprint(question=question, choices=choices)
         if item["split"] == R3_SPLIT_TRAIN:
             train_ids.add(item_identifier)
-            train_content.setdefault(content, item_identifier)
+            train_content.setdefault(duplicate_key, item_identifier)
         else:
             test_ids.add(item_identifier)
-            test_content.setdefault(content, item_identifier)
+            test_content.setdefault(duplicate_key, item_identifier)
 
     if train_ids & test_ids:
         raise PopulationError("TRAIN and TEST item ids must be disjoint")

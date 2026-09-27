@@ -19,6 +19,7 @@ rows it reports descriptive effect direction and magnitude only.
 from __future__ import annotations
 
 import importlib.util
+import json
 import math
 import statistics
 import sys
@@ -60,6 +61,11 @@ FIXED_DECISION_INPUT_SCORE_ID = _integrity.FIXED_DECISION_INPUT_SCORE_ID
 FIXED_DECISION_INPUT_SCORE_VERSION = _integrity.FIXED_DECISION_INPUT_SCORE_VERSION
 
 PILOT_FITTED_CALIBRATOR_FINGERPRINT_VERSION = 1
+
+#: Shared analysis-artifact identity, kept identical to the run orchestrator's
+#: artifact so a regenerated artifact is byte-comparable with a freshly written one.
+ANALYSIS_ARTIFACT_TYPE = "calibration-transport-frozen-decision-pilot-analysis"
+PILOT_ARTIFACT_VERSION = 1
 
 RESEARCH_LOGISTIC_METHOD_ID = "research-l2-logistic-fixed-decision-probability"
 RESEARCH_LOGISTIC_METHOD_VERSION = 1
@@ -316,8 +322,19 @@ def observed_range_diagnostics(
     """Empirical observed-range diagnostics (NOT a support theorem).
 
     Cross application ``A->B`` applies a calibrator fitted on A to B scores, so
-    the relevant question is how far B's test scores move outside A's observed
-    TRAIN range, and symmetrically for ``B->A``.
+    the relevant question is how far B's TEST scores move outside A's observed
+    TRAIN range, and symmetrically for ``B->A``. The SOURCE is the fitting
+    measurement's TRAIN scores; the TARGET is the other measurement's TEST
+    scores. In the R2 CAT/OVR pilot ``A = CAT`` and ``B = OVR``, so:
+
+    - ``A->B`` (``test_b_outside_train_a_range_fraction``) checks OVR TEST scores
+      against the CAT TRAIN range;
+    - ``B->A`` (``test_a_outside_train_b_range_fraction``) checks CAT TEST scores
+      against the OVR TRAIN range.
+
+    The two directions are NOT symmetric and must never be swapped. The
+    explicitly named alias keys restate the same numbers without relying on the
+    reader mapping A/B to CAT/OVR.
     """
     train_a = [p.score_a for p in train_points]
     train_b = [p.score_b for p in train_points]
@@ -330,13 +347,45 @@ def observed_range_diagnostics(
         count = sum(1 for v in values if v < lo or v > hi)
         return count / len(values)
 
+    outside_b_vs_a = outside(test_b, min(train_a), max(train_a))
+    outside_a_vs_b = outside(test_a, min(train_b), max(train_b))
     return {
         "train_a": _range_summary(train_a),
         "train_b": _range_summary(train_b),
         "test_a": _range_summary(test_a),
         "test_b": _range_summary(test_b),
-        "test_b_outside_train_a_range_fraction": outside(test_b, min(train_a), max(train_a)),
-        "test_a_outside_train_b_range_fraction": outside(test_a, min(train_b), max(train_b)),
+        "test_b_outside_train_a_range_fraction": outside_b_vs_a,
+        "test_a_outside_train_b_range_fraction": outside_a_vs_b,
+        # Direction-explicit aliases (A = CAT, B = OVR): TARGET TEST scores that
+        # fall outside the SOURCE TRAIN observed range.
+        "cat_to_ovr_target_test_outside_source_train_fraction": outside_b_vs_a,
+        "ovr_to_cat_target_test_outside_source_train_fraction": outside_a_vs_b,
+    }
+
+
+def raw_relative_brier_changes(
+    points: Sequence[PairedPoint], g_a: Any, g_b: Any
+) -> dict[str, float]:
+    """Held-out fitted-vs-RAW-target Brier changes (A = CAT, B = OVR).
+
+    This answers a DIFFERENT question than :func:`brier_matrix`. Here the
+    baseline is the RAW target measurement score, not the target self-fitted
+    calibrator. Sign convention: ``positive`` means the fitted application has
+    HIGHER held-out Brier risk than the raw target score (worse on this held-out
+    set); ``negative`` means lower risk (better on this held-out set). It is a
+    descriptive held-out comparison only, never a guaranteed improvement.
+    """
+    fit_a_eval_a = brier(_predict(points, g_a, score="a"))
+    fit_a_eval_b = brier(_predict(points, g_a, score="b"))
+    fit_b_eval_a = brier(_predict(points, g_b, score="a"))
+    fit_b_eval_b = brier(_predict(points, g_b, score="b"))
+    raw_a = brier([(p.score_a, p.y) for p in points])
+    raw_b = brier([(p.score_b, p.y) for p in points])
+    return {
+        "cat_self_minus_raw_cat": fit_a_eval_a - raw_a,
+        "ovr_self_minus_raw_ovr": fit_b_eval_b - raw_b,
+        "cat_to_ovr_minus_raw_ovr": fit_a_eval_b - raw_b,
+        "ovr_to_cat_minus_raw_cat": fit_b_eval_a - raw_a,
     }
 
 
@@ -376,3 +425,148 @@ def ovr_non_simplex_diagnostics(
             1 for count in over_half_counts if count > 1
         ),
     }
+
+
+def winner_by_item(records: Sequence[Mapping[str, Any]]) -> dict[str, str]:
+    """Map item id to a measurement's own winner (end-to-end diagnostic only)."""
+    return {str(record["item_id"]): str(record["winner"]) for record in records}
+
+
+def build_analysis_artifact(
+    *,
+    plan: Any,
+    dataset: Any,
+    case_set_fingerprint: str,
+    cat_records: Sequence[Mapping[str, Any]],
+    ovr_records: Sequence[Mapping[str, Any]],
+    outcomes_a: Sequence[Any],
+    outcomes_b: Sequence[Any],
+) -> dict[str, Any]:
+    """Assemble the R2 analysis artifact from one frozen measurement run.
+
+    Pure function of (plan, dataset, raw records): it fits nothing that depends
+    on test rows and consults no model, so the artifact is a deterministic
+    function of the frozen raw evidence.
+    """
+    train_points = scored_points(dataset, split=Split.TRAIN)
+    test_points = scored_points(dataset, split=Split.TEST)
+    g_a = fit_pilot_calibrator(
+        source_measurement=plan.measurement_a,
+        training_rows=[(p.item_id, p.score_a, p.y) for p in train_points],
+        plan_fingerprint=plan.fingerprint,
+    )
+    g_b = fit_pilot_calibrator(
+        source_measurement=plan.measurement_b,
+        training_rows=[(p.item_id, p.score_b, p.y) for p in train_points],
+        plan_fingerprint=plan.fingerprint,
+    )
+    truth_by_item = {item.item_id: str(item.ground_truth_value) for item in plan.items}
+    test_ids = {p.item_id for p in test_points}
+    cat_winners = winner_by_item([r for r in cat_records if r["item_id"] in test_ids])
+    ovr_winners = winner_by_item([r for r in ovr_records if r["item_id"] in test_ids])
+    winner_diag = winner_diagnostics(
+        truth_by_item={i: truth_by_item[i] for i in sorted(cat_winners)},
+        winner_a_by_item=cat_winners,
+        winner_b_by_item=ovr_winners,
+    )
+    non_simplex = ovr_non_simplex_diagnostics(
+        candidate_score_sums=[float(r["candidate_score_sum"]) for r in ovr_records],
+        over_half_counts=[
+            sum(1 for c in r["candidates"] if c["probability_true"] > 0.5) for r in ovr_records
+        ],
+    )
+    return {
+        "artifact_type": ANALYSIS_ARTIFACT_TYPE,
+        "artifact_version": PILOT_ARTIFACT_VERSION,
+        "research_spec_id": RESEARCH_SPEC_ID,
+        "research_spec_version": RESEARCH_SPEC_VERSION,
+        "source_case_set_fingerprint": case_set_fingerprint,
+        "plan_fingerprint": plan.fingerprint,
+        "paired_dataset_fingerprint": dataset.fingerprint,
+        "measurement_a": plan.measurement_a.measurement_id,
+        "measurement_b": plan.measurement_b.measurement_id,
+        "l2_strength": PILOT_L2_STRENGTH,
+        "completeness": {
+            "planned_n": len(plan.items),
+            "train_planned_n": sum(1 for i in plan.items if i.split is Split.TRAIN),
+            "test_planned_n": sum(1 for i in plan.items if i.split is Split.TEST),
+            "cat_scored": sum(1 for o in outcomes_a if o.status is MeasurementStatus.SCORED),
+            "ovr_scored": sum(1 for o in outcomes_b if o.status is MeasurementStatus.SCORED),
+            "paired_scored_train_n": len(train_points),
+            "paired_scored_test_n": len(test_points),
+            "train_y1": sum(1 for p in train_points if p.y == 1.0),
+            "train_y0": sum(1 for p in train_points if p.y == 0.0),
+            "test_y1": sum(1 for p in test_points if p.y == 1.0),
+            "test_y0": sum(1 for p in test_points if p.y == 0.0),
+        },
+        "train_item_ids": [p.item_id for p in train_points],
+        "test_item_ids": [p.item_id for p in test_points],
+        "calibrator_a": g_a.canonical_payload(),
+        "calibrator_a_fingerprint": g_a.fingerprint,
+        "calibrator_b": g_b.canonical_payload(),
+        "calibrator_b_fingerprint": g_b.fingerprint,
+        "brier_matrix": brier_matrix(test_points, g_a, g_b),
+        "raw_relative_brier_changes": raw_relative_brier_changes(test_points, g_a, g_b),
+        "logloss_matrix": logloss_matrix(test_points, g_a, g_b),
+        "observed_range_diagnostics": observed_range_diagnostics(train_points, test_points),
+        "winner_diagnostics": winner_diag,
+        "ovr_non_simplex_diagnostics": non_simplex,
+    }
+
+
+def analyze_raw_artifact(
+    raw: Mapping[str, Any], *, cases_path: str | Path | None = None
+) -> dict[str, Any]:
+    """Deterministically rebuild the analysis artifact from a frozen raw artifact.
+
+    No model is loaded and no network is touched: the plan, dataset, and
+    outcomes are rebuilt from the raw artifact's own records, and their
+    fingerprints are re-checked against the recorded lineage. Any mismatch
+    fails closed instead of silently re-deriving a different measurement.
+    """
+    pilot_plan = _load_sibling("pilot_plan")
+    measurements = _load_sibling("measurements")
+    payload = pilot_plan.load_case_set(cases_path or pilot_plan.DEFAULT_CASES_PATH)
+    if pilot_plan.case_set_fingerprint(payload) != raw["source_case_set_fingerprint"]:
+        raise ValueError("case set fingerprint does not match the raw artifact lineage")
+    config = raw["model_configuration"]
+    plan = pilot_plan.build_plan(
+        payload, model_id=config["model"], model_revision=config["revision"]
+    )
+    if plan.fingerprint != raw["plan_fingerprint"]:
+        raise ValueError("plan fingerprint does not match the raw artifact lineage")
+    cat_records = raw["cat_raw_records"]
+    ovr_records = raw["ovr_raw_records"]
+    outcomes_a = tuple(measurements.cat_outcome(record) for record in cat_records)
+    outcomes_b = tuple(measurements.ovr_outcome(record) for record in ovr_records)
+    dataset = _integrity.PairedFixedDecisionDataset.create(plan, outcomes_a, outcomes_b)
+    if dataset.fingerprint != raw["paired_dataset_fingerprint"]:
+        raise ValueError("paired dataset fingerprint does not match the raw artifact lineage")
+    return build_analysis_artifact(
+        plan=plan,
+        dataset=dataset,
+        case_set_fingerprint=raw["source_case_set_fingerprint"],
+        cat_records=cat_records,
+        ovr_records=ovr_records,
+        outcomes_a=outcomes_a,
+        outcomes_b=outcomes_b,
+    )
+
+
+def _main(argv: Sequence[str]) -> int:
+    """Regenerate the derived analysis artifact from a frozen raw artifact."""
+    if len(argv) != 2:
+        print("usage: analysis.py <raw-artifact.json>", file=sys.stderr)
+        return 2
+    raw_path = Path(argv[1])
+    raw = json.loads(raw_path.read_text(encoding="utf-8"))
+    artifact = analyze_raw_artifact(raw)
+    out_path = raw_path.with_name(raw_path.stem + "-analysis.json")
+    text = json.dumps(artifact, ensure_ascii=False, sort_keys=True, indent=2, allow_nan=False)
+    out_path.write_text(text + "\n", encoding="utf-8")
+    print(f"wrote {out_path}", file=sys.stderr)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(_main(sys.argv))

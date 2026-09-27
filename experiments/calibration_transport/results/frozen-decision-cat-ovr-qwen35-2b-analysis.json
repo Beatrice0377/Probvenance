@@ -118,6 +118,8 @@
   "measurement_a": "direct-categorical-anchor-probability",
   "measurement_b": "independent-binary-anchor-probability",
   "observed_range_diagnostics": {
+    "cat_to_ovr_target_test_outside_source_train_fraction": 0.0,
+    "ovr_to_cat_target_test_outside_source_train_fraction": 0.8333333333333334,
     "test_a": {
       "max": 0.9989097477762737,
       "median": 0.9963141572055663,
@@ -162,6 +164,12 @@
   },
   "paired_dataset_fingerprint": "46c9ed1353d71b87b21ded8cb81fb8f06bc6c1d6ab832fbbc1b5ffdb24b3582c",
   "plan_fingerprint": "37aeb0862f89931207d2c60bcb9f41fac9ad6e05a254e94dd17822c232e6571e",
+  "raw_relative_brier_changes": {
+    "cat_self_minus_raw_cat": 0.006942489783470528,
+    "cat_to_ovr_minus_raw_ovr": 0.00952977924157411,
+    "ovr_self_minus_raw_ovr": 0.06389344735431593,
+    "ovr_to_cat_minus_raw_cat": 0.050704782064378465
+  },
   "research_spec_id": "calibration-transport-research-spec",
   "research_spec_version": 1,
   "source_case_set_fingerprint": "9ceb36cf8974680224d767206d107fb6bfc44225e25498978ca7dca10938e2a2",

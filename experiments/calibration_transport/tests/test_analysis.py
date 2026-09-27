@@ -347,3 +347,52 @@ def test_fit_rejects_empty_rows() -> None:
         pass
     else:  # pragma: no cover
         raise AssertionError("zero training rows must be rejected")
+
+
+def test_observed_range_direction_is_asymmetric() -> None:
+    # Deliberately asymmetric: A train spans [0.0, 1.0], B train spans [0.4, 0.6].
+    train = [
+        analysis.PairedPoint(item_id="t1", y=1.0, score_a=0.0, score_b=0.4),
+        analysis.PairedPoint(item_id="t2", y=0.0, score_a=1.0, score_b=0.6),
+    ]
+    test = [
+        analysis.PairedPoint(item_id="e1", y=1.0, score_a=0.2, score_b=0.1),
+        analysis.PairedPoint(item_id="e2", y=0.0, score_a=0.8, score_b=0.9),
+    ]
+    diagnostics = analysis.observed_range_diagnostics(train, test)
+    # A->B: B TEST (0.1, 0.9) inside A TRAIN [0.0, 1.0].
+    assert diagnostics["test_b_outside_train_a_range_fraction"] == 0.0
+    # B->A: A TEST (0.2, 0.8) both outside B TRAIN [0.4, 0.6].
+    assert diagnostics["test_a_outside_train_b_range_fraction"] == 1.0
+    # Direction-explicit aliases must match, and must NOT be swapped.
+    assert diagnostics["cat_to_ovr_target_test_outside_source_train_fraction"] == 0.0
+    assert diagnostics["ovr_to_cat_target_test_outside_source_train_fraction"] == 1.0
+
+
+def test_raw_relative_brier_change_sign_is_positive_when_fitted_worse() -> None:
+    points = [analysis.PairedPoint(item_id="i1", y=1.0, score_a=0.9, score_b=0.9)]
+    g = _cal(0.0, 0.0)  # apply(x) == 0.5 everywhere
+    changes = analysis.raw_relative_brier_changes(points, g, g)
+    # raw = (0.9 - 1)^2 = 0.01 ; fitted = (0.5 - 1)^2 = 0.25.
+    assert changes["cat_self_minus_raw_cat"] == 0.25 - 0.01
+    assert changes["ovr_self_minus_raw_ovr"] == 0.25 - 0.01
+    assert changes["cat_to_ovr_minus_raw_ovr"] == 0.25 - 0.01
+    assert changes["ovr_to_cat_minus_raw_cat"] == 0.25 - 0.01
+    assert changes["cat_self_minus_raw_cat"] > 0.0
+
+
+def test_raw_relative_brier_baseline_is_raw_target_not_self_fitted() -> None:
+    points = [
+        analysis.PairedPoint(item_id="i1", y=1.0, score_a=0.9, score_b=0.2),
+        analysis.PairedPoint(item_id="i2", y=0.0, score_a=0.1, score_b=0.8),
+    ]
+    g_a = _cal(0.0, 0.0)  # constant 0.5
+    g_b = _cal(0.0, 4.0)  # near 1.0
+    matrix = analysis.brier_matrix(points, g_a, g_b)
+    changes = analysis.raw_relative_brier_changes(points, g_a, g_b)
+    assert changes["cat_self_minus_raw_cat"] == matrix["fit_a_eval_a"] - matrix["raw_a"]
+    assert changes["ovr_self_minus_raw_ovr"] == matrix["fit_b_eval_b"] - matrix["raw_b"]
+    assert changes["cat_to_ovr_minus_raw_ovr"] == matrix["fit_a_eval_b"] - matrix["raw_b"]
+    assert changes["ovr_to_cat_minus_raw_cat"] == matrix["fit_b_eval_a"] - matrix["raw_a"]
+    # Different baseline from the transport excess risk, so the numbers differ.
+    assert changes["cat_to_ovr_minus_raw_ovr"] != matrix["delta_a_to_b"]

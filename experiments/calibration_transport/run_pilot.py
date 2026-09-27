@@ -65,7 +65,6 @@ DEFAULT_RENDERING_CONFIG: dict[str, Any] = {"enable_thinking": False}
 DEFAULT_TAG = "frozen-decision-cat-ovr-qwen35-2b"
 
 RAW_ARTIFACT_TYPE = "calibration-transport-frozen-decision-pilot-raw"
-ANALYSIS_ARTIFACT_TYPE = "calibration-transport-frozen-decision-pilot-analysis"
 PILOT_ARTIFACT_VERSION = 1
 
 
@@ -189,10 +188,6 @@ def _write_json(path: Path, payload: Mapping[str, Any]) -> None:
     path.write_text(text + "\n", encoding="utf-8")
 
 
-def _winner_by_item(records: Sequence[Mapping[str, Any]]) -> dict[str, str]:
-    return {str(record["item_id"]): str(record["winner"]) for record in records}
-
-
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--model", default=DEFAULT_MODEL)
@@ -293,76 +288,16 @@ def main(argv: Sequence[str] | None = None) -> int:
         },
     )
 
-    train_points = analysis.scored_points(dataset, split=Split.TRAIN)
-    test_points = analysis.scored_points(dataset, split=Split.TEST)
-    g_a = analysis.fit_pilot_calibrator(
-        source_measurement=plan.measurement_a,
-        training_rows=[(p.item_id, p.score_a, p.y) for p in train_points],
-        plan_fingerprint=plan.fingerprint,
+    artifact = analysis.build_analysis_artifact(
+        plan=plan,
+        dataset=dataset,
+        case_set_fingerprint=case_set_fingerprint,
+        cat_records=cat_records,
+        ovr_records=ovr_records,
+        outcomes_a=outcomes_a,
+        outcomes_b=outcomes_b,
     )
-    g_b = analysis.fit_pilot_calibrator(
-        source_measurement=plan.measurement_b,
-        training_rows=[(p.item_id, p.score_b, p.y) for p in train_points],
-        plan_fingerprint=plan.fingerprint,
-    )
-
-    truth_by_item = {item.item_id: str(item.ground_truth_value) for item in plan.items}
-    test_ids = {p.item_id for p in test_points}
-    cat_winners = _winner_by_item([r for r in cat_records if r["item_id"] in test_ids])
-    ovr_winners = _winner_by_item([r for r in ovr_records if r["item_id"] in test_ids])
-    winner_diagnostics = analysis.winner_diagnostics(
-        truth_by_item={i: truth_by_item[i] for i in sorted(cat_winners)},
-        winner_a_by_item=cat_winners,
-        winner_b_by_item=ovr_winners,
-    )
-    non_simplex = analysis.ovr_non_simplex_diagnostics(
-        candidate_score_sums=[float(r["candidate_score_sum"]) for r in ovr_records],
-        over_half_counts=[
-            sum(1 for c in r["candidates"] if c["probability_true"] > 0.5) for r in ovr_records
-        ],
-    )
-
-    _write_json(
-        out_dir / f"{args.tag}-analysis.json",
-        {
-            "artifact_type": ANALYSIS_ARTIFACT_TYPE,
-            "artifact_version": PILOT_ARTIFACT_VERSION,
-            "research_spec_id": _integrity.RESEARCH_SPEC_ID,
-            "research_spec_version": _integrity.RESEARCH_SPEC_VERSION,
-            "source_case_set_fingerprint": case_set_fingerprint,
-            "plan_fingerprint": plan.fingerprint,
-            "paired_dataset_fingerprint": dataset.fingerprint,
-            "measurement_a": plan.measurement_a.measurement_id,
-            "measurement_b": plan.measurement_b.measurement_id,
-            "l2_strength": analysis.PILOT_L2_STRENGTH,
-            "completeness": {
-                "planned_n": len(plan.items),
-                "train_planned_n": sum(1 for i in plan.items if i.split is Split.TRAIN),
-                "test_planned_n": sum(1 for i in plan.items if i.split is Split.TEST),
-                "cat_scored": sum(1 for o in outcomes_a if o.status is MeasurementStatus.SCORED),
-                "ovr_scored": sum(1 for o in outcomes_b if o.status is MeasurementStatus.SCORED),
-                "paired_scored_train_n": len(train_points),
-                "paired_scored_test_n": len(test_points),
-                "train_y1": sum(1 for p in train_points if p.y == 1.0),
-                "train_y0": sum(1 for p in train_points if p.y == 0.0),
-                "test_y1": sum(1 for p in test_points if p.y == 1.0),
-                "test_y0": sum(1 for p in test_points if p.y == 0.0),
-            },
-            "train_item_ids": [p.item_id for p in train_points],
-            "test_item_ids": [p.item_id for p in test_points],
-            "calibrator_a": g_a.canonical_payload(),
-            "calibrator_a_fingerprint": g_a.fingerprint,
-            "calibrator_b": g_b.canonical_payload(),
-            "calibrator_b_fingerprint": g_b.fingerprint,
-            "brier_matrix": analysis.brier_matrix(test_points, g_a, g_b),
-            "logloss_matrix": analysis.logloss_matrix(test_points, g_a, g_b),
-            "observed_range_diagnostics": analysis.observed_range_diagnostics(
-                train_points, test_points
-            ),
-            "winner_diagnostics": winner_diagnostics,
-            "ovr_non_simplex_diagnostics": non_simplex,
-        },
-    )
+    _write_json(out_dir / f"{args.tag}-analysis.json", artifact)
 
     print(f"wrote {raw_path} and analysis artifact", file=sys.stderr)
     return 0

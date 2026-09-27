@@ -186,7 +186,28 @@ Delta OVR→CAT = Brier(OVR→CAT) - Brier(CAT→CAT) = 0.07560034 - 0.03183805 
 Both directions are reported. The two directions have **opposite signs**:
 transporting the CAT-fitted map onto OVR *reduces* Brier relative to the
 OVR-fitted map, while transporting the OVR-fitted map onto CAT *increases* Brier
-relative to the CAT-fitted map.
+relative to the CAT-fitted map. The baseline here is the **target self-fitted
+calibrator**, which is a finite-sample estimator and not an oracle map (see
+§9.1 and §14).
+
+## 9.1 Raw-target-relative Brier changes (different baseline)
+
+These compare each fitted application against the **raw target score**, not the
+target self-fitted calibrator. Sign convention: `positive` means the fitted map
+has higher held-out Brier risk than the raw target score (worse on this held-out
+set); `negative` means lower risk (better).
+
+```
+CAT  self  − raw CAT   0.03183805 − 0.02489556 = +0.00694249
+OVR  self  − raw OVR   0.22691209 − 0.16301864 = +0.06389345
+CAT→OVR    − raw OVR   0.17254842 − 0.16301864 = +0.00952978
+OVR→CAT    − raw CAT   0.07560034 − 0.02489556 = +0.05070478
+```
+
+All four are positive: every fitted-calibrator application has **higher** held-out
+Brier risk than the corresponding raw target measurement on this six-item slice.
+This baseline answers a different question than the transport excess risk in §9
+and the two must not be conflated.
 
 ## 10. Exact LogLoss (TEST, no clipping, no smoothing)
 
@@ -203,17 +224,24 @@ All cells are finite; no `{"state": "positive_infinity"}` cell occurs.
 
 ## 11. Observed-range diagnostics (empirical only)
 
+Direction convention: for `SOURCE → TARGET`, the fraction counts **TARGET TEST**
+scores that fall outside the **SOURCE TRAIN** observed range. In this pilot
+`A = CAT` and `B = OVR`.
+
 ```
 CAT train anchor-score range   min 0.0008018  median 0.0027984  max 0.9985519
 OVR train anchor-score range   min 0.2689414  median 0.4073334  max 0.6224593
 
-fraction of OVR TEST scores outside CAT train observed range : 0.8333
-fraction of CAT TEST scores outside OVR train observed range : 0.0000
+CAT→OVR: OVR TEST scores outside CAT TRAIN range   0 / 6 = 0.0000
+OVR→CAT: CAT TEST scores outside OVR TRAIN range   5 / 6 = 0.8333
 ```
 
 The CAT score distribution is strongly bimodal (near 0/1); the OVR score
-distribution is narrow and near the middle. This is an observed-range
-observation only — it is not used to filter or exclude items.
+distribution is narrow and near the middle. This is an observed-range observation
+only — it is not used to filter or exclude items, and it is not a support theorem.
+The two directions are strongly asymmetric: every OVR test score lies inside the
+CAT training range, while five of six CAT test scores lie outside the OVR training
+range.
 
 ## 12. End-to-end descriptive diagnostics (secondary only)
 
@@ -223,8 +251,11 @@ OVR winner accuracy (TEST)   0.6667
 CAT/OVR winner agreement     0.6667
 ```
 
-These are secondary and never entered row eligibility. They show the two
-measurements are **not** matched on task accuracy in this pilot.
+These are **secondary** end-to-end diagnostics and never entered row eligibility.
+They show that, when each protocol chooses its own winner, the two measurements
+also differ in decision behavior on this fixture. A secondary own-winner accuracy
+difference does **not** invalidate the primary Frozen-decision comparison, which
+uses the same frozen anchor and label for both protocols (§14).
 
 ## 13. OVR non-simplex diagnostics
 
@@ -239,25 +270,40 @@ Reported as a measurement-semantics diagnostic, not a validity test.
 
 Facts only, no universal claim:
 
-- CAT→OVR delta is **negative** (`-0.0544`); OVR→CAT delta is **positive**
-  (`+0.0438`).
-- The directions are **not symmetric** in sign.
-- Magnitudes are of the same order as the self-risk of the affected target
-  (`OVR→OVR = 0.2269`, `CAT→CAT = 0.0318`), i.e. not negligible relative to
-  self-risk for CAT, and comparable to a substantial fraction of self-risk for
-  OVR.
-- Observed-range mismatch is one-sided: 83% of CAT test scores fall outside the
-  OVR training range, while 0% of OVR test scores fall outside the CAT training
-  range. The two mechanisms the spec asks to separate (a changed conditional
-  relation vs. target scores moving into poorly-supported regions) cannot be
-  separated from a 6-item test set.
-- Own-decision accuracies differ substantially (CAT 1.0 vs OVR 0.67), so this
-  pilot does **not** cleanly isolate a pure measurement shift. The measurement
-  protocol and its own decision behavior are confounded here.
+- CAT→OVR delta is **negative** (`-0.0544`) and OVR→CAT delta is **positive**
+  (`+0.0438`): the two directions are **not symmetric** in sign.
+- The transport excess risks are measured against the **target self-fitted
+  calibrator** (`Delta = cross fitted − target self-fitted`). They are **not**
+  measured against raw target scores.
+- Raw-target-relative changes are all **positive** here: both self-fitted maps and
+  both cross-applied maps have higher held-out Brier risk than the corresponding
+  raw target score. On this test slice the OVR risk ordering is
+  `raw OVR < CAT→OVR < OVR→OVR`.
+- Therefore the negative `Delta CAT→OVR` does **not** establish that CAT
+  calibration improves OVR scores. It means only that, on these six items, the
+  CAT-fitted map has lower Brier risk than the independently fitted OVR
+  self-calibrator when both are evaluated on OVR scores — while still being worse
+  than the raw OVR score.
+- **Finite-sample self-calibrator caution.** Both target calibrators are fitted on
+  only 9 training rows and evaluated on 6 test rows, so `g_CAT` and `g_OVR` are
+  finite-sample estimators, not oracle maps `q_target`. The self-fitted maps
+  themselves worsen held-out Brier relative to raw target scores in this pilot, so
+  cross-vs-self excess risk must be read together with raw-target-relative risk.
+- Observed-range mismatch is strongly one-sided: `0/6` OVR test scores fall outside
+  the CAT training range, while `5/6` CAT test scores fall outside the OVR training
+  range. This directional range mismatch is a useful **hypothesis-generating
+  diagnostic**, not a causal explanation; a min/max observed range over 6 test
+  items is not a distribution support, and it does not explain the transport
+  asymmetry.
+- **The primary Frozen-decision comparison remains measurement-controlled.** CAT
+  and OVR score the same pre-frozen anchor `D_i` under the same correctness label
+  `Y_i`; the primary rows (`D_i`, `Y_i`, `S_CAT(D_i)`, `S_OVR(D_i)`) are unchanged
+  by either protocol's own winner choice. The differing end-to-end winner
+  accuracies therefore do **not** invalidate the primary measurement-shift
+  estimand.
 
-This is a positive-vs-negative-direction observation on one model and 6 test
-items. It is not an incompatibility proof in either direction, and it is not a
-compatibility proof in either direction.
+This is a sign/direction observation on one model and 6 test items. It is neither
+an incompatibility proof nor a compatibility proof in either direction.
 
 ## 15. Research Gate Evidence
 
@@ -265,14 +311,17 @@ Facts only:
 
 - Were all 15 pairs measurable? **Yes** (CAT 15/15, OVR 15/15 scored).
 - Paired train/test counts? **9 / 6**.
-- CAT→OVR delta? **-0.05436** (negative).
-- OVR→CAT delta? **+0.04376** (positive).
+- Primary condition measurement-controlled? **Yes** — same frozen anchor `D_i` and
+  same `Y_i` for both protocols; own-winner accuracy differences are secondary.
+- CAT→OVR delta (vs OVR self-fitted)? **-0.05436** (negative).
+- OVR→CAT delta (vs CAT self-fitted)? **+0.04376** (positive).
 - Same sign? **No** — opposite signs.
-- Magnitude relative to self-risk? CAT→OVR vs OVR self-risk `0.2269`: sizeable
-  reduction. OVR→CAT vs CAT self-risk `0.0318`: increase larger than CAT self-risk.
-- Observed-range mismatch? OVR TEST outside CAT train range `0.833`, CAT TEST
-  outside OVR train range `0.000`.
-- CAT/OVR own-decision accuracy? **1.000 / 0.667** (not matched).
+- Raw-target-relative Brier changes? CAT self `+0.00694`, OVR self `+0.06389`,
+  CAT→OVR `+0.00953`, OVR→CAT `+0.05070` (all positive).
+- OVR risk ordering on TEST? `raw OVR (0.1630) < CAT→OVR (0.1725) < OVR→OVR (0.2269)`.
+- Observed-range mismatch (CAT→OVR)? OVR TEST outside CAT TRAIN range **0/6 = 0.000**.
+- Observed-range mismatch (OVR→CAT)? CAT TEST outside OVR TRAIN range **5/6 = 0.833**.
+- CAT/OVR own-decision accuracy (secondary)? **1.000 / 0.667** (not matched).
 - OVR non-simplex behavior? sums in `[0.912, 2.076]`, 2/15 items with more than
   one candidate over 0.5.
 
@@ -284,11 +333,21 @@ topic", and does not declare the thesis validated.
 ## 16. Reproducibility
 
 - Raw artifact: `results/frozen-decision-cat-ovr-qwen35-2b.json`
-  (`plan_fingerprint = 37aeb0862f89931207d2c60bcb9f41fac9ad6e05a254e94dd17822c232e6571e`,
+  (`sha256 = 7b65e8085f3fe38d76f23ad50fc03c19b633cf872717c126e41115770dd66354`,
+  `plan_fingerprint = 37aeb0862f89931207d2c60bcb9f41fac9ad6e05a254e94dd17822c232e6571e`,
   `paired_dataset_fingerprint = 46c9ed1353d71b87b21ded8cb81fb8f06bc6c1d6ab832fbbc1b5ffdb24b3582c`).
+  The raw artifact is frozen evidence: this analysis round did not modify it.
 - Analysis artifact: `results/frozen-decision-cat-ovr-qwen35-2b-analysis.json`.
 - The analysis artifact is a deterministic function of the raw artifact plus the
-  research harness (`analysis.py`): rebuilding the plan and dataset from the raw
-  records and re-running the analysis reproduces every fingerprint and matrix
-  exactly (verified without re-running the model). The report is not the only
-  data source.
+  research harness (`analysis.py`) and can be regenerated from the raw evidence
+  alone, with no model and no network:
+
+  ```
+  uv run python experiments/calibration_transport/analysis.py \
+    results/frozen-decision-cat-ovr-qwen35-2b.json
+  ```
+
+  Regeneration re-checks the plan and paired-dataset fingerprints against the
+  recorded lineage and fails closed on any mismatch. Running it twice on the same
+  raw artifact produces byte-identical output. The report is not the only data
+  source.

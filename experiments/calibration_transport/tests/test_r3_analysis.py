@@ -66,6 +66,39 @@ def _fixture() -> tuple[list[Any], list[Any]]:
     return train, test
 
 
+def _winner_record(item_id: str, truth: str, cat_winner: str, ovr_winner: str) -> Any:
+    return analysis.R3WinnerRecord(item_id, truth, cat_winner, ovr_winner)
+
+
+def _evidence_item(
+    item_id: str,
+    ground_truth_value: str,
+    *,
+    cat_winner: str | None,
+    cat_anchor_score: float,
+    ovr_winner: str | None,
+    ovr_anchor_score: float,
+) -> dict[str, Any]:
+    def block(winner: str | None, anchor_score: float) -> dict[str, Any]:
+        record = None if winner is None else {"winner": winner, "anchor_score": anchor_score}
+        return {"status": "scored", "record": record}
+
+    return {
+        "item_id": item_id,
+        "ground_truth_value": ground_truth_value,
+        "cat": block(cat_winner, cat_anchor_score),
+        "ovr": block(ovr_winner, ovr_anchor_score),
+    }
+
+
+def _expect_analysis_error(func: Any, *args: Any, **kwargs: Any) -> None:
+    try:
+        func(*args, **kwargs)
+    except analysis.AnalysisError:
+        return
+    raise AssertionError("expected AnalysisError")
+
+
 class TestRawBrierInvariant:
     def test_raw_brier_is_the_mean_squared_error(self) -> None:
         pairs = [(0.8, 1.0), (0.2, 0.0), (0.5, 1.0)]
@@ -340,6 +373,12 @@ class TestArtifactAssembly:
     def test_build_analysis_artifact_runs_on_synthetic(self) -> None:
         train, test = _fixture()
         design = protocol.build_design(__import__("r3_population").load_manifest())
+        winners = [
+            _winner_record("c0", "option-1", "option-1", "option-2"),
+            _winner_record("c1", "option-2", "option-2", "option-2"),
+            _winner_record("d0", "option-3", "option-3", "option-3"),
+            _winner_record("d1", "option-4", "option-4", "option-1"),
+        ]
         payload = analysis.build_analysis_artifact(
             protocol_design=design,
             conditions=[
@@ -348,6 +387,7 @@ class TestArtifactAssembly:
                     "model_revision": protocol.PRIMARY_MODEL_REVISION,
                     "train_items": train,
                     "test_items": test,
+                    "test_winner_records": winners,
                 }
             ],
             test_replicates=40,
@@ -358,6 +398,12 @@ class TestArtifactAssembly:
         block = payload["models"][0]
         assert len(block["native_reference"]) == 8
         assert len(block["directions"]) == 2
+        assert block["end_to_end"] == {
+            "n": 4,
+            "cat_own_winner_accuracy": 1.0,
+            "ovr_own_winner_accuracy": 0.5,
+            "winner_agreement": 0.5,
+        }
 
 
 _STUB_CAT_SLOPE = 2.0
@@ -778,3 +824,221 @@ class TestTrainRefitFailureContract:
                 assert cell["interval"] is not None
                 assert cell["interval"]["n"] == 3
                 assert isinstance(cell["point"], float)
+
+
+class TestWinnerRecordFromEvidence:
+    """The analysis winner input is the recorded native winner, not a score."""
+
+    def test_reads_recorded_winners_and_ground_truth(self) -> None:
+        evidence = _evidence_item(
+            "i1",
+            "option-1",
+            cat_winner="option-3",
+            cat_anchor_score=0.40,
+            ovr_winner="option-2",
+            ovr_anchor_score=0.47,
+        )
+        record = analysis.winner_record_from_evidence(evidence)
+        assert record == _winner_record("i1", "option-1", "option-3", "option-2")
+
+    def test_winner_is_not_derived_from_anchor_score(self) -> None:
+        evidence = _evidence_item(
+            "i1",
+            "option-1",
+            cat_winner="option-1",
+            cat_anchor_score=0.40,
+            ovr_winner="option-1",
+            ovr_anchor_score=0.20,
+        )
+        record = analysis.winner_record_from_evidence(evidence)
+        assert record.cat_winner == "option-1"
+        assert record.ovr_winner == "option-1"
+        old_cat_correct = (evidence["cat"]["record"]["anchor_score"] >= 0.5) == (
+            record.ground_truth_value == record.cat_winner
+        )
+        assert old_cat_correct is False
+
+    def test_scored_row_without_a_recorded_winner_fails_closed(self) -> None:
+        evidence = _evidence_item(
+            "i1",
+            "option-1",
+            cat_winner=None,
+            cat_anchor_score=0.40,
+            ovr_winner="option-1",
+            ovr_anchor_score=0.20,
+        )
+        _expect_analysis_error(analysis.winner_record_from_evidence, evidence)
+
+    def test_non_scored_block_fails_closed(self) -> None:
+        evidence = _evidence_item(
+            "i1",
+            "option-1",
+            cat_winner="option-1",
+            cat_anchor_score=0.40,
+            ovr_winner="option-1",
+            ovr_anchor_score=0.20,
+        )
+        evidence["ovr"] = {"status": "missing", "record": None}
+        _expect_analysis_error(analysis.winner_record_from_evidence, evidence)
+
+
+class TestEndToEndWinnerDiagnostics:
+    """Native-winner semantics: no anchor threshold, no calibrated probability."""
+
+    def test_cat_winner_correct_below_half_threshold(self) -> None:
+        record = _winner_record("i1", "option-1", "option-1", "option-3")
+        diagnostics = analysis.end_to_end_diagnostics([record])
+        assert diagnostics["n"] == 1
+        assert diagnostics["cat_own_winner_accuracy"] == 1.0
+
+    def test_ovr_winner_correct_when_all_candidate_scores_below_half(self) -> None:
+        record = _winner_record("i1", "option-2", "option-2", "option-2")
+        diagnostics = analysis.end_to_end_diagnostics([record])
+        assert diagnostics["ovr_own_winner_accuracy"] == 1.0
+
+    def test_threshold_class_agreement_masks_recorded_disagreement(self) -> None:
+        record = _winner_record("i1", "option-1", "option-1", "option-3")
+        diagnostics = analysis.end_to_end_diagnostics([record])
+        assert diagnostics["winner_agreement"] == 0.0
+
+    def test_recorded_agreement_when_threshold_classes_differ(self) -> None:
+        record = _winner_record("i1", "option-4", "option-3", "option-3")
+        diagnostics = analysis.end_to_end_diagnostics([record])
+        assert diagnostics["winner_agreement"] == 1.0
+
+    def test_native_winner_accuracy_and_agreement_values(self) -> None:
+        records = [
+            _winner_record("i1", "option-1", "option-1", "option-2"),
+            _winner_record("i2", "option-2", "option-2", "option-2"),
+            _winner_record("i3", "option-3", "option-4", "option-3"),
+            _winner_record("i4", "option-4", "option-4", "option-1"),
+        ]
+        diagnostics = analysis.end_to_end_diagnostics(records)
+        assert diagnostics["n"] == 4
+        assert diagnostics["cat_own_winner_accuracy"] == 0.75
+        assert diagnostics["ovr_own_winner_accuracy"] == 0.5
+        assert diagnostics["winner_agreement"] == 0.25
+
+    def test_empty_records_fails_closed(self) -> None:
+        _expect_analysis_error(analysis.end_to_end_diagnostics, [])
+
+
+class TestWinnerThresholdCounterexamples:
+    """The retired 0.5-threshold diagnostic must fail where the winner is native."""
+
+    def test_cat_anchor_below_half_with_anchor_as_winner(self) -> None:
+        evidence = _evidence_item(
+            "i1",
+            "option-1",
+            cat_winner="option-1",
+            cat_anchor_score=0.40,
+            ovr_winner="option-2",
+            ovr_anchor_score=0.30,
+        )
+        record = analysis.winner_record_from_evidence(evidence)
+        old_correct = (evidence["cat"]["record"]["anchor_score"] >= 0.5) == (
+            record.ground_truth_value == record.cat_winner
+        )
+        assert old_correct is False
+        assert analysis.end_to_end_diagnostics([record])["cat_own_winner_accuracy"] == 1.0
+
+    def test_ovr_all_scores_below_half_with_recorded_winner(self) -> None:
+        evidence = _evidence_item(
+            "i1",
+            "option-2",
+            cat_winner="option-1",
+            cat_anchor_score=0.42,
+            ovr_winner="option-2",
+            ovr_anchor_score=0.47,
+        )
+        record = analysis.winner_record_from_evidence(evidence)
+        old_correct = (evidence["ovr"]["record"]["anchor_score"] >= 0.5) == (
+            record.ground_truth_value == record.ovr_winner
+        )
+        assert old_correct is False
+        assert analysis.end_to_end_diagnostics([record])["ovr_own_winner_accuracy"] == 1.0
+
+    def test_disagreeing_winners_below_half_threshold(self) -> None:
+        evidence = _evidence_item(
+            "i1",
+            "option-1",
+            cat_winner="option-1",
+            cat_anchor_score=0.40,
+            ovr_winner="option-3",
+            ovr_anchor_score=0.42,
+        )
+        record = analysis.winner_record_from_evidence(evidence)
+        old_agreement = (evidence["cat"]["record"]["anchor_score"] >= 0.5) == (
+            evidence["ovr"]["record"]["anchor_score"] >= 0.5
+        )
+        assert old_agreement is True
+        assert analysis.end_to_end_diagnostics([record])["winner_agreement"] == 0.0
+
+
+class TestWinnerPopulationContract:
+    """Winner diagnostics must use exactly the eligible fixed TEST population."""
+
+    def test_subset_population_fails_closed(self) -> None:
+        train, test = _fixture()
+        winners = [
+            _winner_record("c0", "option-1", "option-1", "option-1"),
+            _winner_record("c1", "option-2", "option-2", "option-2"),
+            _winner_record("d0", "option-3", "option-3", "option-3"),
+        ]
+        _expect_analysis_error(
+            analysis.analyze_model_condition,
+            model_id=protocol.PRIMARY_MODEL_ID,
+            model_revision=protocol.PRIMARY_MODEL_REVISION,
+            train_items=train,
+            test_items=test,
+            test_winner_records=winners,
+            procedures=PROCEDURES,
+            test_replicates=5,
+            train_refit_replicates=2,
+        )
+
+    def test_extra_population_fails_closed(self) -> None:
+        train, test = _fixture()
+        winners = [
+            _winner_record("c0", "option-1", "option-1", "option-1"),
+            _winner_record("c1", "option-2", "option-2", "option-2"),
+            _winner_record("d0", "option-3", "option-3", "option-3"),
+            _winner_record("d1", "option-4", "option-4", "option-4"),
+            _winner_record("zz", "option-1", "option-1", "option-1"),
+        ]
+        _expect_analysis_error(
+            analysis.analyze_model_condition,
+            model_id=protocol.PRIMARY_MODEL_ID,
+            model_revision=protocol.PRIMARY_MODEL_REVISION,
+            train_items=train,
+            test_items=test,
+            test_winner_records=winners,
+            procedures=PROCEDURES,
+            test_replicates=5,
+            train_refit_replicates=2,
+        )
+
+    def test_matching_population_runs(self) -> None:
+        train, test = _fixture()
+        winners = [
+            _winner_record("c0", "option-1", "option-1", "option-1"),
+            _winner_record("c1", "option-2", "option-2", "option-2"),
+            _winner_record("d0", "option-3", "option-3", "option-3"),
+            _winner_record("d1", "option-4", "option-4", "option-4"),
+        ]
+        block = analysis.analyze_model_condition(
+            model_id=protocol.PRIMARY_MODEL_ID,
+            model_revision=protocol.PRIMARY_MODEL_REVISION,
+            train_items=train,
+            test_items=test,
+            test_winner_records=winners,
+            procedures=PROCEDURES,
+            test_replicates=5,
+            train_refit_replicates=2,
+        )
+        assert block["end_to_end"] == {
+            "n": 4,
+            "cat_own_winner_accuracy": 1.0,
+            "ovr_own_winner_accuracy": 1.0,
+            "winner_agreement": 1.0,
+        }

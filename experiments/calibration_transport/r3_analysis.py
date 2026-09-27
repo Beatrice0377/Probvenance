@@ -53,6 +53,10 @@ def _load_sibling(name: str) -> Any:
 
 _protocol = _load_sibling("r3_protocol")
 _population = _load_sibling("r3_population")
+_integrity = _load_sibling("integrity")
+
+#: The frozen raw-evidence status of a block that carries a recorded native winner.
+_SCORED_STATUS = _integrity.MeasurementStatus.SCORED.value
 
 R3_ANALYSIS_ARTIFACT_TYPE = "r3-confirmatory-analysis"
 R3_ANALYSIS_VERSION = 1
@@ -247,6 +251,22 @@ class R3Item:
     label: float
     cat_score: float
     ovr_score: float
+
+
+@dataclass(frozen=True, slots=True)
+class R3WinnerRecord:
+    """One row's recorded native winners and ground truth.
+
+    Held separately from :class:`R3Item` so fixed-decision probability data and
+    end-to-end winner data are never conflated. Every value is read verbatim from
+    the frozen raw evidence; no winner is derived from an anchor score, a 0.5
+    threshold, or a calibrated probability.
+    """
+
+    item_id: str
+    ground_truth_value: str
+    cat_winner: str
+    ovr_winner: str
 
 
 def fit_panel(
@@ -646,15 +666,68 @@ def range_loss_decomposition(
     return result
 
 
-def end_to_end_diagnostics(items: Sequence[R3Item], panel: R3PanelFit) -> dict[str, Any]:
-    cat_correct = sum(1 for item in items if (item.cat_score >= 0.5) == (item.label == 1.0))
-    ovr_correct = sum(1 for item in items if (item.ovr_score >= 0.5) == (item.label == 1.0))
-    agreement = sum(1 for item in items if (item.cat_score >= 0.5) == (item.ovr_score >= 0.5))
+def _recorded_native_winner(evidence_item: Mapping[str, Any], measurement: str) -> str:
+    item_id = evidence_item.get("item_id")
+    block = evidence_item.get(measurement)
+    if not isinstance(block, Mapping):
+        raise AnalysisError(f"item {item_id} lacks a {measurement} evidence block")
+    if block.get("status") != _SCORED_STATUS:
+        raise AnalysisError(
+            f"item {item_id} {measurement} is not SCORED; no native winner is available"
+        )
+    record = block.get("record")
+    if not isinstance(record, Mapping) or not record.get("winner"):
+        raise AnalysisError(f"item {item_id} SCORED {measurement} lacks its recorded native winner")
+    return str(record["winner"])
+
+
+def winner_record_from_evidence(evidence_item: Mapping[str, Any]) -> R3WinnerRecord:
+    """Map one frozen raw-evidence item onto its winner-diagnostic record.
+
+    The CAT/OVR winners are read verbatim from ``cat.record.winner`` and
+    ``ovr.record.winner`` together with the recorded ``ground_truth_value``; the
+    anchor score, any candidate-score threshold, and any calibrated probability
+    are never consulted. A structurally SCORED block whose recorded winner is
+    missing is an integrity error and fails closed.
+    """
+    return R3WinnerRecord(
+        item_id=str(evidence_item.get("item_id")),
+        ground_truth_value=str(evidence_item.get("ground_truth_value")),
+        cat_winner=_recorded_native_winner(evidence_item, "cat"),
+        ovr_winner=_recorded_native_winner(evidence_item, "ovr"),
+    )
+
+
+def end_to_end_diagnostics(records: Sequence[R3WinnerRecord]) -> dict[str, Any]:
+    """Frozen §16 end-to-end winner diagnostics on the recorded native winners.
+
+    Each protocol's own-winner accuracy compares its recorded native winner with
+    the ground truth, and winner agreement compares the two recorded native
+    winners directly. No anchor probability, threshold, or calibrated score
+    participates: this is decision behaviour, not the per-item estimand.
+    """
+    if not records:
+        raise AnalysisError("end-to-end winner diagnostics require at least one record")
+    count = len(records)
+    cat_correct = sum(1 for row in records if row.cat_winner == row.ground_truth_value)
+    ovr_correct = sum(1 for row in records if row.ovr_winner == row.ground_truth_value)
+    agreement = sum(1 for row in records if row.cat_winner == row.ovr_winner)
     return {
-        "cat_own_winner_accuracy": cat_correct / len(items),
-        "ovr_own_winner_accuracy": ovr_correct / len(items),
-        "winner_agreement": agreement / len(items),
+        "n": count,
+        "cat_own_winner_accuracy": cat_correct / count,
+        "ovr_own_winner_accuracy": ovr_correct / count,
+        "winner_agreement": agreement / count,
     }
+
+
+def _require_winner_population(
+    test_items: Sequence[R3Item], winner_records: Sequence[R3WinnerRecord]
+) -> None:
+    """Frozen §16: winner diagnostics use exactly the eligible fixed TEST rows."""
+    item_ids = [item.item_id for item in test_items]
+    winner_ids = [record.item_id for record in winner_records]
+    if len(winner_ids) != len(item_ids) or set(winner_ids) != set(item_ids):
+        raise AnalysisError("winner records must cover exactly the fixed TEST item population")
 
 
 # --------------------------------------------------------------------------- #
@@ -668,11 +741,13 @@ def analyze_model_condition(
     model_revision: str,
     train_items: Sequence[R3Item],
     test_items: Sequence[R3Item],
+    test_winner_records: Sequence[R3WinnerRecord],
     procedures: Sequence[Any],
     test_replicates: int = _protocol.TEST_BOOTSTRAP_REPLICATES,
     train_refit_replicates: int = _protocol.TRAIN_REFIT_BOOTSTRAP_REPLICATES,
 ) -> dict[str, Any]:
     """Full predeclared analysis for one model condition (synthetic-runnable)."""
+    _require_winner_population(test_items, test_winner_records)
     panel = fit_panel(train_items, procedures)
     labels = procedure_labels(procedures)
 
@@ -764,7 +839,7 @@ def analyze_model_condition(
         "directions": directions,
         "native_reference": native_reference,
         "train_refit_stability": train_refit,
-        "end_to_end": end_to_end_diagnostics(test_items, panel),
+        "end_to_end": end_to_end_diagnostics(test_winner_records),
     }
 
 
@@ -973,6 +1048,7 @@ def build_analysis_artifact(
             model_revision=condition["model_revision"],
             train_items=condition["train_items"],
             test_items=condition["test_items"],
+            test_winner_records=condition["test_winner_records"],
             procedures=procedures,
             test_replicates=test_replicates,
             train_refit_replicates=train_refit_replicates,

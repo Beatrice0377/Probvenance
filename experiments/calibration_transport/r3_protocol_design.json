@@ -1,0 +1,290 @@
+{
+  "anchor": {
+    "id": "sha256-case-id-candidate-set-anchor",
+    "input": "item_id + candidate semantic names only",
+    "version": 1
+  },
+  "artifact_type": "r3-confirmatory-protocol",
+  "artifact_version": 1,
+  "baselines": {
+    "contrasts": [
+      "Delta_native/raw = R_native(B;F) - R_raw(B)",
+      "Delta_cross/raw = R_cross(A->B;F) - R_raw(B)",
+      "Delta_cross/native = R_cross(A->B;F) - R_native(B;F)"
+    ],
+    "cross": "R_cross(A->B;F) = loss(g_F^A(S_B_i), Y_i)",
+    "native": "R_native(B;F) = loss(g_F^B(S_B_i), Y_i)",
+    "raw": "R_raw(B) = loss(S_B_i, Y_i)"
+  },
+  "bootstrap": {
+    "percentile_rule": {
+      "id": "nearest-rank-percentile",
+      "version": 1
+    },
+    "shared_draws": true,
+    "test": {
+      "id": "sha256-r3-subject-stratified-paired-test-bootstrap",
+      "replicates": 20000,
+      "version": 1
+    },
+    "train_refit": {
+      "id": "sha256-r3-subject-stratified-paired-train-refit-bootstrap",
+      "replicates": 2000,
+      "version": 1
+    }
+  },
+  "completeness_rule": {
+    "requires": "100% paired measurement completeness (CAT=SCORED and OVR=SCORED) for every selected item",
+    "row_substitution": false,
+    "winner_agreement_filter": false
+  },
+  "expected_evaluations": {
+    "evaluations_per_item": 5,
+    "items_per_model": 1596,
+    "per_model": 7980,
+    "total_two_models": 15960
+  },
+  "fingerprint_version": 1,
+  "ground_truth_semantics": {
+    "fingerprint": "7425492c14006c7d2abd093aa9cc81a291b22afad39d090d068096124ba00ba8",
+    "fingerprint_version": 1,
+    "provenance": {
+      "adjudicated": false,
+      "ambiguity_policy": "pinned-dataset-answer-key-as-authoritative",
+      "label_source": "pinned cais/mmlu answer field",
+      "labeling_rule": "mmlu-answer-index-to-source-option",
+      "taxonomy_id": "mmlu-four-option-answer-key",
+      "taxonomy_version": 1
+    }
+  },
+  "input_score": {
+    "id": "fixed-decision-semantic-probability",
+    "version": 1
+  },
+  "measurement_a": {
+    "measurement_id": "direct-categorical-anchor-probability",
+    "measurement_version": 1
+  },
+  "measurement_b": {
+    "measurement_id": "independent-binary-anchor-probability",
+    "measurement_version": 1
+  },
+  "models": {
+    "primary": {
+      "child_plan_fingerprint": "787c668201fa1a2046bb3eb7c00ec1fd929d76bc164dadcef6f7dd6a2edb0ee6",
+      "model_id": "openbmb/MiniCPM5-2B",
+      "model_revision": "12a3808a956f869c767195e9266b59c4d21d92e2",
+      "role": "primary-confirmatory"
+    },
+    "replication": {
+      "child_plan_fingerprint": "dc2f58732921466891de16a031f20141e82a28107de7fef114456f65159c6ebe",
+      "model_id": "Qwen/Qwen3.5-2B",
+      "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "role": "preregistered-replication"
+    }
+  },
+  "multiplicity": {
+    "native_reference": {
+      "alpha": 0.05,
+      "correction": "bonferroni-percentile-interval",
+      "family_size": 8,
+      "lower_tail": "1/320",
+      "upper_tail": "319/320"
+    },
+    "primary": {
+      "alpha": 0.05,
+      "correction": "bonferroni-percentile-interval",
+      "family_size": 6,
+      "lower_tail": "1/240",
+      "upper_tail": "239/240"
+    }
+  },
+  "native_reference_states": [
+    "NATIVE_IMPROVEMENT_SUPPORTED",
+    "NATIVE_DEGRADATION_SUPPORTED",
+    "NATIVE_ADEQUACY_UNRESOLVED"
+  ],
+  "non_claims": [
+    "R3 does not establish global CAT/OVR compatibility.",
+    "R3 does not establish universal calibration-procedure superiority.",
+    "R3 does not establish a causal effect of score-range mismatch.",
+    "R3 does not establish contamination-free MMLU generalization.",
+    "R3 does not authorize production cross-identity profile reuse.",
+    "R3 does not establish transitivity or symmetry of the conditioned relation.",
+    "R3 does not establish all-model procedure-level generalization."
+  ],
+  "partition": {
+    "audit": 0,
+    "test": 1140,
+    "test_per_subject": 20,
+    "total": 1596,
+    "train": 456,
+    "train_per_subject": 8
+  },
+  "population": {
+    "dataset_repository": "cais/mmlu",
+    "dataset_revision": "c30699e8356da336a370243923dbaf21066bb9fe",
+    "manifest_artifact_type": "r3-mmlu-confirmatory-population-manifest",
+    "manifest_fingerprint": "40cc9753a711314ff3b25ed6e234d0cbda11f3f60cd87f1d3915195a3d1780b8",
+    "population_id": "r3-mmlu-57-subject-confirmatory",
+    "population_version": 1,
+    "selection_protocol_id": "mmlu-subject-balanced-source-index-hash-selection",
+    "selection_protocol_version": 1
+  },
+  "primary_contrasts": [
+    {
+      "direction": "CAT->OVR",
+      "effect": "feature"
+    },
+    {
+      "direction": "CAT->OVR",
+      "effect": "regularization"
+    },
+    {
+      "direction": "CAT->OVR",
+      "effect": "interaction"
+    },
+    {
+      "direction": "OVR->CAT",
+      "effect": "feature"
+    },
+    {
+      "direction": "OVR->CAT",
+      "effect": "regularization"
+    },
+    {
+      "direction": "OVR->CAT",
+      "effect": "interaction"
+    }
+  ],
+  "primary_estimand": {
+    "definition": "C_d(F) = R_cross(A->B;F) - R_raw(B), primary metric Brier",
+    "id": "cross-vs-raw-procedure-conditioned-transport-risk",
+    "version": 1
+  },
+  "primary_hypothesis_family": {
+    "alternative": "effect != 0 (two-sided)",
+    "null": "effect = 0",
+    "size": 6
+  },
+  "procedures": [
+    {
+      "fingerprint": "7a8e13d51e131f2102cca4e00b172c8bbb2eb49e591acd3746aeb64d003c8857",
+      "payload": {
+        "endpoint_policy_id": "exact-raw-probability-accepted",
+        "endpoint_policy_version": 1,
+        "family_id": "research-l2-logistic-fixed-decision-probability",
+        "family_version": 1,
+        "feature_id": "identity-raw-probability",
+        "feature_version": 1,
+        "fitting_data_protocol_id": "paired-frozen-decision-train",
+        "fitting_data_protocol_version": 1,
+        "l2_strength": 0.0001,
+        "label": "P-low",
+        "objective_id": "mean-bernoulli-nll-plus-l2",
+        "objective_version": 1,
+        "procedure_id": "r3-procedure-P-low",
+        "procedure_version": 1,
+        "regularization_rule_id": "fixed-l2-strength",
+        "regularization_rule_version": 1,
+        "selection_rule_id": "fixed-panel-no-selection",
+        "selection_rule_version": 1
+      }
+    },
+    {
+      "fingerprint": "a44e9217dd43e5e29d859c8dd2dc510a5876db4d46a8e0cc2fd4f1df3121a423",
+      "payload": {
+        "endpoint_policy_id": "exact-raw-probability-accepted",
+        "endpoint_policy_version": 1,
+        "family_id": "research-l2-logistic-fixed-decision-probability",
+        "family_version": 1,
+        "feature_id": "identity-raw-probability",
+        "feature_version": 1,
+        "fitting_data_protocol_id": "paired-frozen-decision-train",
+        "fitting_data_protocol_version": 1,
+        "l2_strength": 0.01,
+        "label": "P-historical",
+        "objective_id": "mean-bernoulli-nll-plus-l2",
+        "objective_version": 1,
+        "procedure_id": "r3-procedure-P-historical",
+        "procedure_version": 1,
+        "regularization_rule_id": "fixed-l2-strength",
+        "regularization_rule_version": 1,
+        "selection_rule_id": "fixed-panel-no-selection",
+        "selection_rule_version": 1
+      }
+    },
+    {
+      "fingerprint": "91d7d506275aade7d4676c39722ac2c4d975de7967a25a808395c056307ad619",
+      "payload": {
+        "endpoint_policy_id": "reject-exact-probability-endpoints",
+        "endpoint_policy_version": 1,
+        "family_id": "research-l2-logistic-logit-fixed-decision-probability",
+        "family_version": 1,
+        "feature_id": "exact-logit-probability",
+        "feature_version": 1,
+        "fitting_data_protocol_id": "paired-frozen-decision-train",
+        "fitting_data_protocol_version": 1,
+        "l2_strength": 0.0001,
+        "label": "L-low",
+        "objective_id": "mean-bernoulli-nll-plus-l2",
+        "objective_version": 1,
+        "procedure_id": "r3-procedure-L-low",
+        "procedure_version": 1,
+        "regularization_rule_id": "fixed-l2-strength",
+        "regularization_rule_version": 1,
+        "selection_rule_id": "fixed-panel-no-selection",
+        "selection_rule_version": 1
+      }
+    },
+    {
+      "fingerprint": "23ec12bbf4a809ba2f419491df80d1f228d3fd778d848115839aab3697f9dd58",
+      "payload": {
+        "endpoint_policy_id": "reject-exact-probability-endpoints",
+        "endpoint_policy_version": 1,
+        "family_id": "research-l2-logistic-logit-fixed-decision-probability",
+        "family_version": 1,
+        "feature_id": "exact-logit-probability",
+        "feature_version": 1,
+        "fitting_data_protocol_id": "paired-frozen-decision-train",
+        "fitting_data_protocol_version": 1,
+        "l2_strength": 0.01,
+        "label": "L-historical",
+        "objective_id": "mean-bernoulli-nll-plus-l2",
+        "objective_version": 1,
+        "procedure_id": "r3-procedure-L-historical",
+        "procedure_version": 1,
+        "regularization_rule_id": "fixed-l2-strength",
+        "regularization_rule_version": 1,
+        "selection_rule_id": "fixed-panel-no-selection",
+        "selection_rule_version": 1
+      }
+    }
+  ],
+  "protocol_fingerprint": "3ef63056ae16b18ad65d9c87d1fbec5b43550873a0e3e25ec0a323f954ee974d",
+  "protocol_id": "r3-confirmatory-procedure-conditioned-transport",
+  "protocol_name": "R3 confirmatory procedure-conditioned calibration transport",
+  "research_spec": {
+    "id": "calibration-transport-research-spec",
+    "version": 2
+  },
+  "runtime": {
+    "dtype": "bfloat16",
+    "local_files_only": true,
+    "rendering": {
+      "enable_thinking": false
+    }
+  },
+  "secondary_diagnostics": [
+    "exact-logloss",
+    "equal-width-reliability-10-bin",
+    "observed-score-range",
+    "source-quantile-range-coverage",
+    "range-loss-decomposition",
+    "end-to-end-winner-diagnostics"
+  ],
+  "target": {
+    "id": "fixed-decision-correctness",
+    "version": 1
+  }
+}

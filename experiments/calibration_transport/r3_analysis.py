@@ -1,0 +1,907 @@
+"""R3 pre-outcome confirmatory analysis implementation.
+
+This module implements the R3 analysis that ``R3_PROTOCOL.md`` freezes, *before*
+any R3 model outcome exists. It runs entirely on synthetic fixtures in R3.0; the
+official run is a later, separately authorized step. It contains **no** model
+loading and **no** measurement runner.
+
+Primary quantity (cross-vs-raw, procedure-conditioned):
+
+    C_d(F) = R_cross(A->B;F) - R_raw(B)
+
+with Brier as the primary metric. The three baselines are always reported
+together; a negative cross-vs-native delta is never interpreted as transport
+success. The primary contrasts are the six factorial contrasts (feature,
+regularization, interaction for each direction) on the PRIMARY model condition,
+with a subject-stratified paired TEST bootstrap and Bonferroni multiplicity.
+
+It reuses only the numerical kernel (``_solve_l2_logistic`` and
+``_stable_sigmoid``) from the production package; it never constructs a
+``CalibrationProfile``. Family ``L`` fails closed on exact 0/1 scores (no
+clipping, no epsilon, no smoothing).
+"""
+
+from __future__ import annotations
+
+import importlib.util
+import json
+import math
+import sys
+from collections.abc import Callable, Mapping, Sequence
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
+
+from probvenance.calibration import _solve_l2_logistic, _stable_sigmoid
+from probvenance.fingerprint import fingerprint
+
+_HARNESS_DIR = Path(__file__).resolve().parent
+
+
+def _load_sibling(name: str) -> Any:
+    module = sys.modules.get(name)
+    if module is not None:
+        return module
+    spec = importlib.util.spec_from_file_location(name, _HARNESS_DIR / f"{name}.py")
+    if spec is None or spec.loader is None:  # pragma: no cover - defensive
+        raise ImportError(f"cannot load {name}.py from {_HARNESS_DIR}")
+    loaded = importlib.util.module_from_spec(spec)
+    sys.modules[name] = loaded
+    spec.loader.exec_module(loaded)
+    return loaded
+
+
+_protocol = _load_sibling("r3_protocol")
+_population = _load_sibling("r3_population")
+
+R3_ANALYSIS_ARTIFACT_TYPE = "r3-confirmatory-analysis"
+R3_ANALYSIS_VERSION = 1
+R3_ANALYSIS_FINGERPRINT_VERSION = 1
+
+R3_FITTED_CALIBRATOR_FINGERPRINT_VERSION = 1
+
+MEASUREMENT_CAT = "CAT"
+MEASUREMENT_OVR = "OVR"
+
+DIRECTION_CAT_TO_OVR = "CAT->OVR"
+DIRECTION_OVR_TO_CAT = "OVR->CAT"
+
+EFFECT_FEATURE = "feature"
+EFFECT_REGULARIZATION = "regularization"
+EFFECT_INTERACTION = "interaction"
+
+PRIMARY_PERCENTILES: tuple[float, ...] = (100.0 / 240.0, 50.0, 100.0 * 239.0 / 240.0)
+NATIVE_PERCENTILES: tuple[float, ...] = (100.0 / 320.0, 50.0, 100.0 * 319.0 / 320.0)
+
+RELIABILITY_BIN_COUNT = 10
+QUANTILE_LOWER = 2.5
+QUANTILE_UPPER = 97.5
+
+STATE_IMPROVEMENT = "NATIVE_IMPROVEMENT_SUPPORTED"
+STATE_DEGRADATION = "NATIVE_DEGRADATION_SUPPORTED"
+STATE_UNRESOLVED = "NATIVE_ADEQUACY_UNRESOLVED"
+
+
+class AnalysisError(ValueError):
+    """Raised when the R3 analysis input violates its frozen contract."""
+
+
+class ProbabilityEndpointError(AnalysisError):
+    """Raised when a Family L feature is an exact 0/1 probability."""
+
+
+# --------------------------------------------------------------------------- #
+# Losses
+# --------------------------------------------------------------------------- #
+
+
+def _logit(probability: float) -> float:
+    if probability <= 0.0 or probability >= 1.0:
+        raise ProbabilityEndpointError(
+            f"exact probability endpoint {probability!r} cannot be transformed"
+        )
+    return math.log(probability / (1.0 - probability))
+
+
+def feature_value(feature_id: str, probability: float) -> float:
+    if feature_id == _protocol.FEATURE_P_ID:
+        return probability
+    if feature_id == _protocol.FEATURE_L_ID:
+        return _logit(probability)
+    raise AnalysisError(f"unknown feature id {feature_id!r}")
+
+
+def brier(pairs: Sequence[tuple[float, float]]) -> float:
+    return math.fsum((probability - label) ** 2 for probability, label in pairs) / len(pairs)
+
+
+def brier_loss(probability: float, label: float) -> float:
+    """The per-item Brier loss, exposed so callers need no inline lambda."""
+    return (probability - label) ** 2
+
+
+def exact_logloss(pairs: Sequence[tuple[float, float]]) -> float | None:
+    total = 0.0
+    for probability, label in pairs:
+        if label == 1.0 and probability <= 0.0:
+            return None
+        if label == 0.0 and probability >= 1.0:
+            return None
+        total += -(label * math.log(probability) + (1.0 - label) * math.log(1.0 - probability))
+    return total / len(pairs)
+
+
+def loss_cell(value: float | None) -> dict[str, Any]:
+    if value is None:
+        return {"state": "positive_infinity"}
+    return {"state": "finite", "value": value}
+
+
+# --------------------------------------------------------------------------- #
+# Calibrators and panel fitting
+# --------------------------------------------------------------------------- #
+
+
+@dataclass(frozen=True, slots=True)
+class R3FittedCalibrator:
+    procedure_label: str
+    procedure_fingerprint: str
+    source_measurement: str
+    feature_id: str
+    feature_version: int
+    l2_strength: float
+    slope: float
+    intercept: float
+    training_item_ids: tuple[str, ...]
+
+    def canonical_payload(self) -> dict[str, Any]:
+        return {
+            "fingerprint_version": R3_FITTED_CALIBRATOR_FINGERPRINT_VERSION,
+            "procedure_label": self.procedure_label,
+            "procedure_fingerprint": self.procedure_fingerprint,
+            "source_measurement": self.source_measurement,
+            "feature_id": self.feature_id,
+            "feature_version": self.feature_version,
+            "l2_strength": self.l2_strength,
+            "slope": self.slope,
+            "intercept": self.intercept,
+            "training_item_ids": list(self.training_item_ids),
+        }
+
+    @property
+    def fingerprint(self) -> str:
+        return fingerprint(self.canonical_payload())
+
+    def apply(self, probability: float) -> float:
+        return _stable_sigmoid(
+            self.slope * feature_value(self.feature_id, probability) + self.intercept
+        )
+
+
+def fit_calibrator(
+    procedure: Any,
+    source_measurement: str,
+    training_points: Sequence[tuple[str, float, float]],
+) -> R3FittedCalibrator:
+    """Fit ``F`` on one measurement's TRAIN scores; fail closed on L endpoints."""
+    ordered = sorted(training_points, key=lambda point: point[0])
+    rows: list[tuple[float, float]] = []
+    for _, score, label in ordered:
+        rows.append((feature_value(procedure.feature_id, score), label))
+    slope, intercept = _solve_l2_logistic(rows, procedure.l2_strength)
+    if not (math.isfinite(slope) and math.isfinite(intercept)):
+        raise AnalysisError("calibrator parameters are not finite")
+    return R3FittedCalibrator(
+        procedure_label=procedure.label,
+        procedure_fingerprint=procedure.fingerprint,
+        source_measurement=source_measurement,
+        feature_id=procedure.feature_id,
+        feature_version=procedure.feature_version,
+        l2_strength=procedure.l2_strength,
+        slope=slope,
+        intercept=intercept,
+        training_item_ids=tuple(point[0] for point in ordered),
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class R3PanelFit:
+    """The four-procedure panel fitted on both measurements of one model."""
+
+    calibrators: Mapping[tuple[str, str], R3FittedCalibrator]
+
+    def get(self, procedure_label: str, measurement: str) -> R3FittedCalibrator:
+        return self.calibrators[(procedure_label, measurement)]
+
+    def canonical_payload(self) -> dict[str, Any]:
+        return {
+            "fingerprint_version": R3_ANALYSIS_FINGERPRINT_VERSION,
+            "calibrators": {
+                f"{label}|{measurement}": calibrator.canonical_payload()
+                for (label, measurement), calibrator in sorted(self.calibrators.items())
+            },
+        }
+
+
+# --------------------------------------------------------------------------- #
+# Item model
+# --------------------------------------------------------------------------- #
+
+
+@dataclass(frozen=True, slots=True)
+class R3Item:
+    """One paired TEST/TRAIN record for one model condition."""
+
+    item_id: str
+    subject: str
+    label: float
+    cat_score: float
+    ovr_score: float
+
+
+def fit_panel(
+    train_items: Sequence[R3Item],
+    procedures: Sequence[Any],
+) -> R3PanelFit:
+    calibrators: dict[tuple[str, str], R3FittedCalibrator] = {}
+    for procedure in procedures:
+        for measurement, score_of in (
+            (MEASUREMENT_CAT, lambda item: item.cat_score),
+            (MEASUREMENT_OVR, lambda item: item.ovr_score),
+        ):
+            points = [(item.item_id, score_of(item), item.label) for item in train_items]
+            calibrators[(procedure.label, measurement)] = fit_calibrator(
+                procedure, measurement, points
+            )
+    return R3PanelFit(calibrators)
+
+
+def _direction_target(direction: str) -> str:
+    return MEASUREMENT_OVR if direction == DIRECTION_CAT_TO_OVR else MEASUREMENT_CAT
+
+
+def _direction_source(direction: str) -> str:
+    return MEASUREMENT_CAT if direction == DIRECTION_CAT_TO_OVR else MEASUREMENT_OVR
+
+
+def direction_scores(item: R3Item, direction: str) -> tuple[float, float]:
+    """Return ``(raw_target_score, source_measurement_score)`` for a direction."""
+    if direction == DIRECTION_CAT_TO_OVR:
+        return item.ovr_score, item.cat_score
+    return item.cat_score, item.ovr_score
+
+
+def _raw_loss(item: R3Item, direction: str, loss: Callable[..., float]) -> float:
+    raw_score, _ = direction_scores(item, direction)
+    return loss(raw_score, item.label)
+
+
+def _native_loss(
+    item: R3Item,
+    panel: R3PanelFit,
+    procedure_label: str,
+    direction: str,
+    loss: Callable[..., float],
+) -> float:
+    target = _direction_target(direction)
+    raw_score, _ = direction_scores(item, direction)
+    prediction = panel.get(procedure_label, target).apply(raw_score)
+    return loss(prediction, item.label)
+
+
+def _cross_loss(
+    item: R3Item,
+    panel: R3PanelFit,
+    procedure_label: str,
+    direction: str,
+    loss: Callable[..., float],
+) -> float:
+    source = _direction_source(direction)
+    _, source_score = direction_scores(item, direction)
+    prediction = panel.get(procedure_label, source).apply(source_score)
+    return loss(prediction, item.label)
+
+
+# --------------------------------------------------------------------------- #
+# Subject-weighted means and contrasts
+# --------------------------------------------------------------------------- #
+
+
+def _per_subject_means(
+    items: Sequence[R3Item], value_of: Callable[[R3Item], float]
+) -> dict[str, float]:
+    grouped: dict[str, list[float]] = {}
+    for item in items:
+        grouped.setdefault(item.subject, []).append(value_of(item))
+    return {subject: math.fsum(values) / len(values) for subject, values in grouped.items()}
+
+
+def subject_weighted_mean(items: Sequence[R3Item], value_of: Callable[[R3Item], float]) -> float:
+    """Equal-subject mean of per-subject means (the frozen weighting contract)."""
+    means = _per_subject_means(items, value_of)
+    return math.fsum(means.values()) / len(means)
+
+
+def procedure_labels(procedures: Sequence[Any]) -> tuple[str, ...]:
+    return tuple(procedure.label for procedure in procedures)
+
+
+def cross_vs_raw_values(
+    items: Sequence[R3Item], panel: R3PanelFit, procedures: Sequence[Any], direction: str
+) -> dict[str, float]:
+    """``C_d(F)`` per procedure (per-item loss diff, subject-weighted)."""
+    return {
+        procedure.label: subject_weighted_mean(
+            items,
+            lambda item, procedure=procedure: (
+                _cross_loss(item, panel, procedure.label, direction, brier_loss)
+                - _raw_loss(item, direction, brier_loss)
+            ),
+        )
+        for procedure in procedures
+    }
+
+
+def factorial_contrasts(cross_values: Mapping[str, float]) -> dict[str, float]:
+    p_low = cross_values[_protocol.PROCEDURE_P_LOW]
+    p_hist = cross_values[_protocol.PROCEDURE_P_HISTORICAL]
+    l_low = cross_values[_protocol.PROCEDURE_L_LOW]
+    l_hist = cross_values[_protocol.PROCEDURE_L_HISTORICAL]
+    return {
+        EFFECT_FEATURE: 0.5 * (l_low + l_hist - p_low - p_hist),
+        EFFECT_REGULARIZATION: 0.5 * (p_low + l_low - p_hist - l_hist),
+        EFFECT_INTERACTION: (l_low - p_low) - (l_hist - p_hist),
+    }
+
+
+def risk_matrix(
+    items: Sequence[R3Item], panel: R3PanelFit, procedures: Sequence[Any], direction: str
+) -> dict[str, Any]:
+    """Risk-matrix path (independent calculation path 1): risks, then contrasts."""
+    raw = subject_weighted_mean(items, lambda item: _raw_loss(item, direction, brier_loss))
+    cross = {
+        procedure.label: subject_weighted_mean(
+            items,
+            lambda item, procedure=procedure: _cross_loss(
+                item, panel, procedure.label, direction, brier_loss
+            ),
+        )
+        for procedure in procedures
+    }
+    cross_values = {label: cross[label] - raw for label in cross}
+    return {"raw": raw, "cross": cross, "cross_vs_raw": cross_values}
+
+
+# --------------------------------------------------------------------------- #
+# Deterministic bootstrap
+# --------------------------------------------------------------------------- #
+
+
+def _draw_index(
+    *,
+    protocol_id: str,
+    protocol_version: int,
+    replicate: int,
+    subject: str,
+    draw: int,
+    item_count: int,
+) -> int:
+    digest = fingerprint(
+        {
+            "protocol_id": protocol_id,
+            "protocol_version": protocol_version,
+            "replicate": replicate,
+            "subject": subject,
+            "draw": draw,
+            "item_count": item_count,
+        }
+    )
+    return int(digest, 16) % item_count
+
+
+def _grouped_by_subject(items: Sequence[R3Item]) -> dict[str, list[R3Item]]:
+    grouped: dict[str, list[R3Item]] = {}
+    for item in items:
+        grouped.setdefault(item.subject, []).append(item)
+    return grouped
+
+
+def bootstrap_subject_statistic(
+    items: Sequence[R3Item],
+    value_of: Callable[[R3Item], float],
+    *,
+    replicates: int,
+    protocol_id: str,
+    protocol_version: int,
+) -> list[float]:
+    """Subject-stratified paired bootstrap of an equal-subject mean."""
+    grouped = _grouped_by_subject(items)
+    subjects = sorted(grouped)
+    sizes = {subject: len(grouped[subject]) for subject in subjects}
+    values = {subject: [value_of(item) for item in grouped[subject]] for subject in subjects}
+    samples: list[float] = []
+    for replicate in range(replicates):
+        subject_means: list[float] = []
+        for subject in subjects:
+            count = sizes[subject]
+            total = 0.0
+            for draw in range(count):
+                index = _draw_index(
+                    protocol_id=protocol_id,
+                    protocol_version=protocol_version,
+                    replicate=replicate,
+                    subject=subject,
+                    draw=draw,
+                    item_count=count,
+                )
+                total += values[subject][index]
+            subject_means.append(total / count)
+        samples.append(math.fsum(subject_means) / len(subject_means))
+    return samples
+
+
+def nearest_rank_percentile(ordered_values: Sequence[float], percentile: float) -> float:
+    if not ordered_values:
+        raise AnalysisError("cannot take a percentile of an empty sample")
+    rank = math.ceil(percentile / 100.0 * len(ordered_values))
+    rank = min(max(rank, 1), len(ordered_values))
+    return ordered_values[rank - 1]
+
+
+def _interval(samples: Sequence[float], percentiles: Sequence[float]) -> dict[str, float]:
+    ordered = sorted(samples)
+    lower, median, upper = (
+        nearest_rank_percentile(ordered, percentiles[0]),
+        nearest_rank_percentile(ordered, percentiles[1]),
+        nearest_rank_percentile(ordered, percentiles[2]),
+    )
+    return {
+        "n": len(samples),
+        "lower": lower,
+        "median": median,
+        "upper": upper,
+        "excludes_zero": (lower > 0.0) or (upper < 0.0),
+    }
+
+
+# --------------------------------------------------------------------------- #
+# Secondary diagnostics
+# --------------------------------------------------------------------------- #
+
+
+def reliability_diagnostics(
+    items: Sequence[R3Item], panel: R3PanelFit, procedures: Sequence[Any], direction: str
+) -> dict[str, Any]:
+    target = _direction_target(direction)
+    source = _direction_source(direction)
+
+    def bins_of(predictor: Callable[[R3Item], float]) -> list[dict[str, Any]]:
+        buckets: list[list[tuple[float, float]]] = [[] for _ in range(RELIABILITY_BIN_COUNT)]
+        for item in items:
+            probability = predictor(item)
+            index = min(int(probability * RELIABILITY_BIN_COUNT), RELIABILITY_BIN_COUNT - 1)
+            buckets[index].append((probability, item.label))
+        result = []
+        for index, bucket in enumerate(buckets):
+            if bucket:
+                mean_probability = math.fsum(p for p, _ in bucket) / len(bucket)
+                mean_label = math.fsum(y for _, y in bucket) / len(bucket)
+            else:
+                mean_probability = None
+                mean_label = None
+            result.append(
+                {
+                    "bin": index,
+                    "count": len(bucket),
+                    "mean_probability": mean_probability,
+                    "mean_label": mean_label,
+                }
+            )
+        return result
+
+    return {
+        "raw": bins_of(lambda item: _raw_target(item, direction)),
+        "native": {
+            procedure.label: bins_of(
+                lambda item, procedure=procedure: panel.get(procedure.label, target).apply(
+                    _raw_target(item, direction)
+                )
+            )
+            for procedure in procedures
+        },
+        "cross": {
+            procedure.label: bins_of(
+                lambda item, procedure=procedure: panel.get(procedure.label, source).apply(
+                    direction_scores(item, direction)[1]
+                )
+            )
+            for procedure in procedures
+        },
+    }
+
+
+def _raw_target(item: R3Item, direction: str) -> float:
+    raw_score, _ = direction_scores(item, direction)
+    return raw_score
+
+
+def score_geometry(items: Sequence[R3Item], direction: str) -> dict[str, Any]:
+    """Observed source/target ranges and target fractions outside them."""
+    raw_scores = [_raw_target(item, direction) for item in items]
+    source_scores = [
+        item.cat_score if direction == DIRECTION_CAT_TO_OVR else item.ovr_score for item in items
+    ]
+    return {
+        "target_min": min(raw_scores),
+        "target_max": max(raw_scores),
+        "source_min": min(source_scores),
+        "source_max": max(source_scores),
+        "target_fraction_outside_source_min_max": _fraction_outside(
+            raw_scores, min(source_scores), max(source_scores)
+        ),
+    }
+
+
+def _fraction_outside(values: Sequence[float], low: float, high: float) -> float:
+    outside = sum(1 for value in values if value < low or value > high)
+    return outside / len(values)
+
+
+def range_loss_decomposition(
+    items: Sequence[R3Item], panel: R3PanelFit, procedures: Sequence[Any], direction: str
+) -> dict[str, Any]:
+    source_scores = [
+        item.cat_score if direction == DIRECTION_CAT_TO_OVR else item.ovr_score for item in items
+    ]
+    low, high = min(source_scores), max(source_scores)
+    result: dict[str, Any] = {}
+    for procedure in procedures:
+        inside: list[float] = []
+        outside: list[float] = []
+        for item in items:
+            raw_score, source_score = direction_scores(item, direction)
+            prediction = panel.get(procedure.label, _direction_source(direction)).apply(
+                source_score
+            )
+            diff = brier_loss(prediction, item.label) - brier_loss(raw_score, item.label)
+            (inside if low <= raw_score <= high else outside).append(diff)
+        result[procedure.label] = {
+            "n_in": len(inside),
+            "n_out": len(outside),
+            "mean_in": (math.fsum(inside) / len(inside)) if inside else None,
+            "mean_out": (math.fsum(outside) / len(outside)) if outside else None,
+            "in_contribution": math.fsum(inside) / len(items),
+            "out_contribution": math.fsum(outside) / len(items),
+        }
+    return result
+
+
+def end_to_end_diagnostics(items: Sequence[R3Item], panel: R3PanelFit) -> dict[str, Any]:
+    cat_correct = sum(1 for item in items if (item.cat_score >= 0.5) == (item.label == 1.0))
+    ovr_correct = sum(1 for item in items if (item.ovr_score >= 0.5) == (item.label == 1.0))
+    agreement = sum(1 for item in items if (item.cat_score >= 0.5) == (item.ovr_score >= 0.5))
+    return {
+        "cat_own_winner_accuracy": cat_correct / len(items),
+        "ovr_own_winner_accuracy": ovr_correct / len(items),
+        "winner_agreement": agreement / len(items),
+    }
+
+
+# --------------------------------------------------------------------------- #
+# Assembled analysis
+# --------------------------------------------------------------------------- #
+
+
+def analyze_model_condition(
+    *,
+    model_id: str,
+    model_revision: str,
+    train_items: Sequence[R3Item],
+    test_items: Sequence[R3Item],
+    procedures: Sequence[Any],
+    test_replicates: int = _protocol.TEST_BOOTSTRAP_REPLICATES,
+    train_refit_replicates: int = _protocol.TRAIN_REFIT_BOOTSTRAP_REPLICATES,
+) -> dict[str, Any]:
+    """Full predeclared analysis for one model condition (synthetic-runnable)."""
+    panel = fit_panel(train_items, procedures)
+    labels = procedure_labels(procedures)
+
+    directions: dict[str, Any] = {}
+    for direction in _protocol.PRIMARY_DIRECTIONS:
+        path1 = risk_matrix(test_items, panel, procedures, direction)
+        path2 = cross_vs_raw_values(test_items, panel, procedures, direction)
+        for label in labels:
+            if not math.isclose(
+                path1["cross_vs_raw"][label], path2[label], rel_tol=0.0, abs_tol=1e-12
+            ):
+                raise AnalysisError("independent calculation paths disagree on cross-vs-raw")
+        cross_values = {label: path2[label] for label in labels}
+        contrasts = factorial_contrasts(cross_values)
+        direction_block: dict[str, Any] = {
+            "raw_risk_brier": path1["raw"],
+            "cross_risk_brier": path1["cross"],
+            "cross_vs_raw": cross_values,
+            "factorial_contrasts": contrasts,
+            "cross_vs_native": {
+                label: subject_weighted_mean(
+                    test_items,
+                    lambda item, label=label, direction=direction: (
+                        _cross_loss(item, panel, label, direction, brier_loss)
+                        - _native_loss(item, panel, label, direction, brier_loss)
+                    ),
+                )
+                for label in labels
+            },
+            "native_vs_raw": {
+                label: subject_weighted_mean(
+                    test_items,
+                    lambda item, label=label, direction=direction: (
+                        _native_loss(item, panel, label, direction, brier_loss)
+                        - _raw_loss(item, direction, brier_loss)
+                    ),
+                )
+                for label in labels
+            },
+            "exact_logloss": {
+                "raw": loss_cell(
+                    exact_logloss(
+                        [(_raw_target(item, direction), item.label) for item in test_items]
+                    )
+                ),
+                "native": {
+                    label: loss_cell(
+                        exact_logloss(
+                            [
+                                (
+                                    panel.get(label, _direction_target(direction)).apply(
+                                        _raw_target(item, direction)
+                                    ),
+                                    item.label,
+                                )
+                                for item in test_items
+                            ]
+                        )
+                    )
+                    for label in labels
+                },
+                "cross": {
+                    label: loss_cell(
+                        exact_logloss(
+                            [
+                                (
+                                    panel.get(label, _direction_source(direction)).apply(
+                                        direction_scores(item, direction)[1]
+                                    ),
+                                    item.label,
+                                )
+                                for item in test_items
+                            ]
+                        )
+                    )
+                    for label in labels
+                },
+            },
+            "bootstrap_contrast_intervals": _bootstrap_contrasts(
+                test_items, panel, procedures, direction, replicates=test_replicates
+            ),
+            "score_geometry": score_geometry(test_items, direction),
+            "range_loss_decomposition": range_loss_decomposition(
+                test_items, panel, procedures, direction
+            ),
+            "reliability": reliability_diagnostics(test_items, panel, procedures, direction),
+        }
+        directions[direction] = direction_block
+
+    native_reference = _native_reference(test_items, panel, procedures, replicates=test_replicates)
+    train_refit = _train_refit_stability(
+        train_items, test_items, procedures, replicates=train_refit_replicates
+    )
+
+    return {
+        "model_id": model_id,
+        "model_revision": model_revision,
+        "panel": panel.canonical_payload(),
+        "directions": directions,
+        "native_reference": native_reference,
+        "train_refit_stability": train_refit,
+        "end_to_end": end_to_end_diagnostics(test_items, panel),
+    }
+
+
+def _bootstrap_contrasts(
+    test_items: Sequence[R3Item],
+    panel: R3PanelFit,
+    procedures: Sequence[Any],
+    direction: str,
+    *,
+    replicates: int,
+) -> dict[str, Any]:
+    cross_samples: dict[str, list[float]] = {}
+    for label in procedure_labels(procedures):
+        cross_samples[label] = bootstrap_subject_statistic(
+            test_items,
+            lambda item, label=label, direction=direction: _cross_loss(
+                item, panel, label, direction, brier_loss
+            ),
+            replicates=replicates,
+            protocol_id=_protocol.TEST_BOOTSTRAP_ID,
+            protocol_version=_protocol.TEST_BOOTSTRAP_VERSION,
+        )
+    feature: list[float] = []
+    regularization: list[float] = []
+    interaction: list[float] = []
+    for index in range(replicates):
+        values = {label: samples[index] for label, samples in cross_samples.items()}
+        contrasts = factorial_contrasts(values)
+        feature.append(contrasts[EFFECT_FEATURE])
+        regularization.append(contrasts[EFFECT_REGULARIZATION])
+        interaction.append(contrasts[EFFECT_INTERACTION])
+    by_effect = {
+        EFFECT_FEATURE: feature,
+        EFFECT_REGULARIZATION: regularization,
+        EFFECT_INTERACTION: interaction,
+    }
+    return {
+        effect: _interval(samples, PRIMARY_PERCENTILES) for effect, samples in by_effect.items()
+    }
+
+
+def _native_reference(
+    test_items: Sequence[R3Item], panel: R3PanelFit, procedures: Sequence[Any], *, replicates: int
+) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for measurement in (MEASUREMENT_CAT, MEASUREMENT_OVR):
+        direction = DIRECTION_CAT_TO_OVR if measurement == MEASUREMENT_OVR else DIRECTION_OVR_TO_CAT
+        for procedure in procedures:
+            values = [
+                _native_loss(item, panel, procedure.label, direction, brier_loss)
+                - _raw_loss(item, direction, brier_loss)
+                for item in test_items
+            ]
+            by_item = {item.item_id: value for item, value in zip(test_items, values, strict=True)}
+            value_of = lambda item, by_item=by_item: by_item[item.item_id]  # noqa: E731 - bound lookup
+            point = subject_weighted_mean(test_items, value_of)
+            samples = bootstrap_subject_statistic(
+                test_items,
+                value_of,
+                replicates=replicates,
+                protocol_id=_protocol.TEST_BOOTSTRAP_ID,
+                protocol_version=_protocol.TEST_BOOTSTRAP_VERSION,
+            )
+            interval = _interval(samples, NATIVE_PERCENTILES)
+            if interval["upper"] < 0.0:
+                state = STATE_IMPROVEMENT
+            elif interval["lower"] > 0.0:
+                state = STATE_DEGRADATION
+            else:
+                state = STATE_UNRESOLVED
+            result[f"{procedure.label}|{measurement}"] = {
+                "point": point,
+                "interval": interval,
+                "state": state,
+            }
+    return result
+
+
+def _train_refit_stability(
+    train_items: Sequence[R3Item],
+    test_items: Sequence[R3Item],
+    procedures: Sequence[Any],
+    *,
+    replicates: int,
+) -> dict[str, Any]:
+    grouped = _grouped_by_subject(train_items)
+    subjects = sorted(grouped)
+    per_subject = {subject: grouped[subject] for subject in subjects}
+    reference = fit_panel(train_items, procedures)
+    result: dict[str, Any] = {}
+    for direction in _protocol.PRIMARY_DIRECTIONS:
+        samples: dict[str, list[float]] = {}
+        failures: list[dict[str, Any]] = []
+        for procedure in procedures:
+            samples[procedure.label] = []
+        for replicate in range(replicates):
+            resampled: list[R3Item] = []
+            for subject in subjects:
+                members = per_subject[subject]
+                for draw in range(len(members)):
+                    index = _draw_index(
+                        protocol_id=_protocol.TRAIN_REFIT_BOOTSTRAP_ID,
+                        protocol_version=_protocol.TRAIN_REFIT_BOOTSTRAP_VERSION,
+                        replicate=replicate,
+                        subject=subject,
+                        draw=draw,
+                        item_count=len(members),
+                    )
+                    resampled.append(members[index])
+            try:
+                refit = fit_panel(resampled, procedures)
+            except Exception as exc:  # recorded, never silently dropped
+                failures.append(
+                    {"replicate": replicate, "error_type": type(exc).__name__, "message": str(exc)}
+                )
+                continue
+            for procedure in procedures:
+                samples[procedure.label].append(
+                    subject_weighted_mean(
+                        test_items,
+                        lambda item, procedure=procedure, refit=refit, direction=direction: (
+                            _cross_loss(item, refit, procedure.label, direction, brier_loss)
+                            - _raw_loss(item, direction, brier_loss)
+                        ),
+                    )
+                )
+        block: dict[str, Any] = {
+            "replicates": replicates,
+            "failed_refits": failures,
+            "reference_panel": reference.canonical_payload(),
+        }
+        for label, values in samples.items():
+            if values:
+                block[label] = {
+                    "point": subject_weighted_mean(
+                        test_items,
+                        lambda item, label=label, direction=direction: (
+                            _cross_loss(item, reference, label, direction, brier_loss)
+                            - _raw_loss(item, direction, brier_loss)
+                        ),
+                    ),
+                    "interval": _interval(values, (2.5, 50.0, 97.5)),
+                }
+            else:
+                block[label] = None
+        result[direction] = block
+    return result
+
+
+def build_analysis_artifact(
+    *,
+    protocol_design: Mapping[str, Any],
+    conditions: Sequence[Mapping[str, Any]],
+    test_replicates: int = _protocol.TEST_BOOTSTRAP_REPLICATES,
+    train_refit_replicates: int = _protocol.TRAIN_REFIT_BOOTSTRAP_REPLICATES,
+) -> dict[str, Any]:
+    """Assemble the full R3 analysis artifact from per-model conditions."""
+    _protocol.validate_protocol(protocol_design)
+    procedures = _protocol.procedure_panel()
+    model_blocks = [
+        analyze_model_condition(
+            model_id=condition["model_id"],
+            model_revision=condition["model_revision"],
+            train_items=condition["train_items"],
+            test_items=condition["test_items"],
+            procedures=procedures,
+            test_replicates=test_replicates,
+            train_refit_replicates=train_refit_replicates,
+        )
+        for condition in conditions
+    ]
+    payload: dict[str, Any] = {
+        "artifact_type": R3_ANALYSIS_ARTIFACT_TYPE,
+        "artifact_version": R3_ANALYSIS_VERSION,
+        "fingerprint_version": R3_ANALYSIS_FINGERPRINT_VERSION,
+        "protocol_fingerprint": protocol_design["protocol_fingerprint"],
+        "population_manifest_fingerprint": protocol_design["population"]["manifest_fingerprint"],
+        "primary_model_id": _protocol.PRIMARY_MODEL_ID,
+        "replication_model_id": _protocol.REPLICATION_MODEL_ID,
+        "primary_contrasts": protocol_design["primary_contrasts"],
+        "multiplicity": protocol_design["multiplicity"],
+        "models": model_blocks,
+    }
+    return payload
+
+
+def _main(argv: Sequence[str]) -> int:
+    if len(argv) != 2:
+        print("usage: r3_analysis.py PROTOCOL_DESIGN_JSON", file=sys.stderr)
+        return 2
+    design = json.loads(Path(argv[1]).read_text(encoding="utf-8"))
+    _protocol.validate_protocol(design)
+    raise SystemExit(
+        "r3_analysis.py has no official measurement runner; R3 measurement is not authorized. "
+        "Use analyze_model_condition / build_analysis_artifact with pre-measured data."
+    )
+
+
+if __name__ == "__main__":  # pragma: no cover - CLI entry point
+    raise SystemExit(_main(sys.argv))

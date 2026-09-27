@@ -253,7 +253,31 @@ R2C.1 is a **numerical reference backend, not a new calibration family, not a ne
 R2C configuration, and not an R3 candidate**. It selects no method and authorizes
 no R3 work; its evidence is recorded in `R2C1_REPORT.md`.
 
-## 15. Running the tests
+## 15. R3 — the confirmatory protocol freeze (design only)
+
+R3 is the R3 confirmatory study "Procedure-Conditioned Calibration Transport".
+This round (R3.0) freezes the protocol and implements the pre-outcome analysis; it
+runs **no model measurement**. See `R3_PROTOCOL.md`.
+
+- `R3_PROTOCOL.md` — the human-readable preregistration (population, models,
+  fixed panel, estimands, inference, multiplicity, failure rules, non-claims).
+- `r3_population.py` — deterministic 57-subject MMLU manifest builder
+  (`data/r3-mmlu-57-subject-manifest-v1.json`; TRAIN=456, TEST=1140, AUDIT=0).
+- `r3_protocol.py` — the frozen parent protocol identity and `r3_protocol_design.json`.
+- `r3_analysis.py` — the pre-outcome analysis (three baselines, cross-vs-raw
+  primary estimand, six factorial contrasts, bootstraps, multiplicity,
+  native-reference states). It contains no measurement runner.
+- `tests/test_r3_population.py`, `tests/test_r3_protocol.py`,
+  `tests/test_r3_analysis.py` — offline invariants and oracles.
+
+Design choices: Option A fixed four-procedure panel
+`{raw-p, logit-p} × {λ=1e-4, λ=1e-2}`; no method selection; primary reference is
+cross-vs-raw; primary model `openbmb/MiniCPM5-2B` with `Qwen/Qwen3.5-2B` as a
+preregistered replication; MMLU population `cais/mmlu` at a pinned full revision.
+Official R3 measurement has **not** been run and is not authorized by this
+repository state.
+
+## 16. Running the tests
 
 No model, no GPU, and no network are required:
 

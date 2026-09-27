@@ -281,7 +281,7 @@ These are directions under consideration, not current commitments. None of them
 is guaranteed to reach 1.0, and whether each is pursued must be decided by
 actual experimental results rather than by design intuition.
 
-### Calibration Transportability (R2 exploratory program CLOSED; spec v1 historical, spec v2 frozen for R3+; R3 not started — human research gate pending)
+### Calibration Transportability (R2 CLOSED; R3 confirmatory protocol frozen, measurement not authorized; R3 empirical results: NONE)
 
 `docs/research/calibration-transport-research-spec-v1.md` freezes the problem
 definition, measurement semantics, experimental separation, estimands, metrics,
@@ -335,13 +335,25 @@ R0/R1/R2. `docs/research/calibration-transport-research-spec-v2.md` prospectivel
 freezes the conditioned-compatibility semantics required before any R3 design (the
 calibration procedure `F` as an explicit conditioning axis, the exact-map vs
 procedure-level claim separation, the three-baseline interpretation contract, and
-the confirmatory-analysis discipline). R3 is **not started**, and no R3 calibration
-procedure, method panel, model set, or confirmatory dataset is selected. The human
-research gate remains **pending**, to be decided after external review, and
-R2A/R2B/R2C/R2C.1 must still precede any investment in R3/R4 (transport benchmark,
-evidence-aware transport audit). Declared measurement identity remains the default
-fail-closed authorization boundary; empirical compatibility is a research result,
-not a runtime entitlement.
+the confirmatory-analysis discipline). R2 is **CLOSED**; the research gate
+**PASSED** for R3 design.
+
+R3 design is authorized and its **confirmatory protocol is frozen** (R3.0,
+design-only): `experiments/calibration_transport/R3_PROTOCOL.md` and
+`r3_protocol_design.json` freeze the untouched 57-subject MMLU population
+(`cais/mmlu` at a pinned full revision; TRAIN 456 / TEST 1140 / AUDIT 0), the two
+model conditions (`openbmb/MiniCPM5-2B` primary, `Qwen/Qwen3.5-2B` preregistered
+replication), the fixed four-procedure panel `{raw-p, logit-p} x {1e-4, 1e-2}`,
+the cross-vs-raw primary estimands, the six factorial contrasts, the
+subject-stratified paired TEST bootstrap, the Bonferroni multiplicity, the
+native-reference assessment, and the failure rules; the pre-outcome analysis is
+implemented and verified on synthetic fixtures. **No R3 model measurement has
+occurred** (`R3 empirical results: NONE`) and official R3 measurement is **not
+authorized**; the human measurement gate is pending. R2A/R2B/R2C/R2C.1 remain the
+precedent exploratory evidence, and R3 design still precedes any investment in
+R4 (a transport benchmark, or an evidence-aware transport audit). Declared
+measurement identity remains the default fail-closed authorization boundary;
+empirical compatibility is a research result, not a runtime entitlement.
 
 ### Scoring Doctrine
 

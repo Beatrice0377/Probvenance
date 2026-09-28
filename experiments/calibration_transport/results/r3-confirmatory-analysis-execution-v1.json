@@ -1,0 +1,53 @@
+{
+  "analysis_kernel": {
+    "file": "experiments/calibration_transport/r3_analysis.py",
+    "file_sha256": "819f299304703d27ff89af7e8cfc00e6bffcb8d9ae11d8bb1724db0d7cc6a0c5"
+  },
+  "analysis_output_filename": "r3-confirmatory-analysis-v1.json",
+  "analysis_output_sha256": "27b945097a0b6156998a47112437c3b258037db2c9888cea20e97b52075be796",
+  "analysis_runner": {
+    "file": "experiments/calibration_transport/run_r3_analysis.py",
+    "file_sha256": "2872e121fd3919f3dd0431dab3cf3ba7d7ddde82380d274f682d9ddc0aef18fd"
+  },
+  "artifact_type": "r3-confirmatory-analysis-execution",
+  "artifact_version": 1,
+  "execution_environment": {
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "python_version": "3.11.14"
+  },
+  "execution_fingerprint": "e738be013fd0f98a6b0ae635e09420e65de9c91b3b819aa11c1ff7ed2901f479",
+  "fingerprint_version": 1,
+  "git": {
+    "branch": "main",
+    "head": "0c16ca2460de8b18433a9c677b3e6989b0736f9f",
+    "origin_main": "0c16ca2460de8b18433a9c677b3e6989b0736f9f"
+  },
+  "measurement_code_commit": "8b1ea40aee0e7518c2ab3b25a8cc6d4ec2d0f800",
+  "population_manifest_fingerprint": "40cc9753a711314ff3b25ed6e234d0cbda11f3f60cd87f1d3915195a3d1780b8",
+  "protocol_fingerprint": "3ef63056ae16b18ad65d9c87d1fbec5b43550873a0e3e25ec0a323f954ee974d",
+  "raw_index": {
+    "filename": "r3-raw-evidence-index-v1.json",
+    "fingerprint": "25fa4086e67a1cbd48cb8d857337092b132790ceb04925407649629c35d1bc51",
+    "sha256": "b04351acd878161d21022f3e5f5f08da1443977a484f62c8ba465adba051c461"
+  },
+  "raw_inputs": {
+    "primary": {
+      "child_plan_fingerprint": "787c668201fa1a2046bb3eb7c00ec1fd929d76bc164dadcef6f7dd6a2edb0ee6",
+      "evidence_fingerprint": "726bb8340aecfa0c98e4d4b7fe1548278f3cc8ff391b9f6d14aa5215e84d7c71",
+      "filename": "r3-raw-minicpm5-2b-mmlu-v1.json",
+      "model_id": "openbmb/MiniCPM5-2B",
+      "model_revision": "12a3808a956f869c767195e9266b59c4d21d92e2",
+      "sha256": "e7b45e921d35523f9fb6aabaefe10e585f43f35f25e5e4159bb2211cec8b999b"
+    },
+    "replication": {
+      "child_plan_fingerprint": "dc2f58732921466891de16a031f20141e82a28107de7fef114456f65159c6ebe",
+      "evidence_fingerprint": "378b2676dad4b12be4d57c9030c9d44823df921dc62f4d9b7f73acf79f0d4887",
+      "filename": "r3-raw-qwen35-2b-mmlu-v1.json",
+      "model_id": "Qwen/Qwen3.5-2B",
+      "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "sha256": "00a1d04e6cb308cf609ccf3cde69b761497c4a3a110704ea069f3e933cf9248a"
+    }
+  },
+  "test_bootstrap_replicates": 20000,
+  "train_refit_bootstrap_replicates": 2000
+}

@@ -1,0 +1,38 @@
+{
+  "analysis_execution_authorized": false,
+  "analysis_kernel_changed": false,
+  "analysis_output_path_override_allowed": false,
+  "artifact_type": "r3-analysis-execution-entry-reaudit",
+  "artifact_version": 1,
+  "builder_injection_allowed": false,
+  "cli_execute_calls_zero_argument_official_entrypoint": true,
+  "entrypoint_fix_commit": "3f18b1bb4eeac9e92bac00f9c0ba8461867d83d5",
+  "fingerprint_version": 1,
+  "frozen_scientific_design_changed": false,
+  "inherited_verification_exceptions": [
+    {
+      "check": "ruff format --check .",
+      "classification": "pre-existing frozen provenance formatting exception",
+      "file_modified_this_round": false,
+      "introduced_by_this_round": false,
+      "path": "experiments/calibration_transport/R3_ANALYSIS_ENTRY_AUDIT_ERRATUM.md"
+    }
+  ],
+  "initial_execution_gate_commit": "77b07fc1e4e107f3026750fa8f9d5ca1d04cd5cd",
+  "official_cli_scientific_parameters_exposed": false,
+  "official_confirmatory_statistical_outcome_computed": false,
+  "official_input_structural_preflight_passed": true,
+  "official_output_files_created": false,
+  "prepared_input_injection_allowed": false,
+  "provenance_output_path_override_allowed": false,
+  "public_official_entrypoint": "execute_official_r3()",
+  "public_official_entrypoint_parameter_count": 0,
+  "push": false,
+  "raw_artifacts_rewritten": false,
+  "reaudit_finding": "official execution entrypoint accepted injectable prepared inputs, builder, and output paths",
+  "reaudit_finding_class": "execution-integrity-must-fix",
+  "reaudit_fingerprint": "986d7d02501a949e9aedda52b516f1606c8a8b6723c83a6c8d9469068157353e",
+  "runner_initial_implementation_commit": "2d6c3553c650b948f348e1d7d216a7d93dd4326d",
+  "static_semantic_closure_commit": "9d18f9f0efe6a6089f63e47ce15dc7cf218673db",
+  "temporary_partial_write_cleanup_verified": true
+}

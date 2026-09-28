@@ -1,0 +1,111 @@
+{
+  "analysis_entry_authorized": true,
+  "analysis_kernel": {
+    "file": "experiments/calibration_transport/r3_analysis.py",
+    "sha256": "819f299304703d27ff89af7e8cfc00e6bffcb8d9ae11d8bb1724db0d7cc6a0c5"
+  },
+  "analysis_output_filename": "r3-confirmatory-analysis-v1.json",
+  "analysis_output_sha256": "27b945097a0b6156998a47112437c3b258037db2c9888cea20e97b52075be796",
+  "analysis_runner": {
+    "file": "experiments/calibration_transport/run_r3_analysis.py",
+    "sha256": "2872e121fd3919f3dd0431dab3cf3ba7d7ddde82380d274f682d9ddc0aef18fd"
+  },
+  "artifact_type": "r3-confirmatory-execution-receipt",
+  "artifact_version": 1,
+  "attempt_3_wrapper": {
+    "contains_retry_loop": false,
+    "official_command_occurrences": 1,
+    "path": "/tmp/probvenance-r3-attempt3/run.sh",
+    "sha256": "be62f1c36053cf1a80e70ca6d3060ff63dcadfa4fae1b95be9713fc094b29e3f"
+  },
+  "attempts": [
+    {
+      "attempt_number": 1,
+      "authorization": "initial-human-authorized-execution",
+      "automatic_retry": false,
+      "exit_code": null,
+      "launcher": "shell-tool-background",
+      "observable_statistical_outcome": false,
+      "official_artifacts_created": false,
+      "status": "externally-terminated-before-artifact",
+      "supervisor": null,
+      "temporary_files_remaining": false,
+      "termination_reason": "outer-shell-tool-timeout-process-group-termination"
+    },
+    {
+      "attempt_number": 2,
+      "authorization": "human-authorized-operational-retry",
+      "automatic_retry": false,
+      "exit_code": null,
+      "launcher": "tmux-detached",
+      "observable_statistical_outcome": false,
+      "official_artifacts_created": false,
+      "status": "externally-terminated-before-artifact",
+      "supervisor": "tmux",
+      "temporary_files_remaining": false,
+      "termination_reason": "host-system-reboot-during-system-update"
+    },
+    {
+      "attempt_number": 3,
+      "authorization": "human-authorized-operational-retry",
+      "automatic_retry": false,
+      "exit_code": 0,
+      "launcher": "tmux-detached",
+      "observable_statistical_outcome": true,
+      "official_artifacts_created": true,
+      "status": "completed",
+      "supervisor": "tmux",
+      "temporary_files_remaining": false,
+      "termination_reason": null
+    }
+  ],
+  "automatic_retry_count": 0,
+  "detached_supervision": {
+    "mechanism": "tmux",
+    "probe_marker": "probe-ok",
+    "probe_note": "probe validated before attempt 2; attempt 3 reused the same validated detached mechanism",
+    "probe_performed": true,
+    "probe_status": "passed",
+    "probe_survived_original_timeout_boundary": true,
+    "socket": "probvenance-r3-retry",
+    "tmux_version": "3.4"
+  },
+  "execution_attempt_count": 3,
+  "execution_code_commit": "0c16ca2460de8b18433a9c677b3e6989b0736f9f",
+  "execution_fingerprint": "e738be013fd0f98a6b0ae635e09420e65de9c91b3b819aa11c1ff7ed2901f479",
+  "execution_origin_main": "0c16ca2460de8b18433a9c677b3e6989b0736f9f",
+  "execution_provenance_filename": "r3-confirmatory-analysis-execution-v1.json",
+  "execution_provenance_sha256": "9992ceefba32f4d0f55e692a0c60472a05751bdca316993ed3f98e220b0f6deb",
+  "fingerprint_version": 1,
+  "human_authorized_retry_count": 2,
+  "measurement_code_commit": "8b1ea40aee0e7518c2ab3b25a8cc6d4ec2d0f800",
+  "official_result_frozen": true,
+  "population_manifest_fingerprint": "40cc9753a711314ff3b25ed6e234d0cbda11f3f60cd87f1d3915195a3d1780b8",
+  "post_outcome_invariants": {
+    "analysis_rerun_after_outcome": false,
+    "code_changed_after_outcome": false,
+    "post_hoc_statistical_analysis_performed": false,
+    "scientific_interpretation_performed": false
+  },
+  "protocol_fingerprint": "3ef63056ae16b18ad65d9c87d1fbec5b43550873a0e3e25ec0a323f954ee974d",
+  "push": false,
+  "raw_index": {
+    "filename": "r3-raw-evidence-index-v1.json",
+    "fingerprint": "25fa4086e67a1cbd48cb8d857337092b132790ceb04925407649629c35d1bc51",
+    "sha256": "b04351acd878161d21022f3e5f5f08da1443977a484f62c8ba465adba051c461"
+  },
+  "raw_inputs": {
+    "primary": {
+      "evidence_fingerprint": "726bb8340aecfa0c98e4d4b7fe1548278f3cc8ff391b9f6d14aa5215e84d7c71",
+      "filename": "r3-raw-minicpm5-2b-mmlu-v1.json",
+      "sha256": "e7b45e921d35523f9fb6aabaefe10e585f43f35f25e5e4159bb2211cec8b999b"
+    },
+    "replication": {
+      "evidence_fingerprint": "378b2676dad4b12be4d57c9030c9d44823df921dc62f4d9b7f73acf79f0d4887",
+      "filename": "r3-raw-qwen35-2b-mmlu-v1.json",
+      "sha256": "00a1d04e6cb308cf609ccf3cde69b761497c4a3a110704ea069f3e933cf9248a"
+    }
+  },
+  "receipt_fingerprint": "b49e2ac5c0809b727843468120bf3b15a695e981dd3556ca38fb20d1eca74da7",
+  "result_artifact_commit": "c68c7e3ac725de1bc5db369cb7c951a810ed80f9"
+}

@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import hashlib
 import importlib.util
+import inspect
 import json
 import sys
 from pathlib import Path
@@ -918,6 +919,27 @@ class TestValidateOnlyIsolation:
             runner.verify_git_state(require_synchronized=False)
 
 
+class TestOfficialEntrypointSignature:
+    def test_official_entrypoint_takes_no_parameters(self) -> None:
+        assert list(inspect.signature(runner.execute_official_r3).parameters) == []
+
+    def test_rejects_positional_prepared_input(self) -> None:
+        with pytest.raises(TypeError):
+            runner.execute_official_r3(_synthetic_prepared())
+
+    def test_rejects_builder_keyword(self) -> None:
+        with pytest.raises(TypeError):
+            runner.execute_official_r3(builder=lambda **kwargs: {})
+
+    def test_rejects_output_path_keyword(self, tmp_path: Path) -> None:
+        with pytest.raises(TypeError):
+            runner.execute_official_r3(output_path=tmp_path / "x.json")
+
+    def test_rejects_provenance_path_keyword(self, tmp_path: Path) -> None:
+        with pytest.raises(TypeError):
+            runner.execute_official_r3(provenance_path=tmp_path / "y.json")
+
+
 class TestExecuteControlFlow:
     def _patched_git(self, monkeypatch: pytest.MonkeyPatch) -> None:
         monkeypatch.setattr(
@@ -932,23 +954,31 @@ class TestExecuteControlFlow:
             },
         )
 
-    def test_execute_calls_builder_once_with_primary_first(
+    def _patch_canonical(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> tuple[Path, Path]:
+        self._patched_git(monkeypatch)
+        monkeypatch.setattr(runner, "prepare_official_inputs", _synthetic_prepared)
+        out = tmp_path / "analysis.json"
+        prov = tmp_path / "execution.json"
+        monkeypatch.setattr(runner, "OFFICIAL_ANALYSIS_OUTPUT_PATH", out)
+        monkeypatch.setattr(runner, "OFFICIAL_EXECUTION_PROVENANCE_PATH", prov)
+        return out, prov
+
+    def test_execute_calls_canonical_builder_once_with_primary_first(
         self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
     ) -> None:
-        prepared = _synthetic_prepared()
-        self._patched_git(monkeypatch)
+        out, prov = self._patch_canonical(monkeypatch, tmp_path)
         calls: list[dict[str, Any]] = []
 
         def fake_builder(**kwargs: Any) -> dict[str, Any]:
             calls.append(kwargs)
             return {"artifact_type": "r3-confirmatory-analysis"}
 
-        out = tmp_path / "analysis.json"
-        prov = tmp_path / "execution.json"
-        result = runner.execute_official_r3(
-            prepared, output_path=out, provenance_path=prov, builder=fake_builder
-        )
+        monkeypatch.setattr(runner.r3_analysis, "build_analysis_artifact", fake_builder)
+        result = runner.execute_official_r3()
         assert len(calls) == 1
+        assert set(calls[0]) == {"protocol_design", "conditions"}
         assert "test_replicates" not in calls[0]
         assert "train_refit_replicates" not in calls[0]
         assert [c["model_id"] for c in calls[0]["conditions"]] == [
@@ -958,37 +988,75 @@ class TestExecuteControlFlow:
         assert out.exists() and prov.exists()
         assert result["analysis_output_sha256"] == hashlib.sha256(out.read_bytes()).hexdigest()
 
-    def test_execute_refuses_existing_output(
+    def test_execute_prepares_canonical_inputs_internally(
         self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
     ) -> None:
-        prepared = _synthetic_prepared()
-        self._patched_git(monkeypatch)
         out = tmp_path / "analysis.json"
+        prov = tmp_path / "execution.json"
+        self._patched_git(monkeypatch)
+        monkeypatch.setattr(runner, "OFFICIAL_ANALYSIS_OUTPUT_PATH", out)
+        monkeypatch.setattr(runner, "OFFICIAL_EXECUTION_PROVENANCE_PATH", prov)
+        calls = {"prepare": 0}
+
+        def fake_prepare() -> Any:
+            calls["prepare"] += 1
+            return _synthetic_prepared()
+
+        monkeypatch.setattr(runner, "prepare_official_inputs", fake_prepare)
+        monkeypatch.setattr(
+            runner.r3_analysis,
+            "build_analysis_artifact",
+            lambda **kwargs: {"artifact_type": "r3-confirmatory-analysis"},
+        )
+        runner.execute_official_r3()
+        assert calls["prepare"] == 1
+
+    def test_execute_refuses_existing_analysis_output(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
+        out, _ = self._patch_canonical(monkeypatch, tmp_path)
         out.write_text("existing", encoding="utf-8")
         with pytest.raises(runner.RunnerError):
-            runner.execute_official_r3(
-                prepared,
-                output_path=out,
-                provenance_path=tmp_path / "execution.json",
-                builder=lambda **kwargs: {},
-            )
+            runner.execute_official_r3()
+
+    def test_execute_refuses_existing_provenance_output(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
+        _, prov = self._patch_canonical(monkeypatch, tmp_path)
+        prov.write_text("existing", encoding="utf-8")
+        with pytest.raises(runner.RunnerError):
+            runner.execute_official_r3()
 
     def test_analysis_exception_leaves_no_output(
         self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
     ) -> None:
-        prepared = _synthetic_prepared()
-        self._patched_git(monkeypatch)
+        out, prov = self._patch_canonical(monkeypatch, tmp_path)
 
         def _boom(**kwargs: Any) -> dict[str, Any]:
             raise RuntimeError("kernel failed")
 
-        out = tmp_path / "analysis.json"
-        prov = tmp_path / "execution.json"
+        monkeypatch.setattr(runner.r3_analysis, "build_analysis_artifact", _boom)
         with pytest.raises(RuntimeError):
-            runner.execute_official_r3(
-                prepared, output_path=out, provenance_path=prov, builder=_boom
-            )
+            runner.execute_official_r3()
         assert not out.exists() and not prov.exists()
+
+    def test_cli_execute_calls_zero_argument_entrypoint(
+        self, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+    ) -> None:
+        calls = {"execute": 0}
+
+        def fake_execute() -> dict[str, Any]:
+            calls["execute"] += 1
+            return {"artifact_type": runner.EXECUTION_ARTIFACT_TYPE}
+
+        monkeypatch.setattr(runner, "execute_official_r3", fake_execute)
+
+        def _must_not_run(*args: Any, **kwargs: Any) -> Any:
+            raise AssertionError("prepare belongs inside execute_official_r3")
+
+        monkeypatch.setattr(runner, "prepare_official_inputs", _must_not_run)
+        assert runner.main(["--execute-official-r3"]) == 0
+        assert calls["execute"] == 1
 
     def test_write_pair_cleans_up_when_second_finalize_fails(
         self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
@@ -1005,6 +1073,46 @@ class TestExecuteControlFlow:
             real_replace(src, dst)
 
         monkeypatch.setattr(runner.os, "replace", flaky)
+        with pytest.raises(OSError):
+            runner._write_text_pair(first, "one\n", second, "two\n")
+        assert not first.exists() and not second.exists()
+        assert not (tmp_path / "a.json.tmp").exists()
+        assert not (tmp_path / "b.json.tmp").exists()
+
+    def test_write_pair_cleans_up_partial_second_write(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
+        first = tmp_path / "a.json"
+        second = tmp_path / "b.json"
+        real_write = Path.write_text
+
+        def flaky_write(self: Path, data: str, encoding: Any = None) -> int:
+            if self.name == "b.json.tmp":
+                real_write(self, data[:2], encoding=encoding)
+                raise OSError("synthetic partial second write failure")
+            return real_write(self, data, encoding=encoding)
+
+        monkeypatch.setattr(Path, "write_text", flaky_write)
+        with pytest.raises(OSError):
+            runner._write_text_pair(first, "one\n", second, "two\n")
+        assert not first.exists() and not second.exists()
+        assert not (tmp_path / "a.json.tmp").exists()
+        assert not (tmp_path / "b.json.tmp").exists()
+
+    def test_write_pair_cleans_up_partial_first_write(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
+        first = tmp_path / "a.json"
+        second = tmp_path / "b.json"
+        real_write = Path.write_text
+
+        def flaky_write(self: Path, data: str, encoding: Any = None) -> int:
+            if self.name == "a.json.tmp":
+                real_write(self, data[:2], encoding=encoding)
+                raise OSError("synthetic partial first write failure")
+            return real_write(self, data, encoding=encoding)
+
+        monkeypatch.setattr(Path, "write_text", flaky_write)
         with pytest.raises(OSError):
             runner._write_text_pair(first, "one\n", second, "two\n")
         assert not first.exists() and not second.exists()

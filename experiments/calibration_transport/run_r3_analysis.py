@@ -792,8 +792,8 @@ def _write_text_pair(
             (first_tmp, first_final, first_text),
             (second_tmp, second_final, second_text),
         ):
-            tmp.write_text(text, encoding="utf-8")
             temps.append(tmp)
+            tmp.write_text(text, encoding="utf-8")
             os.replace(tmp, final)
             finals.append(final)
             temps.remove(tmp)
@@ -803,26 +803,22 @@ def _write_text_pair(
         raise
 
 
-def execute_official_r3(
-    prepared: PreparedInputs,
-    *,
-    output_path: str | Path = OFFICIAL_ANALYSIS_OUTPUT_PATH,
-    provenance_path: str | Path = OFFICIAL_EXECUTION_PROVENANCE_PATH,
-    builder: Callable[..., dict[str, Any]] | None = None,
-) -> dict[str, Any]:
-    """Call the frozen kernel exactly once and write the result pair.
+def execute_official_r3() -> dict[str, Any]:
+    """Run the canonical official execution path and write the result pair.
 
-    The kernel is invoked with frozen defaults only: the runner never passes
-    ``test_replicates`` or ``train_refit_replicates``.
+    This public official entrypoint takes no arguments. It always uses the
+    canonical official input preparation, the frozen analysis kernel, and the
+    canonical output paths, so no caller can inject prepared inputs, a
+    substitute builder, or alternate output paths. The kernel is invoked with
+    frozen defaults only: the runner never passes ``test_replicates`` or
+    ``train_refit_replicates``.
     """
-    active_builder: Callable[..., dict[str, Any]] = (
-        r3_analysis.build_analysis_artifact if builder is None else builder
-    )
     git_state = verify_git_state(require_synchronized=True)
-    _require_absent(output_path)
-    _require_absent(provenance_path)
+    _require_absent(OFFICIAL_ANALYSIS_OUTPUT_PATH)
+    _require_absent(OFFICIAL_EXECUTION_PROVENANCE_PATH)
 
-    analysis_payload = active_builder(
+    prepared = prepare_official_inputs()
+    analysis_payload = r3_analysis.build_analysis_artifact(
         protocol_design=prepared.design,
         conditions=list(prepared.conditions),
     )
@@ -831,19 +827,24 @@ def execute_official_r3(
     provenance = build_execution_provenance(
         prepared,
         git_state=git_state,
-        output_path=output_path,
+        output_path=OFFICIAL_ANALYSIS_OUTPUT_PATH,
         analysis_sha256=analysis_sha256,
     )
     provenance_text = _canonical_text(provenance)
 
-    _require_absent(output_path)
-    _require_absent(provenance_path)
-    _write_text_pair(output_path, analysis_text, provenance_path, provenance_text)
+    _require_absent(OFFICIAL_ANALYSIS_OUTPUT_PATH)
+    _require_absent(OFFICIAL_EXECUTION_PROVENANCE_PATH)
+    _write_text_pair(
+        OFFICIAL_ANALYSIS_OUTPUT_PATH,
+        analysis_text,
+        OFFICIAL_EXECUTION_PROVENANCE_PATH,
+        provenance_text,
+    )
     return {
         "artifact_type": EXECUTION_ARTIFACT_TYPE,
-        "analysis_output_filename": Path(output_path).name,
+        "analysis_output_filename": Path(OFFICIAL_ANALYSIS_OUTPUT_PATH).name,
         "analysis_output_sha256": analysis_sha256,
-        "execution_provenance_filename": Path(provenance_path).name,
+        "execution_provenance_filename": Path(OFFICIAL_EXECUTION_PROVENANCE_PATH).name,
         "execution_fingerprint": provenance["execution_fingerprint"],
     }
 
@@ -882,8 +883,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         summary["git"] = _git_summary(git_state)
         print(_canonical_text(summary), end="")
         return 0
-    prepared = prepare_official_inputs()
-    result = execute_official_r3(prepared)
+    result = execute_official_r3()
     print(_canonical_text(result), end="")
     return 0
 

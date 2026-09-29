@@ -23,26 +23,28 @@ Epistemic 标记：`[PLANNING DECISION]` / `[PROPOSED R4 DESIGN]` / `[OPEN QUEST
 推荐方向（不冻结措辞）：
 
 ```text
-Does calibration transport risk remain measurably
+Does the deployment delta (R_cross - R_raw) remain measurably
 procedure-dependent across broader model families,
 model scales, and populations?
 
 And can pre-transport score geometry provide
-a preregistered label-free warning signal
-for transport risk?
+a preregistered target-label-free warning signal
+for the deployment delta and/or the transport penalty
+(R_cross - R_native)?
 ```
 
 具体子问题：
 
 ```text
-Q1. R3 在 2 × 2B + MMLU 上观察到的 F-conditioned transport dependence，
-    在更大模型 / 不同 family / 非 MMLU population 上是否仍可测？
+Q1. R3 在 2 × 2B + MMLU 上观察到的 F-conditioned deployment delta dependence
+    （cross-vs-raw），在更大模型 / 不同 family / 非 MMLU population 上是否仍可测？
 
 Q2. 三基线（raw / native / cross）的 directional pattern
     是否随 scale / family / population 系统性变化？
 
-Q3. pre-transport、label-free 的 score-geometry 信号
-    能否预测 transport risk（transport penalty 与 deployment delta）？
+Q3. pre-transport、target-label-free 的 score-geometry 信号
+    能否预测 deployment delta（R_cross - R_raw）与 transport penalty（R_cross - R_native）？
+    两个 estimand 必须分开定义、分开假设、分开解释。
 ```
 
 ---
@@ -107,6 +109,19 @@ minimum：>= 1 truly non-MMLU population（不得删除）。
 retain MMLU (cais/mmlu @ c30699e8356da336a370243923dbaf21066bb9fe) 作为 R3 continuity
 + >= 1 non-MMLU multiple-choice / declared-answer population
 ```
+
+minimum vs recommended target：
+
+```text
+hard minimum        : >= 1 truly non-MMLU population
+recommended target  : 2 non-MMLU populations
+                      if predictor validation is intended
+                      as a major paper contribution
+```
+
+若最终只能实现 1 个 non-MMLU：model / population generalization 仍有价值，
+但 predictor contribution 应降级为 secondary / exploratory predictive evidence，
+而不是 headline validated predictor。
 
 非 MMLU 候选筛选（outcome-independent）：
 
@@ -219,12 +234,18 @@ interpretability / multiplicity burden / continuity with R3 / risk of post-hoc f
 
 高优先 candidate；只能 predictive diagnostic，不得 causal。
 
-label-free 约束：
+target-label-free 约束：
 
 ```text
-predictor feature 只允许：source TRAIN scores / target unlabeled score distribution /
-                          fitted calibrator geometry
-禁止：target Y / target Brier / target LogLoss
+"target-label-free" means that predictor construction and application
+require no target outcome labels.
+
+允许：source TRAIN scores / source TRAIN labels（仅通过 source calibrator fitting 等
+      source-side procedure 使用）/ target unlabeled score distribution /
+      fitted source calibrator geometry
+
+禁止：target Y / target correctness labels / target Brier / target LogLoss /
+      任何由 target outcome label 派生的 feature
 ```
 
 候选 metrics（下一轮 predeclare 1 primary + small secondary set）：
@@ -253,6 +274,25 @@ Architecture 2: support mismatch + fitted map sensitivity/extrapolation -> F-spe
 ```
 
 [OPEN QUESTION] primary predictor 的选择与 group-aware inference 方案。
+
+### Predictor development / validation isolation [PLANNING DECISION — 硬边界]
+
+```text
+R3 model × MMLU × direction cells
+are development / hypothesis-generation evidence only
+for the future predictor.
+
+They must not be counted as independent confirmatory
+validation units for R4 predictor performance.
+
+Only R4 target outcomes generated after the formal predictor
+specification is frozen may enter preregistered predictor validation.
+
+No predictor metric, feature set, threshold, coefficient,
+aggregation rule, or selection rule
+may be tuned using R4 target outcomes.
+All such choices must be frozen before target-outcome inspection.
+```
 
 ---
 
@@ -295,16 +335,31 @@ Option 2: 分层 multiplicity（continuity core 与 family-extension 各自独�
 
 ---
 
-## 11. Replication structure [PLANNING DECISION]
+## 11. Confirmatory structure（primary / replication 治理原则）[PLANNING DECISION]
 
-保持 R3 的 primary / replication 区分原则：
+R4 inherits the governance principles of primary-vs-replication separation：
+
+```text
+- no rescue
+- no selective reporting
+- no post-hoc pooling
+- no outcome-driven reassignment
+```
 
 ```text
 primary conclusion 由 primary model frozen rule 决定
 replication 单独描述，不 rescue、不 pooling、不 post-hoc meta-analysis、不选模型汇报
 ```
 
-[OPEN QUESTION] R4 的 primary model 身份（是否仍是 MiniCPM5-2B，或新增 7–8B 作为 primary）待 design review。
+However, the exact R4 confirmatory structure
+（single primary model vs multi-condition confirmatory family）
+remains an OPEN QUESTION and is not frozen here。
+
+R4 的研究问题更偏 cross-model / cross-family / cross-population generalization，
+最终可能更适合 predeclared multi-condition confirmatory family。
+
+[OPEN QUESTION] R4 的 primary model 身份（是否仍是 MiniCPM5-2B，或新增 7–8B 作为 primary）
+与 overall confirmatory structure 待 design review。
 
 ---
 
@@ -390,22 +445,35 @@ U10. deterministic parallel 的具体实现契约（numerical vs byte equivalenc
 
 ## 18. Freeze checklist [PLANNING DECISION]
 
-R4 可进入 freeze 前必须全部满足：
+R4 可进入 freeze 前必须全部满足（selection / closure before freeze）：
 
 ```text
 [ ] human design review 完成
 [ ] §17 所有 unresolved decision 关闭
 [ ] model-selection gate 通过（outcome-independent 记录）
 [ ] dataset-selection gate 通过（outcome-independent 记录）
-[ ] calibration-family 语义 / oracle closure 完成
-[ ] deterministic parallel 等价性验证完成
-[ ] multiplicity / hypothesis 集合冻结
-[ ] primary / replication 结构冻结
 [ ] fixed-event semantics 在新 population 上验证
+[ ] calibration-family 语义 / oracle closure 完成（R3 P/L continuity / isotonic / beta）
+[ ] inferential architecture 冻结
+[ ] target-label-free predictor specification 冻结
+[ ] multiplicity / hypothesis 集合冻结
+[ ] confirmatory structure 冻结（primary/replication 或 multi-condition）
+[ ] deterministic parallel 等价性验证完成
 [ ] pre-freeze engineering tests 通过
 [ ] provenance 契约（含 analysis code commit）定义
 [ ] contamination limitation 明确写入
 [ ] non-goals 明确写入
+```
+
+**Gate-order rule：** model-selection / dataset-selection / fixed-event semantics /
+calibration-family / inference / predictor / multiplicity / execution semantics
+都必须在最终 freeze 之前关闭。不得出现「模型还没选，R4 已经 freeze」。
+
+**Analysis-freeze rule：**
+
+```text
+R4 的 outcome-dependent analysis definitions 与正式 analysis implementation
+必须在查看正式 R4 target outcomes 之前冻结。
 ```
 
 在 freeze checklist 全部完成前：

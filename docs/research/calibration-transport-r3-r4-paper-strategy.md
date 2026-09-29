@@ -360,7 +360,72 @@ MiniCPM: cat_own_winner_accuracy 0.5430 | ovr_own_winner_accuracy 0.4886 | winne
 Qwen   : cat_own_winner_accuracy 0.5018 | ovr_own_winner_accuracy 0.4816 | winner_agreement 0.4851 (n=1140)
 ```
 
-**关键 descriptive 观察（不是 claim）：** cross-vs-raw 与 cross-vs-native 在 Qwen OVR->CAT 上符号相反（cross 低于 native 但高于 raw）。这正是三基线 contract 的存在理由，也是未来 predictor 必须区分 `transport penalty (cross-native)` 与 `deployment delta (cross-raw)` 的经验依据。
+**关键 descriptive 观察（不是 claim）：** 三基线 comparators 可以给出不同的 sign pattern。
+
+```text
+Qwen OVR->CAT 是一个不同的 descriptive pattern：
+
+  cross_vs_raw > 0
+  cross_vs_native > 0
+
+即 transferred calibrator 的 Brier risk 同时高于 raw target score
+和 target-native calibrator。
+
+For Qwen OVR->CAT, both cross-vs-raw and cross-vs-native are positive:
+the transferred calibrator is worse than both the raw target score
+and the target-native calibrator.
+```
+
+真正呈现 comparator sign disagreement（`cross_vs_raw < 0` 且 `cross_vs_native > 0`）的条件是：
+
+```text
+MiniCPM CAT->OVR
+MiniCPM OVR->CAT
+Qwen CAT->OVR
+```
+
+其准确含义是：
+
+```text
+transferred calibration improves over doing nothing / raw,
+but still underperforms a calibrator fitted natively
+on the target measurement.
+```
+
+这正说明 `transport succeeded / failed` 不能作为一个不带 comparator 的二元结论：必须区分「相对 raw 是否有部署改善」（deployment delta）与「相对 target-native 是否存在 transfer penalty」（transport penalty）。这正是三基线 contract 的存在理由，也是未来 predictor 必须区分二者的经验依据。
+
+**不要**把 Qwen OVR->CAT 写成 cross-vs-raw 与 cross-vs-native 符号相反的例子——它不是。
+
+## Vocabulary rule [PLANNING DECISION — 全文强制，防 estimand 漂移]
+
+```text
+deployment delta:
+    Δ_raw(A->B;F) = R_cross(A->B;F) - R_raw(B)
+
+transport penalty:
+    Δ_native(A->B;F) = R_cross(A->B;F) - R_native(B;F)
+
+These are distinct estimands and must never be used interchangeably.
+```
+
+- R3 primary 正式 hypothesis 测的是 `cross-vs-raw`，即 **deployment delta**，不是 `cross-vs-native` transport penalty。
+- 因此 R3 的正式 primary 证据是 **deployment delta 的 F-conditioned dependence**，而不是一个模糊的 "all transport risk is F-dependent"。
+- 全文若出现 `transport risk` 一词，必须立刻说明具体指哪个 estimand；更推荐直接不用模糊词，改用 `deployment delta` / `transport penalty`。
+- R4 可以同时研究两个 estimand，但必须**分开定义、分开假设、分开解释**，不能混成一个 outcome。
+
+术语不得混用（另一条防漂移规则）：
+
+```text
+native-reference
+  = target-native calibration adequacy / improvement / degradation status
+    对应 R_native - R_raw 的 TEST inference（R3 的 m=8 native-reference 家族）
+
+TRAIN-refit stability
+  = 对 resampled TRAIN 重拟合的 bootstrap 稳定性诊断
+    对应 R3 §17 的 2000 TRAIN-refit diagnostic（INCOMPLETE / COMPLETE 记法）
+
+二者不是同一件事，禁止把 native-reference 写成 native-refit。
+```
 
 ---
 
@@ -373,9 +438,15 @@ A1. 在 primary condition（MiniCPM5-2B，MMLU，fixed-event CAT/OVR，predeclar
     cross-vs-raw calibration risk 依赖 predeclared F panel
     （>=1 of 6 adjusted intervals excludes zero）。
 
-A2. 该依赖是 direction-dependent 的：在 predeclared resolution 下，
-    CAT->OVR 的 regularization 与 interaction 被检出，
-    OVR->CAT 的 feature 被检出。
+A2. 两个方向中被调整区间检出的 predeclared contrast pattern 不同：
+    CAT->OVR 检出 regularization 与 interaction；
+    OVR->CAT 检出 feature。
+
+    这只是 direction-specific detection pattern 的描述，
+    不是一个正式的 between-direction effect-difference test
+    （R3 未预注册 contrast_CAT->OVR - contrast_OVR->CAT 的 between-direction hypothesis；
+    significant in one direction + not significant in the other
+    != significant difference between directions）。
 
 A3. cross-vs-raw 与 cross-vs-native 是两个不同 comparator，
     在本数据中可以给出不同的方向/含义（R2 已提出，R3 复现其存在性）。
@@ -384,7 +455,8 @@ A4. 在 preregistered replication model（Qwen3.5-2B）上，
     观察到 4/6 adjusted intervals excludes zero 的 replication pattern
     （作为 replication evidence 单独陈述，不并入 primary）。
 
-A5. native-refit 在 MiniCPM 全部 8 cells 上为 IMPROVEMENT_SUPPORTED；
+A5. native-reference（R_native - R_raw 的 target-native calibration adequacy status）
+    在 MiniCPM 全部 8 cells 上为 IMPROVEMENT_SUPPORTED；
     在 Qwen 上呈现 CAT/OVR 不对称（CAT 多为 UNRESOLVED，OVR 全为 IMPROVEMENT）。
 
 A6. TRAIN-refit stability 在不同 procedure 上不同：
@@ -538,7 +610,7 @@ N2. three-baseline contract：R_raw / R_native / R_cross 强制同时报告；
     cross = source measurement 上 fit 的 calibrator 应用于 target score
 
 N3. F-conditioned transport：不是只问“map transfer 好不好”，
-    而是问 transport risk 是否依赖 predeclared calibration procedure F
+    而是问 deployment delta（R_cross - R_raw）是否依赖 predeclared calibration procedure F
     （feature geometry × regularization 的预声明 factorial probe）
 
 N4. confirmatory design：untouched confirmatory TEST population、
@@ -628,17 +700,29 @@ G6. bootstrap / refit 目前主要单 CPU core（工程效率，不是科学缺�
 R4 research question（推荐方向，不冻结措辞）：
 
 ```text
-Does calibration transport risk remain measurably
+Does the deployment delta (R_cross - R_raw) remain measurably
 procedure-dependent across broader model families,
 model scales, and populations?
 
 And can pre-transport score geometry provide
-a preregistered label-free warning signal
-for transport risk?
+a preregistered target-label-free warning signal
+for the deployment delta and/or the transport penalty
+(R_cross - R_native)?
 ```
 
 **R4 is not designed to rescue, strengthen, or overturn the R3 primary result.**
 R4 addresses independently identified external-validity and generalization questions。
+
+## R3 continuity claim 必须绑定 deployment delta [PLANNING DECISION]
+
+```text
+R3 confirmed F-dependence of deployment delta
+in the MiniCPM primary condition
+under the frozen decision rule.
+```
+
+不得写成 `R3 confirmed all forms of transport penalty / transport risk are F-dependent`。
+R4 的 continuity 部分只能继承上面这一条精确表述。
 
 ## R4 rationale 在读取 R3 详细结果之前就已确定 [PLANNING DECISION — 防 HARKing]
 
@@ -660,6 +744,27 @@ models    : 2 new 7–8B（不得降回 1）
 population: >= 1 truly non-MMLU（不得删除）
 family    : retain R3 P/L continuity panel + isotonic candidate + beta candidate
 predictor : support-overlap diagnostic（high-priority，不得由 agent 自行删除；未冻结）
+```
+
+### population target：minimum vs recommended [PLANNING DECISION]
+
+```text
+hard minimum        : >= 1 truly non-MMLU population
+recommended target  : 2 non-MMLU populations
+                      if predictor validation is intended
+                      as a major paper contribution
+```
+
+理由：predictor 的有效独立单位不是「每个 F」，而更接近 `model × population × direction`。
+若只有一个新 population，独立 validation units 数量仍然有限，且不得靠把多个 F 当独立样本来虚增 n。
+
+若最终只能实现 1 个 non-MMLU：
+
+```text
+不要把研究判为失败——model / population generalization 仍然有价值；
+但 predictor contribution 应更保守，定位为
+secondary / exploratory predictive evidence，
+而不是 headline validated predictor。
 ```
 
 ---
@@ -825,11 +930,22 @@ solver / precision / device / library 一般属于 provenance，不是 scientifi
 不得写“support mismatch causes transport failure”
 ```
 
-label-free 约束（若目标是 pre-transport diagnostic）：
+target-label-free 约束（若目标是 pre-transport diagnostic）：
 
 ```text
-只允许 predictor feature：source TRAIN scores、target unlabeled score distribution、fitted calibrator geometry
-禁止使用 target Y / target Brier / target LogLoss 作为 predictor feature
+"target-label-free" means that predictor construction and application
+require no target outcome labels.
+
+允许：
+  source TRAIN scores
+  source TRAIN labels（仅通过 source calibrator fitting 等 source-side procedure 使用）
+  target unlabeled score distribution
+  fitted source calibrator geometry
+
+禁止：
+  target Y / target correctness labels
+  target Brier / target LogLoss
+  任何由 target outcome label 派生的 feature
 ```
 
 候选 support metrics（下一轮需 predeclare 1 primary predictor + small secondary diagnostic set，不要一次上十几个）：
@@ -863,11 +979,38 @@ Architecture 1（measurement-pair level）:
   support mismatch -> mean/max predeclared transport penalty across F
   优点：避免 F-level pseudo-replication
 
-Architecture 2（F-specific label-free diagnostic）:
+Architecture 2（F-specific target-label-free diagnostic）:
   support mismatch + fitted map sensitivity / extrapolation behavior
   -> F-specific transport penalty
   必须 grouped inference
 ```
+
+## Predictor development / validation isolation [PLANNING DECISION — 硬边界]
+
+R3 的 support geometry 已经被我们看过，因此：
+
+```text
+R3 model × MMLU × direction cells
+are development / hypothesis-generation evidence only
+for the future predictor.
+
+They must not be counted as independent confirmatory
+validation units for R4 predictor performance.
+```
+
+只有 formal predictor specification 冻结之后新产生的 R4 target outcomes，
+才可以进入 preregistered predictor validation。
+
+```text
+No predictor metric, feature set, threshold,
+coefficient, aggregation rule, or selection rule
+may be tuned using R4 target outcomes.
+
+All such choices must be frozen before target-outcome inspection.
+```
+
+grouped unit 继续保持：`model × population × direction`；
+禁止把同一个 grouped unit 中多个 F cell 当成独立样本。
 
 ---
 
@@ -975,6 +1118,30 @@ how loss is defined,
 and which calibration procedure is used.
 ```
 
+## Comparator-dependent story [PLANNING DECISION — 防 overclaim]
+
+```text
+Calibration transport is procedure-conditioned
+and comparator-dependent.
+
+A transferred map may improve over doing nothing
+without matching a target-fitted calibrator.
+```
+
+中文：
+
+```text
+校准迁移不能用一个不带 comparator 的「成功 / 失败」标签概括。
+
+一个 transferred calibrator
+可能比 raw target score 更好，
+但仍明显差于 target-native calibrator。
+```
+
+不要把论文写成 `calibration transfer is bad` / `calibration transport fails`。
+正确 thesis：compatibility is conditional，且 operational conclusion
+取决于声明了哪个 comparator 与哪个 fitting procedure。
+
 ## 结果可以影响 narrative emphasis，但不能制造 hypothesis
 
 ```text
@@ -1081,17 +1248,32 @@ R4 成功后只能说减弱 L1/L2/L3，不能说 universality established。
 
 # AB. Next gates [PLANNING DECISION]
 
+**Gate order 原则（硬性）：** 模型、dataset、fixed-event semantics、calibration family、
+inference、predictor、multiplicity、execution semantics 都是 scientific design 本身，
+必须在**最终 R4 freeze 之前**全部关闭。不得出现「模型还没选，R4 已经 freeze」。
+
 ```text
-1. human review of R3 interpretation（本文件 C–I 节）
-2. human review of R4 / paper strategy（本文件 P–Y 节 + R4_DESIGN_DRAFT.md）
-3. R4 design freeze
-4. model-selection gate
-5. dataset-selection gate
-6. new calibration-family semantic/oracle closure
-7. deterministic parallel execution infrastructure
-8. R4 raw measurement
-9. R4 confirmatory / preregistered analysis
-10. paper integration
+1.  human review of R3 interpretation（本文件 C–I 节）
+2.  human review of R4 / paper strategy（本文件 P–Y 节 + R4_DESIGN_DRAFT.md）
+3.  Model-selection gate
+4.  Dataset-selection gate
+5.  Fixed-event semantics closure for new population
+6.  Calibration-family semantic + oracle closure
+      - R3 P/L continuity
+      - isotonic
+      - beta
+7.  Inferential architecture closure
+8.  Target-label-free predictor specification closure
+9.  Multiplicity / hypothesis-family closure
+10. Primary / replication or multi-condition structure closure
+11. Deterministic parallel implementation
+12. Single-worker vs multi-worker equivalence verification
+13. Model-adapter / dataset-integrity / calibration-family engineering tests
+14. Final R4 protocol + implementation freeze
+15. Execution-entry gate
+16. Official R4 raw measurement
+17. Official frozen R4 analysis
+18. Paper integration
 ```
 
 预期路线：
@@ -1103,21 +1285,49 @@ human scientific interpretation
 ↓
 paper-positioning / Kim & Kang differentiation
 ↓
-R4 design freeze
+human review of corrected R3/R4 strategy
 ↓
-model-selection gate
+Model-selection gate
 ↓
-dataset-selection gate
+Dataset-selection gate
 ↓
-new calibration-family semantic/oracle closure
+Fixed-event semantics closure for new population
 ↓
-deterministic parallel execution infrastructure
+Calibration-family semantic + oracle closure（R3 P/L continuity / isotonic / beta）
 ↓
-R4 raw measurement
+Inferential architecture closure
 ↓
-R4 confirmatory / preregistered analysis
+Target-label-free predictor specification closure
 ↓
-paper integration
+Multiplicity / hypothesis-family closure
+↓
+Primary / replication or multi-condition structure closure
+↓
+Deterministic parallel implementation
+↓
+Single-worker vs multi-worker equivalence verification
+↓
+Model-adapter / dataset-integrity / calibration-family engineering tests
+↓
+Final R4 protocol + implementation freeze
+↓
+Execution-entry gate
+↓
+Official R4 raw measurement
+↓
+Official frozen R4 analysis
+↓
+Paper integration
+```
+
+**Guardrail（analysis implementation）：**
+
+```text
+R4 的 outcome-dependent analysis definitions
+和正式 analysis implementation
+必须在查看正式 R4 target outcomes 之前冻结。
+
+不得留下「看完 R4 raw/result 再实现 inferential rule」的空间。
 ```
 
 而不是：继续无限扩 R3 audit。

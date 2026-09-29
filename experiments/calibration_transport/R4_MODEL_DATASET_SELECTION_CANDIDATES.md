@@ -11,6 +11,12 @@ model inference, does not compute any calibration outcome, and does not create a
 population manifest. Model and dataset revisions below are OBSERVED CANDIDATE REVISIONS
 recorded during candidate research only — they are NOT frozen R4 revisions.
 
+> **Refresh note (append-only).** §23 *Current-Generation Refresh* appends a
+> current-generation model refresh (2026) plus a revised model shortlist that is still
+> NOT FINAL. Sections §1–§22 above are preserved unchanged as the previous-round record.
+> Where §8 / §18 and §23 disagree, §23 carries the newer evidence. The top-level STATUS
+> of this memo is unchanged.
+
 Authority: `docs/research/calibration-transport-r3-r4-paper-strategy.md` and
 `experiments/calibration_transport/R4_DESIGN_DRAFT.md` (both STATUS DRAFT / NOT FROZEN /
 NOT EXECUTION-AUTHORIZED).
@@ -404,6 +410,10 @@ scientific interpretability. No composite score.
 ## 8. Human-review model shortlist (NOT FINAL)
 
 Maximum three for the next engineering probe. Explicitly NOT a final selection.
+
+> **Superseded for model status by §23.15.** This §8 shortlist is preserved as the
+> previous-round record; §23.15 gives the revised current-generation shortlist (still
+> NOT FINAL). No candidate card above is deleted.
 
 - **STRONG CANDIDATE FOR ENGINEERING PROBE — M1 Mistral-7B-Instruct-v0.3.**
   Different family, Apache-2.0, non-gated, native Transformers, no thinking mode,
@@ -837,6 +847,13 @@ Reading the matrix:
 - Scientific complementarity is maximized by pairing a diverse model pair (e.g.
   Mistral+OLMo or Mistral+Granite) with D1+D2.
 
+Refresh cross-reference (§23, append-only): the current-generation candidates inherit the
+same dataset-side compatibility (semantic compatibility is model-independent). Their only
+matrix delta is model-side engineering complexity — `granite-4.0-h-tiny` (MoE + hybrid),
+`Ministral-3-8B-Instruct-2512` and `Qwen3.5-9B` (multimodal classes) — which adds adapter
+work but creates no semantic incompatibility with any dataset candidate. No dataset row or
+shortlist changes.
+
 ## 19. Explicit exclusions / deferrals
 
 Models:
@@ -932,3 +949,523 @@ Repository-internal authority:
   `src/probvenance/compiler.py`, `src/probvenance/doctrine.py`,
   `src/probvenance/assembler.py`, `src/probvenance/diagnostics.py`,
   `experiments/semantic_signal/qwen35_loader.py`.
+
+---
+
+## 23. Current-Generation Refresh
+
+STATUS: CANDIDATE RESEARCH / NOT FROZEN / NOT EXECUTION-AUTHORIZED.
+This section is append-only. It adds a current-generation (2026) model refresh and a
+revised model shortlist. It makes NO final model selection, freezes NO revision, runs NO
+model inference, and changes NO dataset shortlist. All revisions below are OBSERVED
+CANDIDATE REVISIONS, NOT FROZEN.
+
+### 23.1 Why a refresh was needed
+
+Human review of the previous round returned:
+
+```text
+DATASET CANDIDATE RESEARCH:            PASS
+MODEL INTERFACE AUDIT:                 PASS
+MODEL CURRENT-GENERATION COVERAGE:     INCOMPLETE
+```
+
+The previous pool (M1–M6) is engineering-mature but is anchored on checkpoints that may
+not represent the current 7–9B instruct generation. This refresh adds current-generation
+candidates, re-evaluates the shortlist, and keeps every previous candidate card as a
+possible engineering fallback. Nothing above is deleted or rewritten.
+
+### 23.2 Recency is a preference, not a hard cutoff
+
+- No "released within exactly N months" hard filter exists.
+- 2026 current-generation checkpoint → strong positive.
+- 2025 H2 / late-2025 current or still-representative checkpoint → fully acceptable.
+- 2025 H1 → acceptable if still scientifically representative or substantially cleaner /
+  more reproducible.
+- A checkpoint clearly superseded by a newer same-family official instruct checkpoint →
+  prefer as backup rather than default R4 primary candidate.
+- **Late-2025 models remain acceptable current/recent candidates if they are still
+  representative and technically suitable.**
+- Recency never overrides the measurement / reproducibility bottom line (§23.9, §23.12).
+
+### 23.3 Selection axes (descriptive, never summed)
+
+- Axis 1 — Current-generation representativeness.
+- Axis 2 — General contemporary capability (external evidence only; never our study outcomes).
+- Axis 3 — Measurement / reproducibility compatibility (non-negotiable bottom line).
+- Auxiliary: family diversity, scale continuity, license, compute.
+
+No numeric score and no weighted ranking is produced. Each candidate gets a *trade-off
+profile*, not a total.
+
+### 23.4 Generation-status vocabulary
+
+`CURRENT-GENERATION`, `RECENT / STILL-REPRESENTATIVE`, `MATURE / ENGINEERING-STABLE`,
+`SUPERSEDED-BUT-USEFUL-BACKUP`, `UNCLEAR`. Basis (per candidate): release / update date,
+existence of a newer same-family official instruct checkpoint, whether official docs still
+recommend the checkpoint, whether it belongs to an older lineage, and whether it is still
+maintained. Date alone is never sufficient.
+
+### 23.5 Current-generation candidate cards
+
+All facts below are `[VERIFIED PRIMARY SOURCE]` (HF repo metadata, config.json,
+tokenizer_config.json, generation_config.json, model card) unless tagged otherwise. The
+installed transformers is **5.17.0** (the R3 pin); architecture-support statements are
+`[STATIC REPO INSPECTION]` against that pin.
+
+#### 23.5.1 R1 — `allenai/Olmo-3-7B-Instruct`
+
+- canonical model_id: `allenai/Olmo-3-7B-Instruct` (canonical casing verified; the request
+  `allenai/OLMo-3-7B-Instruct` resolves to the same repo).
+- organization: Allen Institute for AI (AllenAI). family: OLMo 3 (7B/32B, Instruct + Think).
+- nominal scale: 7B. instruct/chat: yes (Instruct; Think is a separate checkpoint).
+- observed candidate revision: `6e5971d9eba42665f5bd5a0fcf047f299ce1dccc` (lastModified
+  2026-06-25) — OBSERVED CANDIDATE REVISION, NOT FROZEN.
+- license: `apache-2.0`.
+- architecture class: `Olmo3ForCausalLM` / model_type `olmo3`; hidden 4096, 32 layers,
+  vocab 100278, max_pos 65536, 32 KV heads, tie_word_embeddings False.
+- Transformers support: `Olmo3ForCausalLM` IS registered in the 5.17.0
+  `AutoModelForCausalLM` mapping → `AutoModelForCausalLM` loads it. Card requires
+  transformers >= 4.57.0.
+- trust_remote_code required: no. chat_template available: yes (`chat_template.jinja`;
+  `tokenizer.chat_template` present). generation_config: eos `[100265, 100257]`, pad None.
+- thinking / reasoning mode: none on the Instruct checkpoint. thinking disable: n/a;
+  template tolerates `enable_thinking=False` (ignored, render unchanged).
+- local logits accessible: yes (causal LM). safetensors: yes (3 shards). BF16: weights
+  ≈ 13.594 GiB (≈7.3B params bf16); config declares no `torch_dtype` → treat dtype
+  declaration as minor unknown.
+- footprint: 13.594 GiB. 24GB single-GPU: plausible. 32GB: plausible.
+- offline snapshot: feasible. tokenizer files: `vocab.json`, `merges.txt`, `tokenizer.json`,
+  `tokenizer_config.json`, `special_tokens_map.json` (GPT2Tokenizer / TokenizersBackend).
+- family overlap with MiniCPM: none. overlap with Qwen: none.
+- caveats: `base_model` is `allenai/Olmo-3-7B-Instruct-DPO`; supersedes OLMo-2 for
+  current-generation representativeness.
+- model-card warnings: none noted. remaining unknowns: exact declared dtype.
+- generation_status: **CURRENT-GENERATION**.
+- contemporary_capability_evidence: Allen AI's current OLMo 3 generation, released with
+  code/checkpoints/training details; positioned as the current open-science instruct
+  model of its family.
+- measurement-interface class: **STATICALLY COMPATIBLE**; tokenizer-only probe PASS (§23.11).
+
+#### 23.5.2 R2 — `ibm-granite/granite-4.0-h-tiny`
+
+- canonical model_id: `ibm-granite/granite-4.0-h-tiny`. organization: IBM Granite Team.
+  family: Granite 4.0 (H = hybrid).
+- nominal scale: card says "7B parameter long-context instruct model"; bf16 weight set is
+  12.925 GiB (≈6.9B total params). This is a **Mixture-of-Experts** model (64 experts) →
+  active params are far below the total.
+- instruct/chat: yes. observed candidate revision:
+  `791e0d3d28c86e106c9b6e0b4cecdee0375b6124` (2025-11-03) — OBSERVED, NOT FROZEN.
+- license: `apache-2.0`. architecture class: `GraniteMoeHybridForCausalLM` /
+  `granitemoehybrid`; hidden 1536, 40 layers, vocab 100352, `num_local_experts` 64,
+  4 KV heads, max_pos 131072, tie_word_embeddings True, `torch_dtype` bfloat16.
+- Transformers support: `GraniteMoeHybridForCausalLM` IS registered in the 5.17.0
+  `AutoModelForCausalLM` mapping → loadable through `AutoModelForCausalLM`.
+- trust_remote_code required: no. chat_template: yes (`chat_template.jinja`; card update
+  2025-10-07 added a default system prompt to the template). generation_config: eos
+  100257, pad 100256.
+- thinking / reasoning: none. disable: n/a; template tolerates `enable_thinking=False`.
+- local logits accessible: expected yes via causal-LM class, but the MoE/hybrid routing
+  path must be confirmed. safetensors: yes (3 shards). BF16: declared bfloat16.
+- footprint: 12.925 GiB. 24GB: plausible (verify MoE activation memory). 32GB: plausible.
+- offline snapshot: feasible. tokenizer files: `vocab.json`, `merges.txt`, `tokenizer.json`,
+  `tokenizer_config.json`, `special_tokens_map.json` (GPT2Tokenizer).
+- family overlap MiniCPM: none. overlap Qwen: none.
+- caveats: architecture class differs from the dense R3 models (MoE + hybrid
+  attention/Mamba mix); "7B" is a total-parameter figure, not active parameters; repo
+  carries a `model.sig` signature file.
+- model-card warnings: MoF class-3 badge; hybrid/MoE design. remaining unknowns: exact
+  hybrid layout (attention:Mamba ratio), active-parameter count, next-token logits
+  behavior and memory → **NEEDS MODEL-ENGINEERING PROBE**.
+- generation_status: **CURRENT-GENERATION** (Granite 4.0, released 2025-10-02).
+- contemporary_capability_evidence: IBM's current Granite 4.0 family; positioned for
+  enterprise instruction-following / tool-calling / RAG.
+- measurement-interface class: **LIKELY COMPATIBLE — NEEDS MODEL-ENGINEERING PROBE**
+  (architecture class differs); tokenizer-only probe PASS.
+
+#### 23.5.3 R3 — `mistralai/Ministral-3-8B-Instruct-2512`
+
+- canonical model_id: `mistralai/Ministral-3-8B-Instruct-2512`. (`mistralai/Ministral-3-8B-Instruct-2410`
+  does NOT exist — corrected.) organization: Mistral AI. family: Ministral 3.
+- nominal scale: 8B (card: 8.4B language model + 0.4B vision encoder).
+- instruct/chat: yes. observed candidate revision:
+  `5b26027e7b19eeb4b7352e1fed3926375dd2cb4d` (2026-07-15) — OBSERVED, NOT FROZEN.
+- license: `apache-2.0` (card). architecture class: **`Mistral3ForConditionalGeneration`**
+  (multimodal) / model_type `mistral3`; `text_config.model_type` `ministral3`, hidden 4096,
+  34 layers, vocab 131072, 8 KV heads, max_pos 262144.
+- Transformers support: `Mistral3ForConditionalGeneration` is **NOT** in the 5.17.0
+  `AutoModelForCausalLM` mapping; it IS in the `ImageTextToText` mapping → needs an adapter
+  or the image-text-to-text class with a text-only path.
+- trust_remote_code required: no (native). chat_template: yes (`chat_template.jinja`,
+  `SYSTEM_PROMPT.txt`). generation_config: eos 2, pad 11.
+- thinking / reasoning: none. disable: n/a; template tolerates `enable_thinking=False`.
+- local logits accessible: needs probe (multimodal wrapper); text path should expose
+  next-token logits but must be verified. safetensors: yes (3 shards + a
+  `consolidated.safetensors` duplicate; effective weight set to be confirmed).
+- BF16: card states the instruct release is **FP8**; config declares no `torch_dtype` →
+  bf16 availability must be confirmed.
+- footprint: 19.410 GiB total across the safetensors entries (includes the duplicate).
+  Card: fits in 12GB VRAM in FP8. 24GB (bf16): plausible/tight. 32GB: plausible.
+- offline snapshot: feasible. tokenizer files: `tekken.json`, `tokenizer.json`,
+  `tokenizer_config.json`, `processor_config.json` (class TokenizersBackend).
+- family overlap MiniCPM: none. overlap Qwen: none.
+- caveats: multimodal (vision encoder); FP8 instruct release; `library_name: vllm`;
+  tokenizer emits a warning — *"incorrect regex pattern … set `fix_mistral_regex=True` …
+  will lead to incorrect tokenization"* → **reproducibility caveat**: correct tokenization
+  requires `fix_mistral_regex=True` (or the `mistral-common` Tekken path). This flag is not
+  currently passed by the R3 backend.
+- model-card warnings: the regex/FP8/vision items above. remaining unknowns: whether
+  `AutoProcessor` is required; whether an image placeholder alters the text-only prompt;
+  bf16 weight availability; exact footprint → **NEEDS MODEL-ENGINEERING PROBE**.
+- generation_status: **CURRENT-GENERATION** (2512 = Dec-2025 release of the Ministral 3 line).
+- contemporary_capability_evidence: Mistral's current small edge-optimized family, text +
+  vision, native function calling, Apache-2.0.
+- measurement-interface class: **NEEDS MODEL ENGINEERING PROBE**; tokenizer-only probe
+  PASS **with the regex caveat**.
+
+#### 23.5.4 R4 — `Qwen/Qwen3.5-9B`
+
+- canonical model_id: `Qwen/Qwen3.5-9B`. organization: Alibaba Qwen. family: Qwen3.5.
+- nominal scale: 9B (card: Number of Parameters 9B) — **above the strict 7–8B band**; see
+  §23.17. instruct/chat: post-trained instruct (thinking + non-thinking in one model).
+- observed candidate revision: `c202236235762e1c871ad0ccb60c8ee5ba337b9a` (2026-03-02) —
+  OBSERVED, NOT FROZEN.
+- license: `apache-2.0`. architecture class: **`Qwen3_5ForConditionalGeneration`**
+  (multimodal) / model_type `qwen3_5`; `text_config.model_type` `qwen3_5_text`, hidden 4096,
+  32 layers, vocab 248320, 4 KV heads, max_pos 262144. Card layout:
+  8 × (3 × (Gated DeltaNet → FFN) → 1 × (Gated Attention → FFN)) — Gated DeltaNet + sparse
+  Mixture-of-Experts (hybrid).
+- Transformers support: `Qwen3_5ForConditionalGeneration` is **NOT** in the 5.17.0
+  `AutoModelForCausalLM` mapping; it IS in the `ImageTextToText` mapping. Precedent: the R3
+  replication model `Qwen/Qwen3.5-2B` is the *same* architecture class and is already
+  handled by `Qwen35TextBackend` (`experiments/semantic_signal/qwen35_loader.py`).
+- trust_remote_code required: no. chat_template: yes (contains `enable_thinking`,
+  `thinking`, `reasoning`, `image`, `vision`). generation_config: bos 151643, eos
+  `[151645, 151643]`, pad 151643.
+- thinking / reasoning: **yes** (thinking + non-thinking in one model). disable: official
+  `enable_thinking=False`; probe confirms the render CHANGES with that kwarg (i.e. honored).
+- local logits accessible: text path via an adapter; needs probe. safetensors: yes
+  (4 shards). BF16: yes.
+- footprint: 17.980 GiB. 24GB: plausible (tight). 32GB: plausible.
+- offline snapshot: feasible. tokenizer files: `vocab.json`, `merges.txt`, `tokenizer.json`,
+  `tokenizer_config.json`, `preprocessor_config.json`, `video_preprocessor_config.json`
+  (Qwen2Tokenizer).
+- family overlap MiniCPM: none. overlap Qwen: **strong** — same vendor/family line as the
+  existing R3 replication model `Qwen/Qwen3.5-2B`, in fact the same architecture class.
+- caveats: 9B exceeds the strict 7–8B planning band; multimodal; hybrid (Gated DeltaNet +
+  MoE); thinking-mode control. model-card warnings: thinking default; multimodal
+  preprocessor. remaining unknowns: adapter details, thinking default, MoE/hybrid memory →
+  **NEEDS MODEL-ENGINEERING PROBE** (lowest marginal risk of the non-dense set, because the
+  exact architecture is already handled by `Qwen35TextBackend`).
+- generation_status: **CURRENT-GENERATION**.
+- contemporary_capability_evidence: Qwen's current Qwen3.5 generation; unified
+  vision-language foundation; hybrid efficient architecture.
+- special positioning: **SCALE-CONTINUITY CANDIDATE** (existing `Qwen3.5-2B` → `Qwen3.5-9B`,
+  same broad lineage). NOT a family-diversity candidate.
+- measurement-interface class: **NEEDS MODEL ENGINEERING PROBE**; tokenizer-only probe PASS.
+
+#### 23.5.5 R5 — `tiiuae/Falcon-H1-7B-Instruct`
+
+- canonical model_id: `tiiuae/Falcon-H1-7B-Instruct`. organization: TII. family: Falcon-H1
+  (hybrid Mamba-Transformer).
+- nominal scale: 7B. instruct/chat: yes. observed candidate revision:
+  `41e72f27effbab80cd45b6e884688452253a3686` (2025-07-31) — OBSERVED, NOT FROZEN.
+- license: `other` / `falcon-llm-license` (custom TII Falcon License,
+  `https://falconllm.tii.ae/falcon-terms-and-conditions.html`) — NOT Apache; not an
+  automatic exclusion but adds redistribution/artifact friction.
+- architecture class: `FalconH1ForCausalLM` / `falcon_h1`; hidden 3072, 44 layers, vocab
+  130049, 2 KV heads, max_pos 262144, tie_word_embeddings False, `torch_dtype` bfloat16.
+- Transformers support: `FalconH1ForCausalLM` IS registered in the 5.17.0
+  `AutoModelForCausalLM` mapping → loadable.
+- trust_remote_code required: no. chat_template: yes (`chat_template.jinja`).
+  generation_config: eos `[11, 228]`, pad 0.
+- thinking / reasoning: none. disable: n/a; template tolerates `enable_thinking=False`.
+- local logits accessible: expected yes; hybrid path to be confirmed. safetensors: yes
+  (4 shards). BF16: declared.
+- footprint: 14.129 GiB. 24GB: plausible. 32GB: plausible.
+- offline snapshot: feasible. tokenizer files: `tokenizer.json`, `tokenizer_config.json`,
+  `special_tokens_map.json` (PreTrainedTokenizer).
+- family overlap MiniCPM: none. overlap Qwen: none.
+- caveats: hybrid Mamba-Transformer architecture (novelty is NOT a selection advantage);
+  custom TII license; mid-2025 release. model-card warnings: none noted. remaining
+  unknowns: hybrid next-token logits behavior / memory → **NEEDS FORWARD PROBE** if treated
+  as a finalist.
+- generation_status: **RECENT / STILL-REPRESENTATIVE** (TII's current 7B instruct line;
+  supersedes Falcon3).
+- contemporary_capability_evidence: TII's current Falcon instruct line (Falcon-H1 hybrid
+  family).
+- measurement-interface class: **STATICALLY COMPATIBLE** (`AutoModelForCausalLM`); tokenizer
+  probe PASS.
+
+### 23.6 Additional modern candidates (max 2) — decision: add none
+
+The five refresh candidates already span five distinct organizations / families
+(AllenAI, IBM, Mistral, Qwen, TII) across the current 7–9B instruct generation. No
+additional 7–9B current instruct checkpoint from a genuinely new family was identified that
+adds non-redundant value, so **zero** extras are added (§8 of the task allows 0–2).
+
+Considered and declined (with reason):
+
+- `google/gemma-3-12b-it` — 12B, above the planning band.
+- `google/gemma-3-4b-it` — 4B, below the planning band.
+- `CohereForAI/c4ai-command-r7b-12-2024` — 7B but **CC-BY-NC** (non-commercial) → license
+  friction for paper artifacts.
+- Meta Llama current generation — no current 7–9B *dense* instruct checkpoint exists
+  (Llama 3.1 8B is 2024; Llama 4 is far larger / MoE and gated).
+
+Adding more would produce a catalog and dilute the decision surface.
+
+### 23.7 Old-vs-new lineage comparisons
+
+Each pair: what improves / what new engineering risk appears / whether the older
+checkpoint still has a reason to remain a primary candidate.
+
+- **OLMo-2 → Olmo-3.** Improves: current-generation representativeness; keeps the
+  open-science lineage and Apache-2.0. New risk: minimal — `Olmo3ForCausalLM` is native and
+  the tokenizer probe passes. Old OLMo-2 remains a mature fallback; **Olmo-3 becomes the
+  preferred current-generation OLMo candidate.**
+- **Granite-3.1 → Granite-4.** Improves: current-generation representativeness; same org
+  and Apache-2.0. New risk: architecture class changes from dense `GraniteForCausalLM`
+  (Granite-3.1) to **MoE + hybrid** `GraniteMoeHybridForCausalLM` (Granite-4) → an
+  engineering probe is required. **Granite-3.1 remains a cleaner-interface engineering
+  fallback; Granite-4 is the preferred current-generation Granite candidate.**
+- **Mistral-7B-v0.3 → Ministral-3-8B.** Improves: current-generation representativeness.
+  New risk: `Mistral3ForConditionalGeneration` (multimodal, not `AutoModelForCausalLM`),
+  FP8 instruct release, and the `fix_mistral_regex` tokenization caveat. **Mistral-7B-v0.3
+  remains the cleanest Mistral interface (dense `MistralForCausalLM`, tokenizer probe
+  PASS); Ministral-3 is preferred only if the adapter is engineered and the regex caveat is
+  handled.**
+- **Falcon3 → Falcon-H1.** Improves: current-generation representativeness. New risk:
+  hybrid Mamba-Transformer. Both carry the custom TII license. **Falcon3 remains the clean
+  dense fallback; Falcon-H1 is the preferred current Falcon candidate.**
+- **Qwen3-8B → Qwen3.5-9B.** Qwen3-8B is dense `Qwen3ForCausalLM`
+  (`AutoModelForCausalLM`, tokenizer PASS, thinking control) — a clean Qwen interface.
+  Qwen3.5-9B is multimodal hybrid `Qwen3_5ForConditionalGeneration` with an existing
+  adapter precedent. **Qwen3-8B remains the clean-interface Qwen fallback; Qwen3.5-9B is
+  the scale-continuity candidate (2B → 9B).**
+
+No "newest always wins" rule is applied: where a newer checkpoint is substantially more
+complex, the older checkpoint may remain the engineering fallback (§23.20).
+
+### 23.8 Current-generation representativeness audit
+
+| model | release / update | newer same-family instruct? | docs still recommend? | lineage generation | maintained | generation_status |
+|---|---|---|---|---|---|---|
+| M1 Mistral-7B-Instruct-v0.3 | 2024 | yes (Ministral 3) | legacy | Mistral 7B v0.x | yes | SUPERSEDED-BUT-USEFUL-BACKUP |
+| M2 OLMo-2-1124-7B-Instruct | 2024-11 / 2025-01 | yes (Olmo 3) | legacy | OLMo 2 | yes | SUPERSEDED-BUT-USEFUL-BACKUP |
+| M3 Llama-3.1-8B-Instruct | 2024-07 | no 7–9B dense successor | legacy | Llama 3.x | yes | MATURE / ENGINEERING-STABLE |
+| M4 Qwen3-8B | 2025-07 | yes (Qwen3.5 line) | legacy | Qwen 3 | yes | RECENT / STILL-REPRESENTATIVE |
+| M5 granite-3.1-8b-instruct | 2025-04 | yes (Granite 4) | legacy | Granite 3.x | yes | SUPERSEDED-BUT-USEFUL-BACKUP |
+| M6 Falcon3-7B-Instruct | 2025-05 | yes (Falcon-H1) | legacy | Falcon 3 | yes | SUPERSEDED-BUT-USEFUL-BACKUP |
+| R1 Olmo-3-7B-Instruct | 2026-06 | — | current | OLMo 3 | yes | CURRENT-GENERATION |
+| R2 granite-4.0-h-tiny | 2025-11 | — | current | Granite 4.0 | yes | CURRENT-GENERATION |
+| R3 Ministral-3-8B-Instruct-2512 | 2026-07 | — | current | Ministral 3 | yes | CURRENT-GENERATION |
+| R4 Qwen3.5-9B | 2026-03 | — | current | Qwen 3.5 | yes | CURRENT-GENERATION |
+| R5 Falcon-H1-7B-Instruct | 2025-07 | — | current | Falcon-H1 | yes | RECENT / STILL-REPRESENTATIVE |
+
+"docs still recommend?" is a coarse reading of the official card/collection positioning and
+is intentionally qualitative.
+
+### 23.9 Contemporary capability evidence (external only; no study outcomes)
+
+- Olmo-3-7B-Instruct: current OLMo 3 generation; open-science release with code,
+  checkpoints and training details.
+- granite-4.0-h-tiny: current Granite 4.0 family; enterprise instruction / tool-calling /
+  RAG positioning; hybrid MoE architecture.
+- Ministral-3-8B-Instruct-2512: current Ministral 3 small family; edge-optimized; text +
+  vision; native function calling.
+- Qwen3.5-9B: current Qwen3.5 generation; unified vision-language foundation; hybrid
+  efficient architecture.
+- Falcon-H1-7B-Instruct: current TII Falcon instruct line; hybrid Mamba-Transformer family.
+
+No MMLU / HellaSwag / MedMCQA accuracy, leaderboard ranking, or study-population
+performance was used to rank or select any candidate. Benchmark mentions that appear on
+model cards were NOT used for selection.
+
+### 23.10 Measurement-interface compatibility (updated)
+
+Two distinct things are separated explicitly:
+
+- **Current implementation contract** — the R3 runner loads through
+  `AutoModelForCausalLM` with `dtype=bfloat16`, `batch=1`, `model(input_ids=...).logits`,
+  and `apply_chat_template(..., add_generation_prompt=True, **template_kwargs)` with
+  `{"enable_thinking": False}`.
+- **Scientific measurement requirement** — the ability to read next-token logits /
+  probabilities deterministically and reproducibly at a frozen prompt boundary.
+
+A modern candidate whose class is not `...ForCausalLM` is therefore **not** mechanically
+excluded; if its text-only path can deterministically build the same textual context and
+expose next-token logits, it is classified `NEEDS MODEL ENGINEERING PROBE`. Conversely, an
+adapter may not change the declared event, CAT/OVR semantics, the exact verbalizer rule, or
+the next-token probability interpretation — if it must, the candidate is
+`STOP / INELIGIBLE FOR CURRENT DESIGN`.
+
+| candidate | arch class | AutoModelForCausalLM (5.17.0) | class |
+|---|---|---|---|
+| R1 Olmo-3-7B-Instruct | `Olmo3ForCausalLM` | yes | STATICALLY COMPATIBLE |
+| R2 granite-4.0-h-tiny | `GraniteMoeHybridForCausalLM` | yes | LIKELY COMPATIBLE — NEEDS MODEL-ENGINEERING PROBE |
+| R3 Ministral-3-8B-Instruct-2512 | `Mistral3ForConditionalGeneration` | no (ImageTextToText) | NEEDS MODEL-ENGINEERING PROBE |
+| R4 Qwen3.5-9B | `Qwen3_5ForConditionalGeneration` | no (ImageTextToText) | NEEDS MODEL-ENGINEERING PROBE (adapter precedent exists) |
+| R5 Falcon-H1-7B-Instruct | `FalconH1ForCausalLM` | yes | STATICALLY COMPATIBLE |
+
+### 23.11 Tokenizer-only probe results (executed this round)
+
+Method: `AutoTokenizer.from_pretrained(repo, revision=<observed sha>,
+trust_remote_code=False)`; a representative CAT-style user turn; `apply_chat_template(...,
+add_generation_prompt=True)`; then for each label in `A,B,C,D,yes,no` test that
+`prefix + label` adds exactly one token and that all six ids are distinct. **No weights
+downloaded, no `model.forward`, no generation, no GPU.** Only token ids / pass-fail /
+template-render feasibility were recorded.
+
+| candidate | tokenizer class | six labels single-token | distinct ids | `enable_thinking=False` |
+|---|---|---|---|---|
+| R1 Olmo-3-7B-Instruct | TokenizersBackend | PASS (32,33,34,35,9891,2201) | yes | accepted (render unchanged) |
+| R2 granite-4.0-h-tiny | TokenizersBackend | PASS (32,33,34,35,9891,2201) | yes | accepted (render unchanged) |
+| R3 Ministral-3-8B-Instruct-2512 | TokenizersBackend | PASS (1065,1066,1067,1068,13059,2649) | yes | accepted (render unchanged) |
+| R4 Qwen3.5-9B | Qwen2Tokenizer | PASS (32,33,34,35,9405,2083) | yes | accepted (render CHANGES → honored) |
+| R5 Falcon-H1-7B-Instruct | TokenizersBackend | PASS (1068,1069,1070,1071,5763,3257) | yes | accepted (render unchanged) |
+
+Previous-round candidates re-probed with the same method: M1 Mistral-7B-v0.3 PASS
+(29509,29528,29511,29525,10548,2278), M2 OLMo-2 PASS (32,33,34,35,9891,2201), M4 Qwen3-8B
+PASS (32,33,34,35,9693,2152), M5 granite-3.1-8B PASS (51,52,53,54,7134,1347), M6 Falcon3-7B
+PASS (2056,2057,2058,2059,10153,3644). M3 Llama-3.1-8B-Instruct → **UNVERIFIED / NEEDS
+ACCESS** (gated repo, 401).
+
+Caveats (must be carried forward):
+
+1. The probe prefix is a *representative* CAT-style turn, not the exact frozen R3 doctrine
+   string. Final confirmation with the exact frozen doctrine prefix is a next-round item.
+2. Ministral-3's tokenizer emits a warning that the default regex yields **incorrect
+   tokenization** unless `fix_mistral_regex=True` is passed (or the `mistral-common` Tekken
+   path is used). The R3 backend does not currently pass this flag.
+3. This is a tokenizer-only probe: it establishes the exact-single-token verbalizer
+   feasibility, not any probability or calibration result.
+
+### 23.12 Tokenizer Probe Recipe (dedicated next round)
+
+- Use the existing helper `resolve_exact_single_token_continuation`
+  (`src/probvenance/backends/verbalizers.py:160-227`) with the **exact frozen R3 doctrine
+  prefix** rendered through each candidate's chat template
+  (`apply_chat_template(..., add_generation_prompt=True, enable_thinking=False)`).
+- Require: exact continuation, single token, distinct ids, no leading-space fallback, no
+  multi-token sum. Any failure → `INELIGIBLE`.
+- For multimodal candidates, additionally confirm the text-only render is unaffected by any
+  image/vision placeholder and that `AutoProcessor` (if required) does not alter the textual
+  prompt.
+
+### 23.13 Model-engineering probe requirements
+
+Two probe classes, kept distinct:
+
+- **TOKENIZER-ONLY PROBE** — GPU-free, small files only (§23.11/§23.12).
+- **MODEL-ENGINEERING / FORWARD PROBE** — requires separate human authorization; no weights
+  may be downloaded in the candidate-research round.
+
+| candidate | tokenizer-only | model-engineering / forward probe needed? | what to verify |
+|---|---|---|---|
+| R1 Olmo-3-7B-Instruct | done (PASS) | not required (native causal LM) | — |
+| R2 granite-4.0-h-tiny | done (PASS) | yes | next-token logits through MoE+hybrid path; activation memory; determinism |
+| R3 Ministral-3-8B-Instruct-2512 | done (PASS w/ regex caveat) | yes | text-only path of the multimodal class; processor necessity; bf16 weights; regex-correct tokenization |
+| R4 Qwen3.5-9B | done (PASS) | yes | adapter reuse of `Qwen35TextBackend`; thinking default; MoE/hybrid memory |
+| R5 Falcon-H1-7B-Instruct | done (PASS) | yes (if finalist) | hybrid Mamba-Transformer next-token logits + memory |
+
+### 23.14 Revised model categories
+
+- **A. CURRENT-GENERATION FAMILY-DIVERSITY PROBE** — Olmo-3-7B-Instruct;
+  granite-4.0-h-tiny; Ministral-3-8B-Instruct-2512; Falcon-H1-7B-Instruct.
+- **B. CURRENT-GENERATION SCALE-CONTINUITY PROBE** — Qwen3.5-9B.
+- **C. MATURE ENGINEERING BACKUP** — Mistral-7B-Instruct-v0.3; OLMo-2-1124-7B-Instruct;
+  granite-3.1-8b-instruct; Falcon3-7B-Instruct; Qwen3-8B; Llama-3.1-8B-Instruct (gated).
+- **D. DEFER / EXCLUDE** — `google/gemma-2-9b-it` (gated); gemma-3-12b/4b (band);
+  `CohereForAI/c4ai-command-r7b-12-2024` (NC license); Meta Llama current-gen (no 7–9B dense);
+  `allenai/quartz` (2-choice); `allenai/sciq` (NC license).
+
+### 23.15 Revised human-review model shortlist (NOT FINAL)
+
+Maximum four for the next probe, split by role:
+
+- **Family-diversity candidates:** Olmo-3-7B-Instruct (cleanest current-gen interface);
+  granite-4.0-h-tiny (current-gen; MoE-hybrid probe required);
+  Ministral-3-8B-Instruct-2512 (highest current-gen + diversity value, but adapter +
+  regex caveat).
+- **Scale-continuity candidate:** Qwen3.5-9B.
+
+Explicitly **NOT FINAL**. No final model pair is named. The human decision "2 × new 7–8B
+models" is unchanged by this memo.
+
+### 23.16 Direct answer to the shortlist question
+
+If today we weigh only (a) current-generation representativeness, (b) family diversity, and
+(c) a clean measurement interface, the 2–3 candidates most worth entering the
+tokenizer / engineering probe are:
+
+1. **Olmo-3-7B-Instruct** — current-gen, distinct family, Apache-2.0, native causal LM,
+   tokenizer PASS.
+2. **granite-4.0-h-tiny** — current-gen, distinct family, Apache-2.0, tokenizer PASS;
+   requires a MoE-hybrid engineering probe.
+3. **Ministral-3-8B-Instruct-2512** — current-gen, distinct family, Apache-2.0, tokenizer
+   PASS; requires an adapter and the regex caveat.
+
+Qwen3.5-9B occupies the scale-continuity slot rather than a diversity slot. This ordering is
+*not* a final selection and does not pre-empt the human review.
+
+### 23.17 Scale-continuity role (Qwen3.5-9B)
+
+`Qwen/Qwen3.5-9B` shares the broad Qwen lineage with the existing `Qwen/Qwen3.5-2B` (same
+architecture class), so its value is scale continuity (2B → 9B), **not** family diversity.
+It is ~9B and therefore exceeds the strict 7–8B planning band. This memo does **not** change
+the R4 minimum; whether "7–8B" should be restated as "roughly 7–9B", or whether ~9B is added
+only as an extra scale-control, is left to the next human gate.
+
+### 23.18 Mature backup role
+
+The previous-round candidates (M1–M6) are retained as mature engineering fallbacks. They
+keep value for execution risk control even where a newer same-family checkpoint becomes the
+preferred current-generation candidate. They are not deleted and not marked "failed".
+
+### 23.19 Dataset shortlist unchanged check
+
+The dataset shortlist is unchanged by this refresh:
+
+```text
+STRONG:  HellaSwag, MedMCQA
+VIABLE:  ARC
+BACKUP:  OpenBookQA, CommonsenseQA
+```
+
+Hard minimum (>= 1 truly non-MMLU) and recommended target (2 non-MMLU if the predictor is a
+major contribution) are unchanged. No dataset was added or removed. The only cross-reference
+update is in the §18 matrix: the non-dense refresh candidates
+(`granite-4.0-h-tiny` MoE-hybrid; `Ministral-3-8B` and `Qwen3.5-9B` multimodal) add adapter
+complexity but create **no semantic incompatibility** with any dataset candidate.
+
+### 23.20 Recommended next gate
+
+```text
+HUMAN CURRENT-GENERATION SHORTLIST REVIEW
+  → TOKENIZER-ONLY PROBE (exact frozen doctrine prefix)
+  → (if needed) SMALL MODEL-ENGINEERING FORWARD PROBE (separate human authorization)
+  → FINAL MODEL-SELECTION GATE
+```
+
+No model freeze is proposed here. Model forward probes for Ministral-3, Qwen3.5-9B,
+Falcon-H1, and granite-4.0-h-tiny require separate authorization.
+
+### 23.21 Refresh sources
+
+Model repositories / cards (primary):
+
+- `https://huggingface.co/allenai/Olmo-3-7B-Instruct` (Apache-2.0; card requires
+  transformers >= 4.57.0)
+- `https://huggingface.co/ibm-granite/granite-4.0-h-tiny` (Apache-2.0; Granite 4.0 release
+  2025-10-02; `https://github.com/ibm-granite/granite-4.0-language-models`)
+- `https://huggingface.co/mistralai/Ministral-3-8B-Instruct-2512` (Apache-2.0; paper
+  `https://arxiv.org/abs/2601.08584`; blog `https://mistral.ai/news/mistral-3`)
+- `https://huggingface.co/Qwen/Qwen3.5-9B` (Apache-2.0; blog `https://qwen.ai/blog?id=qwen3.5`)
+- `https://huggingface.co/tiiuae/Falcon-H1-7B-Instruct` (custom license
+  `https://falconllm.tii.ae/falcon-terms-and-conditions.html`)
+
+Repository-internal authority (unchanged): `docs/research/calibration-transport-r3-r4-paper-strategy.md`;
+`experiments/calibration_transport/R4_DESIGN_DRAFT.md`; frozen R3 measurement path
+(read-only) `src/probvenance/backends/verbalizers.py`,
+`src/probvenance/backends/transformers.py`, `experiments/semantic_signal/qwen35_loader.py`.

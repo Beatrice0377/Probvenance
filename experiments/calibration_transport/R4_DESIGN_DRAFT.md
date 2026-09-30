@@ -185,6 +185,57 @@ unless dataset semantic closure exposes a substantive blocker.
 TRAIN-TEST construction / population manifests 全部待 dataset semantic closure。
 本 planning decision 不生成任何 manifest，也不下载或运行任何 dataset。
 
+### 2026-09-30 Population construction decision — dataset source pins / strata / budgets [PLANNING DECISION]
+
+```text
+DATASET SOURCE PIN（source identity freeze；不是 FULL R4 FREEZE）：
+
+HellaSwag   Rowan/hellaswag            @ 218ec52e09a7e7462a5400043bb9a69a41d06b76
+MedMCQA     openlifescienceai/medmcqa  @ 91c6572c454088bf71b679ad90aa8dffcd0d5868
+
+HellaSwag
+  calibration TRAIN source : train
+  evaluation  TEST  source : validation
+  primary population       : FULL LABELED VALIDATION（不只保留 indomain）
+  primary stratum metadata : activity_label
+  source cluster identity  : source_id（MUST BE PRESERVED；后续 inferential / bootstrap
+                             设计 MUST BE GROUP-AWARE；exact bootstrap algorithm 暂不冻结）
+  split_type               : SECONDARY SUBGROUP DIAGNOSTIC only（indomain / zeroshot）
+                             NOT primary strata，NOT independent population
+                             不得根据 outcome 改变 subgroup role
+
+MedMCQA
+  calibration TRAIN source : train
+  evaluation  TEST  source : validation
+  primary strata           : subject_name
+  topic_name               : REJECTED as cross-split strata
+  choice_type              : KEEP ALL（single 与 multi 都保留）
+                             条件：exactly four structurally distinct candidate option
+                             strings + one unique ground-truth index
+  duplicate-option items   : STRUCTURALLY INELIGIBLE
+                             exclusion 只看 candidate strings，不读 cop / correctness /
+                             model output / score
+
+CALIBRATION TRAIN N = 456（两个新 population 相同）
+  理由：match frozen R3 calibration fitting budget，避免同时改变 population 与
+        calibration data volume；456 由所有 calibration families 共享
+        （P-low / P-historical / L-low / L-historical / isotonic / beta），
+        isotonic / beta 不得单独获得更多 TRAIN data
+
+EVALUATION TEST = all eligible labeled validation rows（不因算力截断）
+  HellaSwag : all eligible labeled validation rows
+  MedMCQA   : all eligible labeled validation rows，先做 duplicate-option structural exclusion
+  禁止 subsample to 1140 / 2000
+
+R3-style overlap guard 保留：TEST 先声明且 pristine；TRAIN candidate 若与 TEST item
+exact question + exact ordered candidate strings 重复则排除并顺延；若 same event 但
+ground truth 冲突则 STOP FOR HUMAN REVIEW，不得 silent dedup。
+
+anchor protocol：见 §5。
+```
+
+本 decision 先于任何 R4 model outcome。R4 仍为 DRAFT / NOT FROZEN / NOT EXECUTION-AUTHORIZED。
+
 ---
 
 ## 5. Fixed-event measurement semantics [PLANNING DECISION]
@@ -208,6 +259,40 @@ Y_i = 1[D_i = GT_i]
 且 CAT / OVR 都能测 `P(D_i correct)`。不能为了 dataset 强行改变 target semantics。
 
 [OPEN QUESTION] 新 population 上 D_i 的具体构造（candidate-anchor 语义如何移植）待 design review。
+
+### 2026-09-30 Fixed-event construction decision for the new populations [PLANNING DECISION]
+
+```text
+HellaSwag
+  question                : ctx
+  candidate names         : option-0 / option-1 / option-2 / option-3
+  candidate descriptions  : endings[0] / endings[1] / endings[2] / endings[3]
+  ground truth            : label
+
+MedMCQA
+  question                : question
+  candidate names         : option-0 / option-1 / option-2 / option-3
+  candidate descriptions  : opa / opb / opc / opd
+  ground truth            : cop
+
+source order 不得改变（no permutation）。
+
+PLANNED R4 FIXED-EVENT ANCHOR PROTOCOL
+  ANCHOR_PROTOCOL_ID      = r4-fixed-event-anchor-deterministic-source-index-hash
+  ANCHOR_PROTOCOL_VERSION = 1
+  anchor_index            = int(fingerprint({
+                              protocol_id, protocol_version,
+                              dataset_id, dataset_revision,
+                              source_split, source_row_index})[:16], 16) % 4
+
+anchor 输入禁止包含：
+  ground truth / label / cop / question text / candidate text /
+  model output / CAT score / OVR score
+```
+
+状态：PLANNED protocol，用于 population candidate construction；
+在 final R4 protocol freeze 前仍需 manifest fingerprint closure。
+不得写 R4 EXECUTION AUTHORIZED。
 
 ---
 
@@ -403,6 +488,34 @@ isotonic 需要足够样本支撑 stepwise fit
 
 [OPEN QUESTION] 新 population 的 TRAIN/TEST 划分比例与 strata 定义。
 
+### 2026-09-30 Calibration train/test budget decision for the new populations [PLANNING DECISION]
+
+```text
+CALIBRATION TRAIN N = 456   （HellaSwag 与 MedMCQA 相同）
+
+  rationale: match frozen R3 calibration fitting budget
+             避免同时改变 population 与 calibration data volume
+  456 由所有 calibration families 共享：
+     P-low / P-historical / L-low / L-historical / isotonic / beta
+  isotonic / beta 不得获得更多 TRAIN data
+
+EVALUATION TEST = all structurally eligible labeled validation rows
+  HellaSwag : all eligible labeled validation rows
+  MedMCQA   : all eligible labeled validation rows（先做 duplicate-option structural exclusion）
+  不做 subsample to 1140 / 2000；不做 compute-driven truncation
+  目的：在固定 calibration fitting budget 的前提下最大化 evaluation precision
+
+predictor validation unit 保持不变：model × population × direction
+  HellaSwag split_type subgroup 不是独立 predictor validation unit
+  MedMCQA subject_name 也不是独立 predictor unit
+
+HellaSwag TRAIN 额外约束：at most one selected row per source_id
+  （rank 遇到已选 source_id 时 skip 并取下一个 ranked row；quota 无法满足则
+   STOP / NEEDS_REVIEW，不得跨 strata 偷补）
+```
+
+本 decision 先于任何 R4 model outcome。
+
 ---
 
 ## 10. Multiplicity options [PROPOSED R4 DESIGN]
@@ -565,4 +678,57 @@ R4 的 outcome-dependent analysis definitions 与正式 analysis implementation
 
 ```text
 R4 STATUS = DRAFT / NOT FROZEN / NOT EXECUTION-AUTHORIZED
+```
+
+---
+
+## 19. 2026-09-30 Population construction planning decision（consolidated）[PLANNING DECISION]
+
+本节汇总 human 在 dataset semantic closure 之后、任何 R4 model outcome 之前做出的
+population construction planning decisions。逐条对应 §4 / §5 / §9 中的 dated block。
+
+```text
+D1  dataset source pins
+      HellaSwag  Rowan/hellaswag            @ 218ec52e09a7e7462a5400043bb9a69a41d06b76
+      MedMCQA    openlifescienceai/medmcqa  @ 91c6572c454088bf71b679ad90aa8dffcd0d5868
+    status: R4 DATASET SOURCE PIN（source identity freeze；不是 FULL R4 FREEZE）
+
+D2  calibration TRAIN budget N = 456（两个新 population），match frozen R3 fitting budget
+
+D3  evaluation TEST = all eligible labeled validation rows（不做算力截断）
+
+D4  HellaSwag primary stratum metadata = activity_label
+
+D5  HellaSwag source cluster identity = source_id（保留；后续 inference group-aware）
+
+D6  HellaSwag split_type = secondary subgroup diagnostic（indomain / zeroshot），
+    不是 primary strata，不是 independent population
+
+D7  MedMCQA primary strata = subject_name
+
+D8  MedMCQA topic_name rejected as cross-split strata
+
+D9  MedMCQA choice_type = KEEP ALL（single 与 multi 均保留）
+
+D10 MedMCQA duplicate-option rows structurally excluded（TRAIN pool 与 TEST population 都排除）
+
+D11 R3-style overlap guard 保留（TEST pristine；TRAIN 排除 exact TEST duplicate；
+    conflicting ground truth => STOP FOR HUMAN REVIEW）
+
+D12 anchor protocol v1
+      ANCHOR_PROTOCOL_ID      = r4-fixed-event-anchor-deterministic-source-index-hash
+      ANCHOR_PROTOCOL_VERSION = 1
+```
+
+状态语言（不得升级）：
+
+```text
+DATASET SOURCE / POPULATION CONSTRUCTION PLANNING DECISION
+R4 STATUS = DRAFT / NOT FROZEN / NOT EXECUTION-AUTHORIZED
+```
+
+```text
+decision made before any R4 model outcome
+本 decision 不产生任何 R4 outcome、不产生任何 scientific selection、
+不构成 R4 freeze、不构成 R4 execution authorization。
 ```

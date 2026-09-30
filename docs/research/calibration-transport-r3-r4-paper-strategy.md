@@ -1541,3 +1541,117 @@ Ministral:   DEFERRED
 本节不产生任何 R4 outcome、不产生任何 scientific selection。
 R4 仍为 DRAFT / NOT FROZEN / NOT EXECUTION-AUTHORIZED。
 ```
+
+---
+
+# AD. 2026-09-30 PRE-OUTCOME HUMAN POPULATION CONSTRUCTION DECISION [PLANNING DECISION]
+
+本节记录 dataset semantic closure 之后、任何 R4 model outcome 之前做出的
+population construction decisions。所有条目均为 outcome-independent。
+
+## AD.1 Dataset source pins [PLANNING DECISION]
+
+```text
+HellaSwag  Rowan/hellaswag            @ 218ec52e09a7e7462a5400043bb9a69a41d06b76
+MedMCQA    openlifescienceai/medmcqa  @ 91c6572c454088bf71b679ad90aa8dffcd0d5868
+
+status: R4 DATASET SOURCE PIN
+        （source identity freeze；不是 FULL R4 FREEZE）
+两个 revision 均已 EXACT REVISION VERIFIED（resolved == requested）。
+```
+
+## AD.2 Calibration TRAIN budget [PLANNING DECISION]
+
+```text
+CALIBRATION TRAIN N = 456，HellaSwag 与 MedMCQA 相同。
+理由：match frozen R3 calibration fitting budget，
+      避免同时改变 population 与 calibration data volume。
+456 由所有 calibration families 共享（P-low / P-historical / L-low / L-historical /
+isotonic / beta）；isotonic / beta 不得单独获得更多 TRAIN data。
+```
+
+## AD.3 Evaluation TEST budget [PLANNING DECISION]
+
+```text
+TEST = all eligible labeled validation rows（不因算力截断，不 subsample）。
+目的：在固定 calibration fitting budget 的前提下最大化 evaluation precision。
+```
+
+## AD.4 HellaSwag population decisions [PLANNING DECISION]
+
+```text
+calibration TRAIN source : train
+evaluation  TEST  source : validation
+primary population       : FULL LABELED VALIDATION（不只保留 indomain）
+primary stratum metadata : activity_label
+source cluster identity  : source_id（MUST BE PRESERVED）
+split_type               : SECONDARY SUBGROUP DIAGNOSTIC（indomain / zeroshot）
+                           NOT primary strata，NOT independent population
+```
+
+后续 inferential / bootstrap design 必须 group-aware；exact bootstrap algorithm 暂不冻结。
+
+## AD.5 MedMCQA population decisions [PLANNING DECISION]
+
+```text
+calibration TRAIN source : train
+evaluation  TEST  source : validation
+primary strata           : subject_name
+topic_name               : REJECTED as cross-split strata
+                           （train 2389 个稀疏主题；validation 仅 5 个值且多为 None；
+                             test 100% None）
+choice_type              : KEEP ALL（single 与 multi 均保留）
+duplicate-option items   : STRUCTURALLY INELIGIBLE（TRAIN pool 与 TEST population 都排除）
+```
+
+duplicate-option exclusion 是 structural rule，不读 cop / correctness / model output /
+score，只看 conservative-normalized candidate strings。
+
+## AD.6 Fixed-event candidate mapping [PLANNING DECISION]
+
+```text
+HellaSwag  question = ctx ; candidates option-0..3 ; descriptions endings[0..3] ; GT = label
+MedMCQA    question = question ; candidates option-0..3 ; descriptions opa/opb/opc/opd ; GT = cop
+source order 不得改变。
+```
+
+## AD.7 Anchor protocol [PLANNING DECISION]
+
+```text
+ANCHOR_PROTOCOL_ID      = r4-fixed-event-anchor-deterministic-source-index-hash
+ANCHOR_PROTOCOL_VERSION = 1
+anchor_index = int(fingerprint({protocol_id, protocol_version, dataset_id,
+                                dataset_revision, source_split, source_row_index})[:16], 16) % 4
+```
+
+anchor 输入不含 ground truth / label / cop / question text / candidate text /
+model output / CAT / OVR score。
+
+状态：PLANNED R4 FIXED-EVENT ANCHOR PROTOCOL；final freeze 前仍需 manifest fingerprint closure。
+
+## AD.8 Overlap guard [PLANNING DECISION]
+
+```text
+TEST selected / declared first and pristine。
+TRAIN candidate 若 exact question + exact ordered candidate strings 与 TEST 重复：
+  exclude 并取下一个 ranked eligible row。
+若 same event 但 ground truth 冲突：
+  STOP FOR HUMAN REVIEW，不得 silent dedup。
+```
+
+## AD.9 Predictor validation unit [PLANNING DECISION]
+
+```text
+unit 仍为 model × population × direction。
+HellaSwag split_type subgroup 与 MedMCQA subject_name
+都不是 independent predictor validation unit。
+```
+
+## AD.10 Guardrail [PLANNING DECISION]
+
+```text
+本节 decision 先于任何正式 R4 target outcomes。
+本节不产生任何 R4 outcome、不产生任何 scientific selection。
+本节不构成 R4 freeze、不构成 R4 execution authorization。
+R4 仍为 DRAFT / NOT FROZEN / NOT EXECUTION-AUTHORIZED。
+```

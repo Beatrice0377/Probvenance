@@ -1331,3 +1331,213 @@ R4 的 outcome-dependent analysis definitions
 ```
 
 而不是：继续无限扩 R3 audit。
+
+---
+
+# AC. 2026-09-30 PRE-OUTCOME HUMAN BREADTH DECISION [PLANNING DECISION]
+
+**时序声明（关键）：** 本节的全部决定，由 human 在**任何正式 R4 target outcome 出现之前**作出，
+并且是在 Qwen3.5-9B engineering probe（Phase 2D）**之前**记录。
+本节只把 design decision 固化进 planning authority，不产生任何 R4 measurement、不产生任何 scientific outcome。
+
+**状态不变：**
+
+```text
+R4:                          DRAFT
+R4:                          NOT FROZEN
+R4:                          NOT OFFICIALLY EXECUTION-AUTHORIZED
+FINAL R4 MODEL PAIR:         NOT SELECTED
+FINAL R4 DATASET:            NOT SELECTED
+```
+
+本节是 human planning decision 的 append-only 记录，**不是** R4 freeze，也不得被解读为 freeze。
+
+## AC.1 Model breadth decision [PLANNING DECISION]
+
+当前 intended current-generation R4 model panel 扩为四个：
+
+```text
+1. allenai/Olmo-3-7B-Instruct
+2. tiiuae/Falcon-H1-7B-Instruct
+3. ibm-granite/granite-4.0-h-tiny
+4. Qwen/Qwen3.5-9B
+```
+
+Qwen3.5-9B 的角色明确为：
+
+```text
+SAME-LINEAGE SCALE-CONTINUITY BRIDGE
+R3: Qwen/Qwen3.5-2B  ->  R4: Qwen/Qwen3.5-9B
+```
+
+它不是 family-diversity 主力，而是 2B→9B 的 scale-continuity condition。
+
+若 Phase 2D engineering PASS，当前计划是：
+
+```text
+四个 current-generation models 全部进入后续 R4 design
+（不再从四个里自动选两个）
+```
+
+但：
+
+```text
+这仍不是 R4 FINAL FREEZE。
+后续必须还有 formal design freeze gate。
+```
+
+## AC.2 Population decision [PLANNING DECISION]
+
+当前 intended population panel：
+
+```text
+1. MMLU      (R3 continuity population)
+2. HellaSwag (non-MMLU / commonsense event-completion population)
+3. MedMCQA   (non-MMLU / medical-domain population)
+```
+
+当前不计划增加 ARC / OpenBookQA / CommonsenseQA / SciQ，
+除非 dataset semantic closure 暴露 substantive blocker。
+
+本任务不下载、不运行任何正式 dataset；exact dataset revisions、fixed-event semantics、
+strata、TRAIN/TEST construction、population manifests 仍全部待 closure。
+
+## AC.3 Intended evidence grid [PLANNING DECISION]
+
+MMLU：
+
+```text
+frozen R3 evidence : MiniCPM5-2B, Qwen3.5-2B
+  不得重跑，不得重新定义。
+
+R4 新增            : Olmo-3, Falcon-H1, Granite-4, Qwen3.5-9B
+最终结构           : 2 frozen R3 models + 4 current-generation R4 models
+```
+
+但：
+
+```text
+R3 model × MMLU cells
+只能作为 predictor development / hypothesis-generation evidence，
+不能冒充新的 R4 independent predictor-validation units。
+```
+
+HellaSwag / MedMCQA（2 个新 non-MMLU population）：
+
+```text
+MiniCPM5-2B
+Qwen3.5-2B
+Olmo-3
+Falcon-H1
+Granite-4
+Qwen3.5-9B
+即 6 models × 2 new non-MMLU populations
+```
+
+该 evidence grid 仍需 dataset semantic closure / fixed-event D_i closure / strata closure /
+TRAIN-TEST split closure 后才能 freeze。
+
+## AC.4 Calibration-family decision [PLANNING DECISION]
+
+R4 planned F panel：
+
+```text
+continuity core（保留 R3）:
+  P-low / P-historical / L-low / L-historical
+  (logistic calibration × feature geometry × regularization)
+
+family extension（human-selected planned families）:
+  isotonic calibration  (non-parametric monotone family)
+  beta calibration      (distinct parametric calibration family)
+```
+
+治理原则：
+
+```text
+R3 logistic factorial      = continuity confirmatory core
+isotonic + beta            = predeclared family-extension hypotheses
+不构造假的统一 factorial
+```
+
+仍未 freeze：exact family definition / parameterization / objective / regularization /
+hyperparameter rule / endpoint behavior / out-of-support behavior / tie handling /
+fitting protocol / selection rule / failure rule。
+
+因此：
+
+```text
+isotonic / beta = HUMAN-SELECTED PLANNED FAMILIES
+但不是 FULLY SPECIFIED / FROZEN F YET
+```
+
+## AC.5 Metric decision [PLANNING DECISION]
+
+```text
+primary evaluation metric     : Brier risk
+secondary                     : exact LogLoss
+descriptive only              : reliability diagnostics / reliability diagram
+```
+
+当前明确不因 “breadth” 额外加入 ECE family / ACE family / multiple NLL variants，
+除非后续 human 明确重新打开 metric gate。不扩大 metric zoo。
+
+## AC.6 Predictor decision [PLANNING DECISION]
+
+R4 target-label-free warning signal：
+
+```text
+PRIMARY planned predictor:
+  fraction of target scores outside source TRAIN q2.5 / q97.5 interval
+  (q2.5-q97.5 support-exceedance fraction)
+
+SECONDARY planned diagnostic:
+  1D Wasserstein distance between source-TRAIN score distribution
+  and target score distribution
+```
+
+target-label-free 定义仍然严格：
+
+```text
+允许: source TRAIN scores / source-side fitting information /
+      source TRAIN labels（仅通过 source calibration procedure）/
+      target unlabeled score distribution / fitted source calibrator geometry
+
+禁止: target correctness labels / target Y / target Brier / target LogLoss /
+      任何由 target-outcome 派生的 feature
+```
+
+## AC.7 Predictor inference unit [PLANNING DECISION]
+
+```text
+默认 grouped unit: model × population × direction
+```
+
+禁止把同一个 group 内不同 F 当成独立样本虚增 n。
+若未来使用 F-specific predictor，必须使用 group-aware inference / grouped resampling。
+
+```text
+R3 model × MMLU × direction
+只允许 development / hypothesis-generation，
+不能算作新的 R4 confirmatory predictor validation。
+```
+
+## AC.8 Model search stopping rule [PLANNING DECISION]
+
+若 Qwen3.5-9B Phase 2D PASS：
+
+```text
+CURRENT MODEL EXPANSION: CLOSED
+model panel: Olmo / Falcon / Granite / Qwen3.5-9B
+Ministral:   DEFERRED
+```
+
+不再搜索第五个模型、不再下载 Ministral、不再下载任意新 candidate，
+除非后续出现 substantive scientific design blocker。
+
+## AC.9 Guardrail [PLANNING DECISION]
+
+```text
+本节 decision 先于正式 R4 target outcomes。
+本节不产生任何 R4 outcome、不产生任何 scientific selection。
+R4 仍为 DRAFT / NOT FROZEN / NOT EXECUTION-AUTHORIZED。
+```

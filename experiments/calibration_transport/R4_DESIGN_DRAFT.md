@@ -99,6 +99,34 @@ Non-MMLU  : 同一 4 models
 不因“更大模型”直接跳 70B（本研究主要不是 scale law）
 ```
 
+### Current human planning decision — 2026-09-30 [PLANNING DECISION]
+
+```text
+CURRENT HUMAN PLANNING DECISION:
+
+current-generation panel target:
+- allenai/Olmo-3-7B-Instruct
+- tiiuae/Falcon-H1-7B-Instruct
+- ibm-granite/granite-4.0-h-tiny
+- Qwen/Qwen3.5-9B
+
+Qwen3.5-9B role:
+same-lineage scale continuity with R3 Qwen/Qwen3.5-2B
+(a 2B -> 9B scale-continuity bridge, NOT a family-diversity candidate).
+
+If the Qwen3.5-9B Phase 2D engineering probe passes,
+all four current-generation candidates are intended
+to remain in the R4 model panel
+(no automatic down-selection to two).
+
+This decision was made BEFORE any formal R4 target outcome.
+It is a planning decision, NOT the final R4 freeze.
+```
+
+历史 rationale 保留：上文 "minimum 2 new 7–8B" 与 family-diversity 原则仍是历史设计记录；
+human 已在其之上把 current-generation panel 扩为四个候选，并让 Qwen3.5-9B 承担 2B→9B scale continuity。
+panel 内最终 scientific 角色仍需后续 formal design freeze gate。
+
 ---
 
 ## 4. Candidate population matrix [PROPOSED R4 DESIGN]
@@ -138,6 +166,24 @@ not selected based on observed transport outcome
 ```
 
 [OPEN QUESTION] 具体非 MMLU dataset 待 dataset-selection gate。
+
+### Current human planning decision — 2026-09-30 [PLANNING DECISION]
+
+```text
+CURRENT HUMAN PLANNING DECISION:
+
+intended population panel:
+1. MMLU      (R3 continuity population)
+2. HellaSwag (non-MMLU / commonsense event-completion population)
+3. MedMCQA   (non-MMLU / medical-domain population)
+
+No plan to add ARC / OpenBookQA / CommonsenseQA / SciQ
+unless dataset semantic closure exposes a substantive blocker.
+```
+
+仍未 freeze：exact dataset revisions / fixed-event semantics / strata /
+TRAIN-TEST construction / population manifests 全部待 dataset semantic closure。
+本 planning decision 不生成任何 manifest，也不下载或运行任何 dataset。
 
 ---
 
@@ -201,6 +247,27 @@ solver / precision / device / library 属于 provenance，不是 scientific F，
 不得把“isotonic 没有 λ”当成 F 不完整，也不得强行构造假的 2×2 factorial。
 
 [OPEN QUESTION] isotonic / beta 的 endpoint 与 out-of-support 行为定义，及 failure rule。
+
+### Current human planning decision — 2026-09-30 [PLANNING DECISION]
+
+```text
+PLANNED FAMILY PANEL:
+
+continuity core (retained from R3):
+  P-low / P-historical / L-low / L-historical
+  (logistic calibration x feature geometry x regularization)
+
+family extension (human-selected planned families):
+  isotonic calibration (non-parametric monotone family)
+  beta calibration     (distinct parametric calibration family)
+```
+
+R3 logistic factorial 仍为 continuity confirmatory core；
+isotonic / beta 为 predeclared family-extension hypotheses，不构造假的统一 factorial。
+
+full semantic specification pending（见上文 [OPEN QUESTION]）：
+isotonic / beta 目前是 HUMAN-SELECTED PLANNED FAMILIES，
+但尚不是 FULLY SPECIFIED / FROZEN F。
 
 ---
 
@@ -274,6 +341,24 @@ Architecture 2: support mismatch + fitted map sensitivity/extrapolation -> F-spe
 ```
 
 [OPEN QUESTION] primary predictor 的选择与 group-aware inference 方案。
+
+### Current human planning decision — 2026-09-30 [PLANNING DECISION]
+
+```text
+PRIMARY planned predictor:
+  fraction of target scores outside
+  source TRAIN q2.5 / q97.5 interval
+  (q2.5-q97.5 support-exceedance fraction)
+
+SECONDARY planned diagnostic:
+  1D Wasserstein distance between
+  the source-TRAIN score distribution
+  and the target score distribution
+```
+
+约束不变：target-label-free；grouped unit = model × population × direction；
+F-specific predictor 必须 group-aware；不得使用任何 R4 target outcome 调参。
+R3 model × MMLU × direction cells 仍仅为 development / hypothesis-generation evidence。
 
 ### Predictor development / validation isolation [PLANNING DECISION — 硬边界]
 

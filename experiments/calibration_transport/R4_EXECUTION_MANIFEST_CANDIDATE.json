@@ -68,73 +68,105 @@
   ],
   "fingerprint_version": 1,
   "formal_execution_authorized": false,
-  "manifest_fingerprint": "65db650429dfe0dd6ec0439a3140a9db99cf93aab7eb744d37f7a2b53e8373c1",
+  "manifest_fingerprint": "2195d283b7666a37593a312f4f6abbf8b7d2bd3a4b88737c151255981057f724",
   "measurement_workload": {
-    "cells": {
-      "current_generation_primary": {
-        "model_population_cells": 12,
+    "call_count_contract": "experiments/calibration_transport/R4_MEASUREMENT_EXECUTION_CONTRACT.json",
+    "call_count_contract_fingerprint": "7b126d300e774cb44d2c47fcb12513865d03c2b08ffd03a5ce409b2ea976e1e5",
+    "call_count_contract_status": "FROZEN",
+    "calls_per_item": {
+      "cat_forwards_per_item": 1,
+      "ovr_forwards_per_item": 1,
+      "ovr_scope": "designated-candidate-only",
+      "total_forwards_per_item": 2
+    },
+    "r3_call_contract_inheritance": "REJECTED",
+    "derivation": "mechanically derived from the frozen required execution grid and the frozen 2-forward contract",
+    "grid": {
+      "hellaswag_current_generation": {
         "models": 4,
-        "populations": 3,
-        "test": {
-          "calls_inherited_r3": 306880,
-          "item_measurements": 61376
-        },
-        "train_456": {
-          "calls_inherited_r3": 27360,
-          "item_measurements": 5472
-        }
+        "test_rows_per_model": 10042,
+        "train_rows_per_model": 912,
+        "train_source": "frozen N912 union",
+        "unique_model_item_rows": 43816,
+        "unique_rows_per_model": 10954
       },
-      "legacy_new_population_secondary": {
-        "model_population_cells": 4,
+      "hellaswag_legacy": {
         "models": 2,
-        "populations": 2,
-        "test": {
-          "calls_inherited_r3": 142040,
-          "item_measurements": 28408
-        },
-        "train_456": {
-          "calls_inherited_r3": 9120,
-          "item_measurements": 1824
-        }
+        "test_rows_per_model": 10042,
+        "train_rows_per_model": 456,
+        "unique_model_item_rows": 20996,
+        "unique_rows_per_model": 10498
       },
-      "n912_secondary_robustness_extension": {
-        "conditional": true,
-        "current_generation": {
-          "calls_inherited_r3": 27360,
-          "item_measurements": 5472
-        },
-        "legacy_new_population": {
-          "calls_inherited_r3": 9120,
-          "item_measurements": 1824
-        }
+      "medmcqa_current_generation": {
+        "models": 4,
+        "test_rows_per_model": 4162,
+        "train_rows_per_model": 912,
+        "train_source": "frozen N912 union",
+        "unique_model_item_rows": 20296,
+        "unique_rows_per_model": 5074
+      },
+      "medmcqa_legacy": {
+        "models": 2,
+        "test_rows_per_model": 4162,
+        "train_rows_per_model": 456,
+        "unique_model_item_rows": 9236,
+        "unique_rows_per_model": 4618
+      },
+      "mmlu_current_generation": {
+        "models": 4,
+        "test_rows_per_model": 1140,
+        "train_rows_per_model": 456,
+        "unique_model_item_rows": 6384,
+        "unique_rows_per_model": 1596
       },
       "r3_legacy_mmlu": {
         "do_not_rerun": true,
-        "new_calls": 0,
         "new_item_measurements": 0,
         "status": "FROZEN_EXISTING"
       }
     },
-    "derivation": "mechanically derived from frozen measurement cell counts and the frozen R3 call count",
-    "inherited_calls_per_item": 5,
-    "inherited_calls_per_item_authority": "experiments/calibration_transport/run_r3_measurements.py:5, :326, :361-362 (one CAT + four OVR per item, deterministic and outcome-independent)",
+    "legacy_n912_semantics": {
+      "legacy_hellaswag_required_train": 456,
+      "legacy_medmcqa_required_train": 456,
+      "legacy_n912": "NOT REQUIRED / NOT MEASURED IN THE FORMAL R4 PLAN"
+    },
+    "n912_extension": {
+      "additional_forwards": 7296,
+      "current_generation_models": 4,
+      "extension_rows_per_model_per_population": 456,
+      "identity": "97080 + 3648 = 100728 ; 194160 + 7296 = 201456",
+      "populations": 2,
+      "unique_model_item_rows": 3648
+    },
+    "n912_semantics": {
+      "current_generation_hellaswag_raw_train_union": 912,
+      "current_generation_medmcqa_raw_train_union": 912,
+      "n912_robustness_consumes": "full N912",
+      "primary_fit_consumes": "selected N456 subset",
+      "raw_scores": "measured once, reused"
+    },
+    "primary_only_audit": {
+      "total_forwards": 194160,
+      "unique_model_item_rows": 97080
+    },
     "protocol": "r4-measurement-workload-audit",
-    "protocol_version": 1,
-    "r4_call_count_freeze_status": {
-      "missing_authority": "a frozen R4 measurement call-count contract",
-      "reason": "The frozen R3 measurement semantics fix 1 CAT + 4 OVR per item. R4 has not frozen whether the OVR measurement is narrowed to the single designated candidate D_i (which would give 1 CAT + 1 OVR per item).",
-      "reporting_rule": "cell and item-measurement counts are exact; call counts are reported under the inherited R3 semantics and must not be read as a frozen R4 execution contract",
-      "status": "NOT_YET_MECHANICALLY_DERIVABLE"
+    "protocol_version": 2,
+    "rejected_previous_numbers": {
+      "previous_inherited_r3_calls": 521880,
+      "previous_item_measurements": 104376,
+      "reasons": [
+        "the inherited 5-call-per-item R3 contract is not the R4 contract",
+        "the nested N912 must reuse N456 raw measurement rows",
+        "required N912 robustness applies to the current-generation panel, not legacy secondary cells"
+      ],
+      "scientific_estimand_changes": "NONE",
+      "status": "NOT AUTHORITATIVE"
     },
     "totals": {
-      "with_n912": {
-        "calls_inherited_r3": 521880,
-        "item_measurements": 104376
-      },
-      "without_n912": {
-        "calls_inherited_r3": 485400,
-        "item_measurements": 97080
-      }
+      "required_cat_forwards": 100728,
+      "required_ovr_forwards": 100728,
+      "required_total_forwards": 201456,
+      "required_unique_model_item_rows": 100728
     }
   },
   "model_roles": {

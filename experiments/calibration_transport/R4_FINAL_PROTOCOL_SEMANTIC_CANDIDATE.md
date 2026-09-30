@@ -318,35 +318,57 @@ R3 legacy MMLU                  : FROZEN_EXISTING / DO_NOT_RERUN
 
 ## 21. Measurement workload audit
 
-Mechanically derived from the frozen measurement cell counts and the frozen R3
-call count (`experiments/calibration_transport/run_r3_measurements.py:5, :326,
-:361-362`: one CAT + four OVR per item, deterministic and outcome-independent).
+Derived from the frozen measurement cell counts and the frozen R4 measurement
+call-count contract
+(`experiments/calibration_transport/R4_MEASUREMENT_EXECUTION_CONTRACT.json`,
+fingerprint `7b126d300e774cb44d2c47fcb12513865d03c2b08ffd03a5ce409b2ea976e1e5`):
+each unique model × item row requires **exactly two** forward evaluations.
 
 ```text
-inherited calls per item (R3 semantics) = 5  (1 CAT + 4 OVR)
+calls per item (R4 frozen contract) = 2  (1 CAT + 1 designated-candidate-only OVR)
+inherited calls per item (R3 semantics) = 5  (1 CAT + 4 OVR)  ->  REJECTED
 ```
 
-| Cell | TRAIN items | TEST items | item-measurements | calls (inherited R3) |
-| --- | --- | --- | --- | --- |
-| current-generation primary | 4 × 3 × 456 = 5472 | 4 × 15344 = 61376 | 66848 | 334240 |
-| legacy new-population secondary | 2 × 2 × 456 = 1824 | 2 × 14204 = 28408 | 30232 | 151160 |
-| **total without N912** | | | **97080** | **485400** |
-| N912 extension (conditional) | 4 × 3 × 456 + 2 × 2 × 456 = 7296 | — | 7296 | 36480 |
-| **total with N912** | | | **104376** | **521880** |
-| R3 legacy MMLU | — | — | 0 | 0 |
+The nested N912 robustness union is measured **once** and reused: the primary
+N456 fit consumes the frozen subset of those same raw rows, so no row is
+forwarded twice.
 
-### 21.1 R4 call-count freeze status
+| Cell | models | TRAIN rows/model | TEST rows/model | unique rows/model | unique model × item rows |
+| --- | --- | --- | --- | --- | --- |
+| MMLU current generation | 4 | 456 | 1140 | 1596 | 6384 |
+| HellaSwag current generation | 4 | 912 (N912 union) | 10042 | 10954 | 43816 |
+| HellaSwag legacy secondary | 2 | 456 | 10042 | 10498 | 20996 |
+| MedMCQA current generation | 4 | 912 (N912 union) | 4162 | 5074 | 20296 |
+| MedMCQA legacy secondary | 2 | 456 | 4162 | 4618 | 9236 |
+| R3 legacy MMLU | — | — | — | — | FROZEN_EXISTING / DO_NOT_RERUN |
+| **total** | | | | | **100728** |
+
+### 21.1 Frozen R4 call-count contract
 
 ```text
-R4 CALL COUNT FREEZE STATUS = NOT_YET_MECHANICALLY_DERIVABLE
+R4 CALL COUNT CONTRACT = FROZEN
 ```
 
-The frozen R3 measurement semantics fix 1 CAT + 4 OVR per item. R4 has **not**
-frozen whether the OVR measurement is narrowed to the single designated
-candidate `D_i` (which would give 1 CAT + 1 OVR per item). Missing authority:
-*a frozen R4 measurement call-count contract*. Cell and item-measurement counts
-are exact; the call counts above are reported under the inherited R3 semantics
-and must not be read as a frozen R4 execution contract.
+| Quantity | Value |
+| --- | --- |
+| unique model × item rows | 100728 |
+| CAT forwards | 100728 |
+| OVR forwards | 100728 |
+| **total forward evaluations** | **201456** |
+
+Audit identities (primary-only, for cross-checking):
+
+```text
+primary-only unique rows  = 97080
+primary-only forwards     = 194160
+N912 extension rows       = 4 models x 2 populations x 456 = 3648
+N912 extension forwards   = 7296
+97080 + 3648 = 100728 ; 194160 + 7296 = 201456
+```
+
+The previously reported inherited-R3 numbers (104376 item-measurements /
+521880 calls) are **NOT AUTHORITATIVE** and are recorded only as rejected
+inputs inside the frozen measurement contract.
 
 ---
 

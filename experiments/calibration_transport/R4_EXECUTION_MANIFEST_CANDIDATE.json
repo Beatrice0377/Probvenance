@@ -1,0 +1,327 @@
+{
+  "analysis_roles": {
+    "descriptive": "reliability and subgroup diagnostics",
+    "family_sizes": {
+      "direction_difference": 6,
+      "extension": 8,
+      "native_reference": 12,
+      "primary": 12
+    },
+    "primary_metrics": "Brier",
+    "secondary_metrics": "exact LogLoss",
+    "test_bootstrap_replicates": 20000,
+    "train_refit_replicates": 2000
+  },
+  "artifact_type": "r4-execution-manifest-candidate",
+  "artifact_version": 1,
+  "cell_registry": {
+    "current_generation_primary": {
+      "directional_units": 24,
+      "model_population_cells": 12,
+      "models": 4,
+      "populations": 3
+    },
+    "legacy_new_population_secondary": {
+      "directional_units": 8,
+      "model_population_cells": 4,
+      "models": 2,
+      "populations": 2
+    },
+    "r3_legacy_mmlu": {
+      "do_not_rerun": true,
+      "status": "FROZEN_EXISTING"
+    }
+  },
+  "dataset_sources": {
+    "r4-hellaswag-activity-primary": {
+      "dataset_id": "Rowan/hellaswag",
+      "dataset_revision": "218ec52e09a7e7462a5400043bb9a69a41d06b76",
+      "license": "MIT",
+      "test_source_split": "validation",
+      "train_source_split": "train"
+    },
+    "r4-medmcqa-subject-primary": {
+      "dataset_id": "openlifescienceai/medmcqa",
+      "dataset_revision": "91c6572c454088bf71b679ad90aa8dffcd0d5868",
+      "license": "apache-2.0",
+      "test_source_split": "validation",
+      "train_source_split": "train"
+    },
+    "r4-mmlu-57-subject": {
+      "dataset_id": "cais/mmlu",
+      "dataset_revision": "c30699e8356da336a370243923dbaf21066bb9fe",
+      "test_source_split": "test",
+      "train_source_split": "validation"
+    }
+  },
+  "directions": [
+    {
+      "direction_id": "CAT->OVR",
+      "source_measurement": "CAT",
+      "target_measurement": "OVR"
+    },
+    {
+      "direction_id": "OVR->CAT",
+      "source_measurement": "OVR",
+      "target_measurement": "CAT"
+    }
+  ],
+  "fingerprint_version": 1,
+  "formal_execution_authorized": false,
+  "manifest_fingerprint": "65db650429dfe0dd6ec0439a3140a9db99cf93aab7eb744d37f7a2b53e8373c1",
+  "measurement_workload": {
+    "cells": {
+      "current_generation_primary": {
+        "model_population_cells": 12,
+        "models": 4,
+        "populations": 3,
+        "test": {
+          "calls_inherited_r3": 306880,
+          "item_measurements": 61376
+        },
+        "train_456": {
+          "calls_inherited_r3": 27360,
+          "item_measurements": 5472
+        }
+      },
+      "legacy_new_population_secondary": {
+        "model_population_cells": 4,
+        "models": 2,
+        "populations": 2,
+        "test": {
+          "calls_inherited_r3": 142040,
+          "item_measurements": 28408
+        },
+        "train_456": {
+          "calls_inherited_r3": 9120,
+          "item_measurements": 1824
+        }
+      },
+      "n912_secondary_robustness_extension": {
+        "conditional": true,
+        "current_generation": {
+          "calls_inherited_r3": 27360,
+          "item_measurements": 5472
+        },
+        "legacy_new_population": {
+          "calls_inherited_r3": 9120,
+          "item_measurements": 1824
+        }
+      },
+      "r3_legacy_mmlu": {
+        "do_not_rerun": true,
+        "new_calls": 0,
+        "new_item_measurements": 0,
+        "status": "FROZEN_EXISTING"
+      }
+    },
+    "derivation": "mechanically derived from frozen measurement cell counts and the frozen R3 call count",
+    "inherited_calls_per_item": 5,
+    "inherited_calls_per_item_authority": "experiments/calibration_transport/run_r3_measurements.py:5, :326, :361-362 (one CAT + four OVR per item, deterministic and outcome-independent)",
+    "protocol": "r4-measurement-workload-audit",
+    "protocol_version": 1,
+    "r4_call_count_freeze_status": {
+      "missing_authority": "a frozen R4 measurement call-count contract",
+      "reason": "The frozen R3 measurement semantics fix 1 CAT + 4 OVR per item. R4 has not frozen whether the OVR measurement is narrowed to the single designated candidate D_i (which would give 1 CAT + 1 OVR per item).",
+      "reporting_rule": "cell and item-measurement counts are exact; call counts are reported under the inherited R3 semantics and must not be read as a frozen R4 execution contract",
+      "status": "NOT_YET_MECHANICALLY_DERIVABLE"
+    },
+    "totals": {
+      "with_n912": {
+        "calls_inherited_r3": 521880,
+        "item_measurements": 104376
+      },
+      "without_n912": {
+        "calls_inherited_r3": 485400,
+        "item_measurements": 97080
+      }
+    }
+  },
+  "model_roles": {
+    "current_generation_primary": [
+      {
+        "model_id": "allenai/Olmo-3-7B-Instruct",
+        "model_revision": "6e5971d9eba42665f5bd5a0fcf047f299ce1dccc",
+        "role": "current-generation primary"
+      },
+      {
+        "model_id": "tiiuae/Falcon-H1-7B-Instruct",
+        "model_revision": "41e72f27effbab80cd45b6e884688452253a3686",
+        "role": "current-generation primary"
+      },
+      {
+        "model_id": "ibm-granite/granite-4.0-h-tiny",
+        "model_revision": "791e0d3d28c86e106c9b6e0b4cecdee0375b6124",
+        "role": "current-generation primary"
+      },
+      {
+        "model_id": "Qwen/Qwen3.5-9B",
+        "model_revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+        "role": "current-generation primary"
+      }
+    ],
+    "legacy_lineage_continuity": [
+      {
+        "model_id": "openbmb/MiniCPM5-2B",
+        "model_revision": "12a3808a956f869c767195e9266b59c4d21d92e2",
+        "role": "legacy lineage continuity"
+      },
+      {
+        "model_id": "Qwen/Qwen3.5-2B",
+        "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+        "role": "legacy lineage continuity"
+      }
+    ],
+    "r3_legacy_mmlu": {
+      "do_not_rerun": true,
+      "models": [
+        "openbmb/MiniCPM5-2B",
+        "Qwen/Qwen3.5-2B"
+      ],
+      "status": "FROZEN_EXISTING"
+    }
+  },
+  "non_claims": [
+    "This manifest is a candidate, not an execution authorization.",
+    "This manifest contains no outcomes.",
+    "The R4 primary inference is conditional on its fixed declared panel.",
+    "N912 cannot rescue N456.",
+    "R3 MMLU legacy results are historical continuity evidence."
+  ],
+  "population_manifest_identities": {
+    "r4-hellaswag-activity-primary": {
+      "n912_manifest_file_sha256": "9920c74071953df24fef760a2878942a17344974bdd341a77e2007f96feb8c4b",
+      "n912_manifest_fingerprint": "6817496f227d9cd57759bf55489cbf8a1dc4dfd27db0ae551e9223d21d02a096",
+      "primary_manifest_file_sha256": "0724128b9168b15a8796f260441c89025c3a224faf079cf7177b1c2faaec53cc",
+      "primary_manifest_fingerprint": "5c45043ba4f0ec436c16dcf494ff26be435c7857244bcbefa321d1678129c400",
+      "test_count": 10042,
+      "train_count": 456
+    },
+    "r4-medmcqa-subject-primary": {
+      "n912_manifest_file_sha256": "f56b09836da06d88f0be0915a9ebbd2bb01de54b2e48cafbeeb5554deab415fc",
+      "n912_manifest_fingerprint": "e48c37293f196e16d8fba42e7fc255e4ac2e77f81c270ed6f71320981968af12",
+      "primary_manifest_file_sha256": "a3db913227c8b6b32e45d6d6555423fdf6fa34d2b1700bd38fb06515226418f7",
+      "primary_manifest_fingerprint": "4a4718438d46ab1ba27c59ca46806756ffb62efa05e6103981dffec4dc48c218",
+      "test_count": 4162,
+      "train_count": 456
+    },
+    "r4-mmlu-57-subject": {
+      "note": "MMLU population identity is carried by the frozen R3 protocol; R4 does not redefine it",
+      "primary_manifest_fingerprint": null,
+      "r3_protocol_fingerprint": "3ef63056ae16b18ad65d9c87d1fbec5b43550873a0e3e25ec0a323f954ee974d",
+      "test_count": 1140,
+      "train_count": 456
+    }
+  },
+  "population_roles": {
+    "r4-hellaswag-activity-primary": {
+      "current_generation": "primary panel",
+      "legacy": "secondary lineage continuity"
+    },
+    "r4-medmcqa-subject-primary": {
+      "current_generation": "primary panel",
+      "legacy": "secondary lineage continuity"
+    },
+    "r4-mmlu-57-subject": {
+      "current_generation": "future R4 measurement",
+      "r3_legacy": "frozen historical evidence"
+    }
+  },
+  "predictor_roles": {
+    "cannot_rescue_primary": false,
+    "development_units": 8,
+    "legacy_extension_units": 8,
+    "primary_predictor": "r4-target-range-exceedance-warning",
+    "primary_predictor_outcome": "r4-core4-mean-transport-penalty",
+    "primary_validation_units": 16,
+    "role_note": "predictor validation is a separate frozen layer; it consumes frozen inference outcomes and never modifies them",
+    "secondary_predictor": "r4-source-target-wasserstein1-warning",
+    "target_label_free": true
+  },
+  "procedure_panel": {
+    "core_four": [
+      "P-low",
+      "P-historical",
+      "L-low",
+      "L-historical"
+    ],
+    "family_roles": "continuity core plus two standalone extensions; explicitly NOT a six-cell factorial",
+    "panel_id": "r4-calibration-family-panel",
+    "panel_version": 1,
+    "procedures": [
+      {
+        "procedure": "P-low",
+        "role": "logistic-core",
+        "scientific_fingerprint": "7a8e13d51e131f2102cca4e00b172c8bbb2eb49e591acd3746aeb64d003c8857"
+      },
+      {
+        "procedure": "P-historical",
+        "role": "logistic-core",
+        "scientific_fingerprint": "a44e9217dd43e5e29d859c8dd2dc510a5876db4d46a8e0cc2fd4f1df3121a423"
+      },
+      {
+        "procedure": "L-low",
+        "role": "logistic-core",
+        "scientific_fingerprint": "91d7d506275aade7d4676c39722ac2c4d975de7967a25a808395c056307ad619"
+      },
+      {
+        "procedure": "L-historical",
+        "role": "logistic-core",
+        "scientific_fingerprint": "23ec12bbf4a809ba2f419491df80d1f228d3fd778d848115839aab3697f9dd58"
+      },
+      {
+        "procedure": "I-isotonic",
+        "role": "standalone-extension",
+        "scientific_fingerprint": "cd13bc07bf92f3375bcd16d57fa5f515cd40f68199b57181791f85c58be8c244"
+      },
+      {
+        "procedure": "B-beta",
+        "role": "standalone-extension",
+        "scientific_fingerprint": "f4b710fb98f7c3056794aa709d53309f462a8f598cef8089d2f9c0ed6f7e37ff"
+      }
+    ],
+    "seventh_procedure": "FORBIDDEN",
+    "standalone_extensions": [
+      "I-isotonic",
+      "B-beta"
+    ]
+  },
+  "protocol_fingerprint_reference": {
+    "resolution": "the protocol candidate fingerprint is recorded in R4_FINAL_PROTOCOL_SEMANTIC_CANDIDATE.json; the manifest deliberately does not embed it, so that no fingerprint cycle exists"
+  },
+  "protocol_semantic_id": "r4-final-integrated-protocol",
+  "protocol_semantic_version": 1,
+  "r3_frozen_reuse": {
+    "forbidden": "re-fitting or re-measuring R3 legacy cells and calling it continuity",
+    "reuse": "reference the frozen R3 result artifact identity",
+    "rule": "do not rerun frozen R3 MMLU legacy cells"
+  },
+  "status": "CANDIDATE",
+  "test_identities": {
+    "r4-hellaswag-activity-primary": {
+      "manifest_fingerprint": "5c45043ba4f0ec436c16dcf494ff26be435c7857244bcbefa321d1678129c400",
+      "test_count": 10042
+    },
+    "r4-medmcqa-subject-primary": {
+      "manifest_fingerprint": "4a4718438d46ab1ba27c59ca46806756ffb62efa05e6103981dffec4dc48c218",
+      "test_count": 4162
+    },
+    "r4-mmlu-57-subject": {
+      "manifest_fingerprint": null,
+      "test_count": 1140
+    }
+  },
+  "train_budgets": {
+    "primary": {
+      "budget": "N456",
+      "train_items_per_population": 456
+    },
+    "secondary_robustness": {
+      "budget": "N912",
+      "cannot_rescue_primary": true,
+      "nested": true,
+      "parent_primary_budget": "N456",
+      "train_items_per_population": 912
+    }
+  }
+}

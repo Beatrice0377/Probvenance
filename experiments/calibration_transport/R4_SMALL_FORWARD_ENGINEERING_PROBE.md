@@ -1020,3 +1020,454 @@ R4 OFFICIAL EXECUTION AUTHORIZED:  NO
 
 This is a model-breadth stopping decision, not an outcome-based model selection and not an R4 model-pair
 freeze. No winner, no ranking, no scientific score, no recommended final pair is recorded here.
+
+# R4 Small Forward Engineering Probe — Phase 2D (Qwen3.5-9B)
+
+Candidate: `Qwen/Qwen3.5-9B` @ `c202236235762e1c871ad0ccb60c8ee5ba337b9a`
+
+## 1. Scope
+
+Fourth candidate of the current model-breadth engineering probe, added by the 2026-09-30 pre-outcome
+human breadth decision. Engineering compatibility only: exact-revision snapshot, offline BF16
+single-GPU load through the pre-existing composite-checkpoint text-tower adapter, real production
+CAT/OVR text-only forward path, target-token logits, determinism, memory, latency, cleanup.
+No study dataset, no generation, no scientific metric.
+
+Role: same-lineage scale-continuity bridge from R3 `Qwen/Qwen3.5-2B` (same family, same adapter path)
+— explicitly NOT a family-diversity candidate.
+
+## 2. Git preflight
+
+```
+repo:                       /root/rivermind-data/Probvenance
+branch:                     main
+HEAD:                       10c41b567b37a1382a199201ef51764a0237108b
+origin/main:                82f1591ac40af859c804476f4cc66d0731d4c427
+ahead/behind:               1/0
+git status --short:          M experiments/calibration_transport/r4_small_forward_probe.py
+git diff --stat:            (1 file, additive candidate extension)
+git diff --cached --stat:   (empty)
+```
+
+HEAD is the Gate-0 local planning commit `docs: update R4 breadth plan before Qwen probe`
+(parent `82f1591ac40af859c804476f4cc66d0731d4c427`). It is deliberately NOT pushed.
+
+## 3. Phase 2A / 2B / 2C artifact provenance (pre-Phase-2D)
+
+```
+r4_small_forward_probe.py                  e7c637830f314892e713f3eeb6625dea855e35f94342ebd4509300fb3616d39e
+R4_SMALL_FORWARD_ENGINEERING_PROBE.md      046a22877df07fa2a3085d784bcfe2a82e922bbf80a625f9ea62d2076b4d113e
+```
+
+Both hashes equal the post-commit values recorded in the Phase 2C provenance closure. Phase 2A
+(Olmo), 2B (Falcon) and 2C (Granite) sections are preserved unmodified; this section is a pure append.
+
+## 4. Environment
+
+```
+python:           3.11.13  (/root/rivermind-data/envs/probvenance-r4/bin/python)
+torch:            2.8.0+cu128
+transformers:     5.17.0
+huggingface_hub:  1.32.0
+tokenizers:       0.23.2
+CUDA:             True
+device_count:     1
+BF16:             True
+device_name:      NVIDIA GeForce RTX 4090
+```
+
+No package was installed, upgraded or downgraded for Phase 2D.
+
+## 5. Snapshot provenance
+
+```
+repo_id:              Qwen/Qwen3.5-9B
+requested_revision:   c202236235762e1c871ad0ccb60c8ee5ba337b9a
+resolved_revision:    c202236235762e1c871ad0ccb60c8ee5ba337b9a
+basename_matches:     true
+snapshot_path:        /root/rivermind-data/hf-cache/hub/models--Qwen--Qwen3.5-9B/snapshots/c202236235762e1c871ad0ccb60c8ee5ba337b9a
+snapshot size:        19,329,302,904 bytes (18.0 GiB)
+file count:           13  (exactly the adapter's SNAPSHOT_ALLOW_PATTERNS set)
+weight format:        safetensors
+weight shard count:   4  (5,276,436,216 / 5,335,161,512 / 5,368,717,440 / 3,325,995,712 bytes)
+incomplete files:     0
+locks:                0
+exact identity:       PROVEN (resolved sha == requested sha; every file size matches the HF revision tree;
+                      every weight shard and tokenizer.json additionally sha256-verified against the
+                      revision tree's LFS oid)
+```
+
+Metadata gate before download: `HfApi(endpoint="https://hf-mirror.com").model_info(revision=REV)`
+returned resolved sha == requested sha (match true), `gated: false`, `private: false`,
+license `apache-2.0`, 16 siblings. Response cached at
+`/root/rivermind-data/r4-forward-probe-runs/qwen35_9b_revision.json`.
+
+Transport caveat (provenance-relevant, recorded honestly): the four weight shards and `tokenizer.json`
+were finally transferred from `https://ai.gitcode.com/hf_mirrors/Qwen/Qwen3.5-9B/resolve/<rev>/...`
+after an explicit human-authorized conditional switch. Reasons: (a) this checkpoint's weights are
+Xet-stored, and the mirror serves them through a signed `cas-bridge.xethub.hf.co` URL that this host
+reaches at only ~3.3 MB/s (hf-mirror ETA ~87 min), while `hf-api.gitee.com` resolved a DIFFERENT sha
+and was therefore rejected; (b) gitcode accepts the exact pinned revision in the path, and its content
+was proven byte-identical before use — `merges.txt` git blob sha1 ==
+`a494e019ca1502219fd0128658b979e5f05ae8e8` (identical to the pinned-revision cache copy) and the
+shard-4 first 1 MiB sha256 was identical to the hf-mirror bytes. No substitute repo and no different
+revision was used. `HF_ENDPOINT` itself remained hf-mirror.com, so snapshot directory naming and
+revision resolution are unchanged.
+
+## 6. License metadata
+
+```
+license tag:   apache-2.0  (from the pre-download metadata gate)
+gated:         false
+private:       false
+```
+
+## 7. Tokenizer / template
+
+```
+tokenizer class:              Qwen2Tokenizer
+tokenizer_has_chat_template:  true
+chat template route:          production doctrine renderer -> tokenizer.apply_chat_template
+template kwargs:              {"enable_thinking": False} -> EFFECTIVE (renders an empty think block)
+CAT ids (A/B/C/D):            32 / 33 / 34 / 35
+OVR ids (yes/no):             9405 / 2083
+exact single-token CAT:       PASS (all four distinct ids)
+exact single-token OVR:       PASS (both distinct ids)
+frozen tokenizer-gate agreement: PASS (ids_match_frozen_gate true; yes/no gate true)
+rendered prefix tail:         ...<|im_end|>\n<|im_start|>assistant\n thinking\n\n</think>\n\n
+```
+
+The rendered prompt ends with an EMPTY think block and no generated answer: scoring is taken at the
+first token after `</think>`, i.e. exactly at the production scoring boundary. No leading-space
+fallback, no capitalization fallback, no multi-token sum, no alternate verbalizer, no template
+modification, no tokenizer monkey-patch.
+
+## 8. Model / architecture identity
+
+```
+checkpoint architecture:  Qwen3_5ForConditionalGeneration  (multimodal composite)
+composite config class:   Qwen3_5Config
+composite model_type:     qwen3_5
+text-only class actually built:  Qwen3_5ForCausalLM
+text config class:        Qwen3_5TextConfig
+text model_type:          qwen3_5_text
+adapter:                  Qwen35TextBackend (existing, unmodified)
+text tower prefix:        model.language_model.
+non-text prefixes:        model.visual. , mtp.
+dtype:                    torch.bfloat16 (param sample bfloat16)
+device:                   cuda:0
+trust_remote_code:        false
+local_files_only:         true
+offline:                  "1" (HF_HUB_OFFLINE=1)
+load time:                142.932 s
+```
+
+`AutoModelForCausalLM` was deliberately NOT used: the checkpoint is a multimodal composite, not a
+plain causal-LM checkpoint. The text tower was mechanically rebuilt through the pre-existing
+`experiments/semantic_signal/qwen35_loader.py` adapter.
+
+Architecture facts (from the pinned `config.json`):
+
+```
+text layer count:         32
+layer_types:              24x "linear_attention" + 8x "full_attention" (full attention at zero-based
+                          indices 3, 7, 11, 15, 19, 23, 27, 31; full_attention_interval 4; 24 + 8 = 32)
+hidden size:              4096
+attention config:         num_attention_heads 16, num_key_value_heads 4, head_dim 256,
+                          attn_output_gate true, attention_bias false, attention_dropout 0.0
+linear-attention (DeltaNet) fields: linear_conv_kernel_dim 4, linear_key_head_dim 128,
+                          linear_num_key_heads 16, linear_value_head_dim 128, linear_num_value_heads 32
+MoE fields:               none (no expert fields in text_config)
+other:                    vocab_size 248320, max_position_embeddings 262144, intermediate_size 12288,
+                          hidden_act silu, rms_norm_eps 1e-06, tie_word_embeddings false,
+                          mamba_ssm_dtype float32, mtp_num_hidden_layers 1,
+                          rope_parameters {rope_theta 10000000, partial_rotary_factor 0.25,
+                          mrope_interleaved true, mrope_section [11,11,10]}
+vision tower (dropped):   depth 27, hidden_size 1152, num_heads 16, patch_size 16,
+                          spatial_merge_size 2, temporal_patch_size 2, out_hidden_size 4096
+config _commit_hash:      absent from this config.json (both levels) — revision identity is therefore
+                          established from the snapshot path + sha256 file verification, not from
+                          _commit_hash
+```
+
+## 9. Runtime warnings / fallback
+
+```
+warnings:  NONE (no warning, no fallback notice, no deprecation notice was emitted)
+```
+
+No BLOCKING item. No accelerated-kernel fallback notice was emitted for this candidate.
+
+## 10. CAT forward (production path)
+
+```
+fixture:               SYNTH-1 (synthetic only)
+path:                  measurements.build_cat_decision -> ChoiceCompiler ->
+                       CATEGORICAL_SEMANTIC_JUDGMENT_V1 -> production renderer ->
+                       exact continuation resolver -> real forward -> logits[:, -1, :]
+input tokens:          148
+scoring position:      logits[:, -1, :] (last input position)
+logits shape:          [1, vocab]
+A id/logit:            32 / 20.0
+B id/logit:            33 / 18.875
+C id/logit:            34 / 19.375
+D id/logit:            35 / 19.625
+all finite:            true
+ids_match_frozen_gate: true
+rendered_input SHA256: 4005ef88c68add9f7191093475f3950bbe5172030342c595c0454e1a4731a8a9
+generation:            none
+```
+
+## 11. OVR forward (production path)
+
+```
+path:                  measurements.build_ovr_proposition -> BoolCompiler ->
+                       BINARY_SEMANTIC_JUDGMENT_V1 -> production renderer ->
+                       yes/no continuation resolver -> real forward
+yes id:                9405
+no id:                 2083
+yes/no gate match:     true / true
+
+candidate  input tokens  logit_no(false)  logit_yes(true)  all finite
+Alpha      158           22.5             20.125           true
+Beta       158           22.5             20.125           true
+Gamma      158           22.5             20.0             true
+Delta      158           22.375           20.125           true
+```
+
+No correctness, accuracy, or winner agreement was computed.
+
+## 12. Determinism
+
+### CAT
+
+```
+run1:  [20.0, 18.875, 19.375, 19.625]
+run2:  [20.0, 18.875, 19.375, 19.625]
+run3:  [20.0, 18.875, 19.375, 19.625]
+exact equality:  true
+max_abs_diff:    0.0
+```
+
+### OVR (representative = Alpha)
+
+```
+run1:  [22.5, 20.125]
+run2:  [22.5, 20.125]
+run3:  [22.5, 20.125]
+exact equality:  true
+max_abs_diff:    0.0
+```
+
+## 13. Memory
+
+```
+pre-load allocated:            0
+pre-load reserved:             0
+pre-load nvidia-smi:           4 MiB
+load allocated:                17,907,635,200
+load reserved:                 17,943,232,512
+load peak allocated:           17,907,635,200
+load peak reserved:            17,943,232,512
+post-load nvidia-smi:          17,508 MiB
+forward peak allocated:        18,052,573,696
+forward peak reserved:         18,213,765,120
+forward peak nvidia-smi:       17,844 MiB
+post-cleanup allocated:        2,042,757,120
+post-cleanup reserved:         2,055,208,960
+post-cleanup nvidia-smi:       2,434 MiB
+```
+
+The composite snapshot is 18.0 GiB, but only the text tower is resident on the GPU; the dropped
+non-text towers (visual + mtp) are not allocated. Resident memory was measured directly rather than
+inferred from the snapshot size.
+
+## 14. Latency
+
+```
+warmup:        2
+CAT runs:      [78.21, 78.13, 78.17, 78.34, 78.28]
+CAT median:    78.21 ms
+OVR runs:      [76.13, 76.16, 76.17, 78.28, 77.68]
+OVR median:    76.17 ms
+```
+
+ENGINEERING INFORMATION ONLY. No cross-candidate comparison, no scientific inference.
+
+## 15. Offline feasibility
+
+```
+HF_HUB_OFFLINE:            1
+local_files_only:          true
+offline tokenizer load:    PASS
+offline config load:       PASS
+offline text-tower load:   PASS
+offline CAT:               PASS
+offline OVR:               PASS
+network needed after complete snapshot:  NO
+```
+
+The adapter's internal `snapshot_download(..., local_files_only=True)` resolved the same local
+snapshot directory; no network access occurred during load or forward.
+
+## 16. Cleanup
+
+```
+model unloaded:            yes (del model/backend, gc.collect, torch.cuda.empty_cache)
+cache released:            yes
+post-run nvidia-smi:       1 MiB, 0% util, no compute processes (after process exit)
+GPU release:               PASS
+```
+
+## 17. Candidate-specific caveats
+
+```
+1. Composite checkpoint: `AutoModelForCausalLM` is not the correct mapping for this checkpoint. The
+   text tower was rebuilt by the pre-existing `Qwen35TextBackend` adapter, unmodified. No new scoring
+   backend was written; rendering, verbalizer resolution, final-position scoring and diagnostics all
+   remain the shared `TransformersBackend` implementation.
+2. Adapter load report: missing = [] , unexpected = [] , dropped = ["348 non-text tower tensors"].
+   The dropped set is exactly the declared non-text prefixes (`model.visual.`, `mtp.`); no unexplained
+   missing or unexpected key. `load_state_dict(..., strict=False)` therefore reported no silent gap.
+3. config _commit_hash is absent from this checkpoint's config.json; exact revision identity rests on
+   the snapshot path and on per-file sha256 verification against the HF revision tree (see §5).
+4. The four weight shards and tokenizer.json were transferred from `ai.gitcode.com/hf_mirrors/...`
+   under an explicit conditional human authorization, after the mirror's Xet/cas-bridge route proved
+   ~3x slower and gitee resolved a different sha. Byte-identity to the pinned revision was proven
+   before use; see §5.
+5. Load time 142.9 s reflects reading 18.0 GiB from disk and moving the text tower to the GPU; it is a
+   one-off engineering figure, not a latency measurement.
+6. No candidate failure occurred; no OOM, no BF16 issue, no unsupported-architecture issue, no
+   adapter modification was required.
+```
+
+## 18. Scientific guardrail audit
+
+```
+Study dataset inference:            NO
+Accuracy computed:                  NO
+Brier computed:                     NO
+LogLoss computed:                   NO
+Calibration computed:               NO
+Calibration transport computed:     NO
+Winner agreement computed:          NO
+Scientific model ranking performed: NO
+Final model selected:               NO
+R4 frozen:                          NO
+R4 official execution authorized:   NO
+```
+
+## 19. Changed files
+
+```
+path                                                             purpose                                     change
+experiments/calibration_transport/r4_small_forward_probe.py       add qwen candidate config (allowlist olmo/falcon/granite/qwen)  additive
+experiments/calibration_transport/R4_SMALL_FORWARD_ENGINEERING_PROBE.md  append Phase 2D section           additive
+```
+
+```
+git status --short  ->   M experiments/calibration_transport/r4_small_forward_probe.py
+                         M experiments/calibration_transport/R4_SMALL_FORWARD_ENGINEERING_PROBE.md
+```
+
+Both files are tracked and modified relative to the Gate-0 planning commit; nothing is staged and
+nothing is committed.
+
+## 20. Tests
+
+```
+py_compile:  PASS
+ruff:        PASS ("All checks passed!")
+pytest:      PASS (repo suite exit 0)
+```
+
+## 21. Git action
+
+```
+NEW COMMIT CREATED:  NO
+PUSH PERFORMED:      NO
+```
+
+NO PUSH PERFORMED
+
+## 22. Gate conclusion
+
+```
+A. QWEN3.5-9B ENGINEERING PASS — READY FOR HUMAN ENGINEERING-PROVENANCE REVIEW
+```
+
+## 23. Current model engineering breadth (facts only)
+
+```
+candidate     native load                                    trust_remote_code  BF16  offline  peak nvidia-smi  determinism  engineering status
+Olmo-3        Olmo3ForCausalLM                               false              yes   yes      14,466 MiB       EXACT        PASS
+Falcon-H1     FalconH1ForCausalLM                            false              yes   yes      18,152 MiB       EXACT        PASS
+Granite-4     GraniteMoeHybridForCausalLM                    false              yes   yes      16,974 MiB       EXACT        PASS
+Qwen3.5-9B    Qwen3_5ForCausalLM (via Qwen35TextBackend)     false              yes   yes      17,844 MiB       EXACT        PASS
+```
+
+```
+CURRENT MODEL ENGINEERING BREADTH:
+COMPLETE FOR THE APPROVED R4 PLAN
+
+Ministral-3  NOT_ATTEMPTED / DEFERRED
+
+FINAL MODEL PAIR:                  NOT SELECTED
+R4 FROZEN:                         NO
+R4 OFFICIAL EXECUTION AUTHORIZED:  NO
+```
+
+No winner, no ranking, no scientific score, no recommended final pair is recorded here.
+
+## 24. Adapter provenance / 2B -> 9B scale-continuity audit (engineering only)
+
+```
+property                     R3 Qwen3.5-2B                        Phase 2D Qwen3.5-9B                  same?
+adapter class                Qwen35TextBackend                    Qwen35TextBackend                    YES
+constructed by               run_r3_measurements.py load_backend  r4_small_forward_probe.py            (different driver, same adapter)
+dtype                        bfloat16                             bfloat16                             YES
+local_files_only             true                                 true                                 YES
+chat_template_kwargs         {"enable_thinking": False}           {"enable_thinking": False}           YES
+checkpoint adaptation        composite -> text tower              composite -> text tower              YES
+scoring semantics            TransformersBackend                  TransformersBackend                  YES
+```
+
+R3 reference: `experiments/calibration_transport/run_r3_measurements.py:262-289` constructs
+`module.Qwen35TextBackend(model=model_id, revision=revision, dtype=EXPECTED_DTYPE, device=device,
+local_files_only=True, chat_template_kwargs={"enable_thinking": False})` with
+`EXPECTED_DTYPE = "bfloat16"` (`run_r3_measurements.py:72`) for `Qwen/Qwen3.5-2B` @
+`15852e8c16360a2fea060d615a32b45270f8a8fc`. The adapter was NOT modified for 9B.
+
+This is a static engineering audit of path identity. No R3 outcome was read and no R3 outcome was used
+to decide whether Phase 2D passes.
+
+## 25. GPU infrastructure incident (Phase 2D first attempt, before any Qwen evidence)
+
+The first Phase 2D attempt produced NO Qwen evidence. It stopped at the environment / GPU gate:
+
+```
+symptom:                        nvidia-smi listed the RTX 4090, but 39010 MiB / 49140 MiB was already
+                                occupied, with GPU-Util N/A and a MIG error state, while
+                                "No running processes found" was reported
+torch.cuda.is_available():      False
+torch.cuda.device_count():      1
+torch.cuda.is_bf16_supported(): False
+raised:                         RuntimeError: No CUDA GPUs are available
+classification:                 GPU_INFRASTRUCTURE = BLOCKED  /  PHASE 2D = BLOCKED  (gate conclusion C)
+actions taken by the agent:     NONE — no NVIDIA driver reinstall, no CUDA reinstall, no torch
+                                reinstall, no /dev/nvidia* change, and no reboot
+resolution:                     human rebooted the instance; afterwards nvidia-smi reported 1 MiB
+                                used, 0% util and no compute processes, and torch reported
+                                cuda_available True, is_bf16_supported True, capability (8, 9)
+then:                           Phase 2D was re-run from the start and produced the evidence above
+```
+
+Classification (important): this was an INFRASTRUCTURE FAILURE OCCURRING BEFORE ANY VALID
+ENGINEERING MODEL RUN. It is NOT a Qwen model failure, NOT a candidate-specific issue, NOT a
+measurement anomaly, and NOT an R4 scientific result. No model load, no forward and no scoring
+occurred during the failed attempt.
+
+Narrow operational rule for any future R4 execution (no wider retry protocol is defined here):
+before starting a scientific run, require a healthy `nvidia-smi` (no unexplained VRAM occupancy and
+no error state) AND `torch.cuda.is_available() == True` AND BF16 supported. If that gate fails, do
+not start the scientific run.

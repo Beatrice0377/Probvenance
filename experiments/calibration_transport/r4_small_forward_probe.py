@@ -1,8 +1,9 @@
-"""R4 single-candidate real-forward engineering probe (Phase 2A Olmo / Phase 2B Falcon).
+"""R4 single-candidate real-forward engineering probe (Phase 2A Olmo / Phase 2B Falcon /
+Phase 2C granite / Phase 2D Qwen3.5-9B).
 
 Scope (engineering compatibility facts ONLY; no scientific outcome):
 
-  * exact-revision snapshot provenance of allenai/Olmo-3-7B-Instruct
+  * exact-revision snapshot provenance of the selected candidate
   * offline, local_files_only, BF16, cuda:0, trust_remote_code=False load
   * the REAL production path:
         measurements.build_cat_decision -> ChoiceCompiler
@@ -18,7 +19,7 @@ Hard prohibitions enforced here:
   * trust_remote_code is hard-pinned False
   * the exact revision is hard-pinned and asserted
 
-Run (candidate defaults to "olmo"; pass "falcon" or set PROBE_CANDIDATE):
+Run (candidate defaults to "olmo"; pass "falcon", "granite" or "qwen", or set PROBE_CANDIDATE):
     HF_HOME=/root/rivermind-data/hf-cache \
     HUGGINGFACE_HUB_CACHE=/root/rivermind-data/hf-cache/hub \
     HF_HUB_OFFLINE=1 \
@@ -40,6 +41,8 @@ from typing import Any
 REPO_ROOT = Path(__file__).resolve().parents[2]
 CAL_DIR = REPO_ROOT / "experiments" / "calibration_transport"
 sys.path.insert(0, str(CAL_DIR))
+# Existing R3 Qwen3.5 text-tower adapter (checkpoint adaptation only; no scoring logic).
+sys.path.insert(0, str(REPO_ROOT / "experiments" / "semantic_signal"))
 
 # Offline by default: the probe must reproduce from the existing snapshot alone.
 os.environ.setdefault("HF_HUB_OFFLINE", "1")
@@ -78,6 +81,18 @@ CANDIDATES: dict[str, dict[str, Any]] = {
         "expected_no_id": 2201,
         "phase": "2C-granite",
         "out_json": "/root/rivermind-data/r4-forward-probe-runs/granite_forward_probe_results.json",
+    },
+    "qwen": {
+        "repo_id": "Qwen/Qwen3.5-9B",
+        "revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+        "expected_cat_ids": {"A": 32, "B": 33, "C": 34, "D": 35},
+        "expected_yes_id": 9405,
+        "expected_no_id": 2083,
+        "phase": "2D-qwen35-9b",
+        "adapter": "qwen35_text",
+        "out_json": (
+            "/root/rivermind-data/r4-forward-probe-runs/qwen35_9b_forward_probe_results.json"
+        ),
     },
 }
 
@@ -221,15 +236,33 @@ def main() -> int:
 
     torch.cuda.reset_peak_memory_stats()
     t0 = time.perf_counter()
-    backend = TransformersBackend(
-        REPO_ID,
-        revision=REVISION,
-        device=DEVICE,
-        dtype=DTYPE,
-        trust_remote_code=False,
-        local_files_only=True,
-        chat_template_kwargs=CHAT_TEMPLATE_KWARGS,
-    )
+    if CFG.get("adapter") == "qwen35_text":
+        # Qwen3.5-9B ships as a multimodal composite checkpoint
+        # (Qwen3_5ForConditionalGeneration). The existing R3 Qwen35TextBackend
+        # rebuilds the text-only Qwen3_5ForCausalLM from text_config and rewrites
+        # the text-tower key prefix; only checkpoint loading differs. Rendering,
+        # verbalizer resolution, scoring and diagnostics stay TransformersBackend.
+        from qwen35_loader import Qwen35TextBackend
+
+        backend = Qwen35TextBackend(
+            REPO_ID,
+            revision=REVISION,
+            device=DEVICE,
+            dtype=DTYPE,
+            trust_remote_code=False,
+            local_files_only=True,
+            chat_template_kwargs=CHAT_TEMPLATE_KWARGS,
+        )
+    else:
+        backend = TransformersBackend(
+            REPO_ID,
+            revision=REVISION,
+            device=DEVICE,
+            dtype=DTYPE,
+            trust_remote_code=False,
+            local_files_only=True,
+            chat_template_kwargs=CHAT_TEMPLATE_KWARGS,
+        )
     load_seconds = time.perf_counter() - t0
     model = backend._model
     tokenizer = backend._tokenizer
@@ -250,6 +283,30 @@ def main() -> int:
         "tokenizer_class": type(tokenizer).__name__,
         "tokenizer_has_chat_template": bool(getattr(tokenizer, "chat_template", None)),
     }
+    # --- checkpoint-adapter report (populated only when an adapter is used) ---
+    result["checkpoint_adapter"] = {
+        "adapter": CFG.get("adapter", "transformers"),
+        "backend_class": type(backend).__name__,
+        "load_report": getattr(backend, "load_report", None),
+    }
+    if CFG.get("adapter") == "qwen35_text":
+        from transformers import AutoConfig
+
+        composite = AutoConfig.from_pretrained(
+            REPO_ID, revision=REVISION, trust_remote_code=False, local_files_only=True
+        )
+        text_cfg = getattr(composite, "text_config", None)
+        result["checkpoint_adapter"].update({
+            "composite_config_class": type(composite).__name__,
+            "composite_architectures": list(getattr(composite, "architectures", []) or []),
+            "composite_model_type": getattr(composite, "model_type", None),
+            "text_config_class": type(text_cfg).__name__ if text_cfg is not None else None,
+            "text_model_type": (
+                getattr(text_cfg, "model_type", None) if text_cfg is not None else None
+            ),
+            "text_tower_prefix": "model.language_model.",
+            "non_text_prefixes": ["model.visual.", "mtp."],
+        })
     result["post_load_memory"] = cuda_mem()
 
     caps = backend.capabilities
@@ -269,6 +326,8 @@ def main() -> int:
         "scoring_position": "logits[:, -1, :] (last input position)",
         "rendered_input_sha256": sha256_text(cat_ev.metadata["rendered_input"]),
         "rendered_input": cat_ev.metadata["rendered_input"],
+        "rendered_input_tail": cat_ev.metadata["rendered_input"][-200:],
+        "chat_template_kwargs": dict(CHAT_TEMPLATE_KWARGS),
         "values_order": list(cat_ev.labels),
         "logits": {lab: float(v) for lab, v in zip(cat_ev.labels, cat_ev.values, strict=True)},
         "all_finite": all_finite(cat_ev.values),

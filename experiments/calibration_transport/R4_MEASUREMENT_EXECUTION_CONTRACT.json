@@ -1,0 +1,479 @@
+{
+  "artifact_type": "r4-measurement-execution-contract",
+  "artifact_version": 1,
+  "authority": {
+    "calibration_scientific_fingerprints": {
+      "B-beta": "f4b710fb98f7c3056794aa709d53309f462a8f598cef8089d2f9c0ed6f7e37ff",
+      "I-isotonic": "cd13bc07bf92f3375bcd16d57fa5f515cd40f68199b57181791f85c58be8c244"
+    },
+    "frozen_inputs": {
+      "experiments/calibration_transport/R4_CALIBRATION_FAMILY_FREEZE.md": {
+        "sha256": "1fd06ad4804cb64cd9220cc86187e26f6d690fba977bd76918e057bab418cdff",
+        "status": "VERIFIED_ON_DISK"
+      },
+      "experiments/calibration_transport/R4_CALIBRATION_FAMILY_IMPLEMENTATION_ENGINEERING.md": {
+        "sha256": "812fd873de3ce882d35c6e46aac0edb4b09278a44fecef5088478b796174e6fe",
+        "status": "VERIFIED_ON_DISK"
+      },
+      "experiments/calibration_transport/R4_EXACT_TOKENIZER_GATE.md": {
+        "sha256": "9bee0d280b81a09eee1506c2f3af32b32c7f01ea334d4c22ef2a4abb5ac516ef",
+        "status": "VERIFIED_ON_DISK"
+      },
+      "experiments/calibration_transport/R4_EXECUTION_MANIFEST_CANDIDATE.json": {
+        "sha256": "d73d9be950e07286c6444a7e620fe68e24a60777c9ed84fd3783608f88b89f79",
+        "status": "VERIFIED_ON_DISK"
+      },
+      "experiments/calibration_transport/R4_FINAL_PROTOCOL_SEMANTIC_CANDIDATE.json": {
+        "sha256": "7d2772a0b911777081554ac3ec8b97e3317ff4ec92da8b60422172b044a2174b",
+        "status": "VERIFIED_ON_DISK"
+      },
+      "experiments/calibration_transport/R4_INFERENCE_IMPLEMENTATION_PROVENANCE_CLOSURE.md": {
+        "sha256": "22f7f93c742cb7c1b1865c133e635b5e6903d6e879f4e5693bc1eaf2e28438df",
+        "status": "VERIFIED_ON_DISK"
+      },
+      "experiments/calibration_transport/R4_INFERENCE_MULTIPLICITY_FREEZE.json": {
+        "sha256": "fdc07904056fd72bdd702e275743839eea741364324bd169ec2bf97504a45ad1",
+        "status": "VERIFIED_ON_DISK"
+      },
+      "experiments/calibration_transport/R4_POPULATION_FREEZE.md": {
+        "sha256": "850b6b24da61f416b76d0bac83a4ba2775d3002e94894f003fd2e0a5488fee2a",
+        "status": "VERIFIED_ON_DISK"
+      },
+      "experiments/calibration_transport/R4_PREDICTOR_FREEZE.json": {
+        "sha256": "423c5cdaf68ce7cdbbb80cf704ed18f67692995e418d0dc8f707871322554f8c",
+        "status": "VERIFIED_ON_DISK"
+      },
+      "experiments/calibration_transport/R4_PREDICTOR_IMPLEMENTATION_PROVENANCE_CLOSURE.md": {
+        "sha256": "5259a7fc7d3eff02e343bce4b3f9f807e6d2a47208055e83a5678ea48dd90b04",
+        "status": "VERIFIED_ON_DISK"
+      },
+      "experiments/calibration_transport/R4_SMALL_FORWARD_ENGINEERING_PROBE.md": {
+        "sha256": "d160c798e40d59e33ea54bcb5aaeb372f0a1922542ef08f58b930ca14613d8a5",
+        "status": "VERIFIED_ON_DISK"
+      },
+      "experiments/calibration_transport/r4_calibration_families.py": {
+        "sha256": "e5b00548429b5b0999d5847db47e1f4c1ae113ee19854c053aeaca1058536ec3",
+        "status": "VERIFIED_ON_DISK"
+      },
+      "experiments/calibration_transport/r4_inference.py": {
+        "sha256": "44f8ac3fe3ca0e138beb4f755e9ee65582ed0b09c14ba253bb01062d8ffda554",
+        "status": "VERIFIED_ON_DISK"
+      },
+      "experiments/calibration_transport/r4_predictor.py": {
+        "sha256": "ccbfbbd681cf55d0cb1f7d3f12ba19e5cd68aa4c65d0ebf52045dc8f0fb2787e",
+        "status": "VERIFIED_ON_DISK"
+      },
+      "experiments/calibration_transport/r4_small_forward_probe.py": {
+        "sha256": "44e09c045f4193e95d2f7440e6271105add437b7cb2891a2942edc4327346145",
+        "status": "VERIFIED_ON_DISK"
+      }
+    },
+    "inference_freeze_fingerprint": "dcbb7ac9e931145fdee86ab984de1249c1b86ca36ee735b70dafc8cabc06c141",
+    "population_manifest_fingerprints": {
+      "r4-hellaswag-activity-primary": "5c45043ba4f0ec436c16dcf494ff26be435c7857244bcbefa321d1678129c400",
+      "r4-hellaswag-activity-robustness912": "6817496f227d9cd57759bf55489cbf8a1dc4dfd27db0ae551e9223d21d02a096",
+      "r4-medmcqa-subject-primary": "4a4718438d46ab1ba27c59ca46806756ffb62efa05e6103981dffec4dc48c218",
+      "r4-medmcqa-subject-robustness912": "e48c37293f196e16d8fba42e7fc255e4ac2e77f81c270ed6f71320981968af12"
+    },
+    "predictor_freeze_fingerprint": "c856fcc161910497a3431593639606682905adcb50fc443455468dfc295d73a9",
+    "r3_continuity_procedure_fingerprints": {
+      "L-historical": "23ec12bbf4a809ba2f419491df80d1f228d3fd778d848115839aab3697f9dd58",
+      "L-low": "91d7d506275aade7d4676c39722ac2c4d975de7967a25a808395c056307ad619",
+      "P-historical": "a44e9217dd43e5e29d859c8dd2dc510a5876db4d46a8e0cc2fd4f1df3121a423",
+      "P-low": "7a8e13d51e131f2102cca4e00b172c8bbb2eb49e591acd3746aeb64d003c8857"
+    },
+    "r3_protocol_fingerprint": "3ef63056ae16b18ad65d9c87d1fbec5b43550873a0e3e25ec0a323f954ee974d",
+    "r3_protocol_id": "r3-confirmatory-procedure-conditioned-transport"
+  },
+  "cat_contract": {
+    "anchor_selection_only": "the anchor decides only which restricted probability is recorded as anchor_score; the prompt still contains all four candidates",
+    "fixed_event_score": "S_CAT_i = restricted-softmax probability assigned to the frozen D_i",
+    "forwards_per_item": 1,
+    "not_four_cat_calls": true,
+    "probability_rule": "restricted softmax over exactly the four label-token logits taken from the same single next-token logits vector",
+    "prompt_contains": [
+      "question / context",
+      "all four ordered candidates"
+    ],
+    "verbalizer_requirements": {
+      "exact_continuation": true,
+      "exactly_one_token_each": true,
+      "four_distinct_token_ids": true
+    },
+    "verbalizers": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ]
+  },
+  "failure_handling": {
+    "cat_failure_suppresses_ovr_attempt": false,
+    "downstream_paired_completeness_requires_both_scored": true,
+    "fallback_verbalizer": "FORBIDDEN",
+    "fresh_anchor": "FORBIDDEN",
+    "fresh_candidate": "FORBIDDEN",
+    "independent_attempts": true,
+    "ovr_failure_invalidates_cat_evidence": false,
+    "planned_forward_count_per_attempted_item": 2,
+    "retry": "FORBIDDEN",
+    "row_substitution": "FORBIDDEN"
+  },
+  "fingerprint_version": 1,
+  "fixed_event_semantics": {
+    "anchor_forbidden_inputs": [
+      "ground truth",
+      "label",
+      "cop",
+      "question text",
+      "candidate text",
+      "model output",
+      "measurement score",
+      "CAT or OVR score"
+    ],
+    "anchor_formula": "anchor_index = int(fingerprint({anchor_protocol_id, anchor_protocol_version, dataset_id, dataset_revision, source_split, source_row_index})[:16], 16) % 4",
+    "anchor_protocol_id": "r4-fixed-event-anchor-deterministic-source-index-hash",
+    "anchor_protocol_version": 1,
+    "cat_measures": "restricted categorical probability assigned to the frozen designated candidate D_i",
+    "designated_candidate": "D_i",
+    "fixed_event": "Y_i = 1[D_i = GT_i]",
+    "ground_truth_candidate": "GT_i",
+    "measured_quantity": "P(D_i correct)",
+    "ovr_measures": "independent binary proposition probability that the frozen designated candidate D_i is correct",
+    "winner_event_redefinition": "FORBIDDEN"
+  },
+  "formal_execution_authorized": false,
+  "measurement_call_contract": {
+    "cat_forwards_per_item": 1,
+    "contract_id": "r4-fixed-event-two-forward-measurement",
+    "contract_version": 1,
+    "ovr_forwards_per_item": 1,
+    "ovr_scope": "designated-candidate-only",
+    "r3_call_contract_inheritance": "REJECTED",
+    "total_forwards_per_item": 2,
+    "unit": "model x population x item"
+  },
+  "measurement_contract_fingerprint": "7b126d300e774cb44d2c47fcb12513865d03c2b08ffd03a5ce409b2ea976e1e5",
+  "model_runtime": {
+    "batch_size": 1,
+    "device": "cuda:0",
+    "dtype": "bfloat16",
+    "enable_thinking": false,
+    "eval_mode": true,
+    "forbidden": [
+      "quantization",
+      "vLLM",
+      "tensor parallel",
+      "multi-GPU",
+      "CPU offload",
+      "torch.compile",
+      "generation"
+    ],
+    "inference_mode": true,
+    "native_architecture_adapter": "only where existing engineering authority requires it",
+    "qwen35_adapter": "existing Qwen35TextBackend path AS-IS",
+    "trust_remote_code": false
+  },
+  "no_verbalizer_fallback": [
+    "leading-space fallback",
+    "uppercase / lowercase fallback",
+    "multi-token fallback",
+    "generation",
+    "string-search over generated text",
+    "tokenizer monkey patch"
+  ],
+  "non_claims": [
+    "This contract is a measurement-execution contract; it is not a scientific outcome.",
+    "It is not a formal R4 execution authorization.",
+    "It does not select a model, a population, a procedure, or a predictor.",
+    "It does not read any real study row, model logit, calibration fit, or metric.",
+    "It freezes the R4 measurement call contract only."
+  ],
+  "offline_policy": {
+    "auto_download_during_formal_run": "FORBIDDEN",
+    "local_files_only": true,
+    "missing_cache": "STOP / MODEL_CACHE_MISSING"
+  },
+  "ovr_contract": {
+    "fixed_event_score": "S_OVR_i = p_true(D_i)",
+    "forwards_per_item": 1,
+    "probability_rule": "restricted softmax over the yes/no logits taken from the same single next-token logits vector",
+    "prompt_contains": [
+      "question / context",
+      "designated candidate D_i only"
+    ],
+    "prompt_excludes": [
+      "the other three candidate descriptions"
+    ],
+    "proposition_id": "independent-binary-anchor-probability",
+    "proposition_scope": "one independent binary proposition for the frozen designated candidate D_i",
+    "proposition_version": 1,
+    "verbalizer_requirements": {
+      "exact_continuation": true,
+      "exactly_one_token_each": true,
+      "two_distinct_token_ids": true
+    },
+    "verbalizers": [
+      "yes",
+      "no"
+    ]
+  },
+  "paired_completeness_gate": {
+    "consumable_condition": "CAT status == SCORED AND OVR status == SCORED for every required frozen row",
+    "forbidden": [
+      "drop row",
+      "replace row",
+      "use only successful pairs"
+    ],
+    "missing_row_effect": "affected model x population block = INCOMPLETE"
+  },
+  "r3_non_inheritance": {
+    "non_designated_candidates": "NO formal OVR forward",
+    "r3_historical_contract": {
+      "authority": "experiments/calibration_transport/run_r3_measurements.py:5, :326, :361-362",
+      "cat_forwards_per_item": 1,
+      "ovr_forwards_per_item": 4,
+      "total_forwards_per_item": 5
+    },
+    "r3_historical_execution": "1 CAT + 4 independent OVR judgments per item",
+    "r3_role": "R3 raw-evidence / winner-diagnostic execution contract",
+    "r4_decision": "DO NOT inherit 4 OVR calls per item",
+    "reason": "the R4 calibration-transport estimand is the externally frozen event Y_i = 1[D_i = GT_i]; CAT and OVR both measure P(D_i correct) and no OVR winner reconstruction is required"
+  },
+  "raw_evidence_contract": {
+    "artifact_scope": "one model x population",
+    "cat_block_fields": [
+      "status",
+      "anchor_score",
+      "restricted candidate probabilities or exact score provenance",
+      "verbalizer token ids",
+      "top-token diagnostic",
+      "source-record fingerprint"
+    ],
+    "cat_restricted_sum_rule": "if four restricted candidate scores are stored their sum must be ~1",
+    "fixed_event_analysis_consumes": "anchor_score only",
+    "ovr_block_fields": [
+      "designated_candidate = D_i",
+      "status",
+      "probability_true",
+      "probability_false",
+      "yes_token_id",
+      "no_token_id",
+      "source-record fingerprint"
+    ],
+    "ovr_block_forbidden": [
+      "four candidate OVR table",
+      "OVR winner"
+    ],
+    "row_required_fields": [
+      "item_id",
+      "source_split",
+      "source_row_index",
+      "population_id",
+      "population_manifest_fingerprint",
+      "anchor (D_i)",
+      "ground_truth_value (GT_i)",
+      "fixed_event (Y_i)",
+      "cat block",
+      "ovr block"
+    ]
+  },
+  "status": "FROZEN",
+  "verbalizer_contract": {
+    "drift_rule": "any model whose tokenizer now yields different identities -> STOP / VERBALIZER_IDENTITY_DRIFT",
+    "models": {
+      "falcon-h1-7b-instruct": {
+        "adapter": "transformers_backend",
+        "cat_token_ids": {
+          "A": 1068,
+          "B": 1069,
+          "C": 1070,
+          "D": 1071
+        },
+        "model_id": "tiiuae/Falcon-H1-7B-Instruct",
+        "negative_token_id": 3257,
+        "negative_verbalizer": "no",
+        "positive_token_id": 5763,
+        "positive_verbalizer": "yes",
+        "revision": "41e72f27effbab80cd45b6e884688452253a3686",
+        "role": "current-generation"
+      },
+      "granite-4-0-h-tiny": {
+        "adapter": "transformers_backend",
+        "cat_token_ids": {
+          "A": 32,
+          "B": 33,
+          "C": 34,
+          "D": 35
+        },
+        "model_id": "ibm-granite/granite-4.0-h-tiny",
+        "negative_token_id": 2201,
+        "negative_verbalizer": "no",
+        "positive_token_id": 9891,
+        "positive_verbalizer": "yes",
+        "revision": "791e0d3d28c86e106c9b6e0b4cecdee0375b6124",
+        "role": "current-generation"
+      },
+      "minicpm5-2b": {
+        "adapter": "transformers_backend",
+        "cat_token_ids": {
+          "A": 54,
+          "B": 55,
+          "C": 56,
+          "D": 57
+        },
+        "model_id": "openbmb/MiniCPM5-2B",
+        "negative_token_id": 3707,
+        "negative_verbalizer": "no",
+        "positive_token_id": 15876,
+        "positive_verbalizer": "yes",
+        "revision": "12a3808a956f869c767195e9266b59c4d21d92e2",
+        "role": "legacy"
+      },
+      "olmo-3-7b-instruct": {
+        "adapter": "transformers_backend",
+        "cat_token_ids": {
+          "A": 32,
+          "B": 33,
+          "C": 34,
+          "D": 35
+        },
+        "model_id": "allenai/Olmo-3-7B-Instruct",
+        "negative_token_id": 2201,
+        "negative_verbalizer": "no",
+        "positive_token_id": 9891,
+        "positive_verbalizer": "yes",
+        "revision": "6e5971d9eba42665f5bd5a0fcf047f299ce1dccc",
+        "role": "current-generation"
+      },
+      "qwen3-5-2b": {
+        "adapter": "qwen35_text",
+        "cat_token_ids": {
+          "A": 32,
+          "B": 33,
+          "C": 34,
+          "D": 35
+        },
+        "model_id": "Qwen/Qwen3.5-2B",
+        "negative_token_id": 2083,
+        "negative_verbalizer": "no",
+        "positive_token_id": 9405,
+        "positive_verbalizer": "yes",
+        "revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+        "role": "legacy"
+      },
+      "qwen3-5-9b": {
+        "adapter": "qwen35_text",
+        "cat_token_ids": {
+          "A": 32,
+          "B": 33,
+          "C": 34,
+          "D": 35
+        },
+        "model_id": "Qwen/Qwen3.5-9B",
+        "negative_token_id": 2083,
+        "negative_verbalizer": "no",
+        "positive_token_id": 9405,
+        "positive_verbalizer": "yes",
+        "revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+        "role": "current-generation"
+      }
+    },
+    "single_token_rule": "any exact verbalizer that is not a single token -> STOP / MEASUREMENT_INTERFACE_DRIFT"
+  },
+  "winner_diagnostic_status": {
+    "adding_extra_ovr_calls_for_winner_agreement": "FORBIDDEN",
+    "r3_historical_diagnostics": "UNTOUCHED",
+    "r4_formal_confirmatory_protocol_includes_four_candidate_ovr_winner_diagnostic": false
+  },
+  "workload": {
+    "derivation": "mechanically derived from the frozen required execution grid and the frozen 2-forward contract",
+    "grid": {
+      "hellaswag_current_generation": {
+        "models": 4,
+        "test_rows_per_model": 10042,
+        "train_rows_per_model": 912,
+        "train_source": "frozen N912 union",
+        "unique_model_item_rows": 43816,
+        "unique_rows_per_model": 10954
+      },
+      "hellaswag_legacy": {
+        "models": 2,
+        "test_rows_per_model": 10042,
+        "train_rows_per_model": 456,
+        "unique_model_item_rows": 20996,
+        "unique_rows_per_model": 10498
+      },
+      "medmcqa_current_generation": {
+        "models": 4,
+        "test_rows_per_model": 4162,
+        "train_rows_per_model": 912,
+        "train_source": "frozen N912 union",
+        "unique_model_item_rows": 20296,
+        "unique_rows_per_model": 5074
+      },
+      "medmcqa_legacy": {
+        "models": 2,
+        "test_rows_per_model": 4162,
+        "train_rows_per_model": 456,
+        "unique_model_item_rows": 9236,
+        "unique_rows_per_model": 4618
+      },
+      "mmlu_current_generation": {
+        "models": 4,
+        "test_rows_per_model": 1140,
+        "train_rows_per_model": 456,
+        "unique_model_item_rows": 6384,
+        "unique_rows_per_model": 1596
+      },
+      "r3_legacy_mmlu": {
+        "do_not_rerun": true,
+        "new_item_measurements": 0,
+        "status": "FROZEN_EXISTING"
+      }
+    },
+    "legacy_n912_semantics": {
+      "legacy_hellaswag_required_train": 456,
+      "legacy_medmcqa_required_train": 456,
+      "legacy_n912": "NOT REQUIRED / NOT MEASURED IN THE FORMAL R4 PLAN"
+    },
+    "n912_extension": {
+      "additional_forwards": 7296,
+      "current_generation_models": 4,
+      "extension_rows_per_model_per_population": 456,
+      "identity": "97080 + 3648 = 100728 ; 194160 + 7296 = 201456",
+      "populations": 2,
+      "unique_model_item_rows": 3648
+    },
+    "n912_semantics": {
+      "current_generation_hellaswag_raw_train_union": 912,
+      "current_generation_medmcqa_raw_train_union": 912,
+      "n912_robustness_consumes": "full N912",
+      "primary_fit_consumes": "selected N456 subset",
+      "raw_scores": "measured once, reused"
+    },
+    "primary_only_audit": {
+      "total_forwards": 194160,
+      "unique_model_item_rows": 97080
+    },
+    "protocol": "r4-measurement-workload-audit",
+    "protocol_version": 2,
+    "rejected_previous_numbers": {
+      "previous_inherited_r3_calls": 521880,
+      "previous_item_measurements": 104376,
+      "reasons": [
+        "the inherited 5-call-per-item R3 contract is not the R4 contract",
+        "the nested N912 must reuse N456 raw measurement rows",
+        "required N912 robustness applies to the current-generation panel, not legacy secondary cells"
+      ],
+      "scientific_estimand_changes": "NONE",
+      "status": "NOT AUTHORITATIVE"
+    },
+    "totals": {
+      "required_cat_forwards": 100728,
+      "required_ovr_forwards": 100728,
+      "required_total_forwards": 201456,
+      "required_unique_model_item_rows": 100728
+    }
+  }
+}

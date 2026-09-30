@@ -1,0 +1,469 @@
+{
+  "artifact_type": "r4-calibration-family-semantic-candidate",
+  "artifact_version": 1,
+  "candidate_procedures": [
+    {
+      "fingerprint": "cd13bc07bf92f3375bcd16d57fa5f515cd40f68199b57181791f85c58be8c244",
+      "label": "I-isotonic",
+      "payload": {
+        "endpoint_policy_id": "exact-raw-probability-accepted",
+        "endpoint_policy_version": 1,
+        "failure_rule_id": "structural-numerical-contract-violation",
+        "failure_rule_version": 1,
+        "family_id": "monotone-isotonic-fixed-decision-probability",
+        "family_version": 1,
+        "feature_id": "identity-raw-probability",
+        "feature_version": 1,
+        "fitting_data_protocol_id": "paired-frozen-decision-train",
+        "fitting_data_protocol_version": 1,
+        "hyperparameter_rule_id": "no-hyperparameter",
+        "hyperparameter_rule_version": 1,
+        "interpolation_policy_id": "piecewise-linear-between-thresholds",
+        "interpolation_policy_version": 1,
+        "l2_strength": null,
+        "label": "I-isotonic",
+        "monotone_direction": "increasing",
+        "objective_id": "mean-squared-error",
+        "objective_version": 1,
+        "out_of_source_support_policy_id": "nearest-endpoint-constant-extension",
+        "out_of_source_support_policy_version": 1,
+        "parameter_constraints_id": "non-decreasing-step-function",
+        "parameter_constraints_version": 1,
+        "procedure_id": "r4-procedure-I-isotonic",
+        "procedure_version": 1,
+        "regularization_rule_id": "no-regularization",
+        "regularization_rule_version": 1,
+        "selection_rule_id": "fixed-panel-no-selection",
+        "selection_rule_version": 1,
+        "tie_policy_id": "exact-score-aggregation-weighted-pava",
+        "tie_policy_version": 1
+      }
+    },
+    {
+      "fingerprint": "f4b710fb98f7c3056794aa709d53309f462a8f598cef8089d2f9c0ed6f7e37ff",
+      "label": "B-beta",
+      "payload": {
+        "application_endpoint_policy_id": "exact-limit-at-endpoints",
+        "application_endpoint_policy_version": 1,
+        "distinct_score_equality_id": "exact-binary64-score-equality-no-tolerance",
+        "distinct_score_equality_version": 1,
+        "distinct_score_rule_id": "minimum-three-exact-distinct-interior-scores",
+        "distinct_score_rule_version": 1,
+        "failure_rule_id": "structural-numerical-contract-violation",
+        "failure_rule_version": 1,
+        "family_id": "full-monotone-beta-fixed-decision-probability",
+        "family_version": 1,
+        "feature_id": "log-odds-beta-pair",
+        "feature_version": 1,
+        "finite_optimum_rule_id": "unique-finite-constrained-optimum-under-frozen-kkt-convergence-contract",
+        "finite_optimum_rule_version": 1,
+        "fitting_data_protocol_id": "paired-frozen-decision-train",
+        "fitting_data_protocol_version": 1,
+        "hyperparameter_rule_id": "no-hyperparameter",
+        "hyperparameter_rule_version": 1,
+        "identifiability_rule_id": "full-three-parameter-design-no-reduction",
+        "identifiability_rule_version": 1,
+        "l2_strength": null,
+        "label": "B-beta",
+        "monotone_direction": "increasing",
+        "monotone_separation_rule_id": "reject-increasing-monotone-separation",
+        "monotone_separation_rule_version": 1,
+        "objective_id": "mean-bernoulli-nll",
+        "objective_version": 1,
+        "out_of_source_support_policy_id": "parametric-application-no-clipping",
+        "out_of_source_support_policy_version": 1,
+        "parameter_constraints_id": "nonnegative-a-nonnegative-b",
+        "parameter_constraints_version": 1,
+        "procedure_id": "r4-procedure-B-beta",
+        "procedure_version": 1,
+        "regularization_rule_id": "no-regularization",
+        "regularization_rule_version": 1,
+        "reversed_orientation_rule_id": "reversed-orientation-not-monotone-separation",
+        "reversed_orientation_rule_version": 1,
+        "selection_rule_id": "fixed-panel-no-selection",
+        "selection_rule_version": 1,
+        "single_class_policy_id": "fit-ineligible-single-class",
+        "single_class_policy_version": 1,
+        "tie_policy_id": "not-applicable-continuous-map",
+        "tie_policy_version": 1,
+        "train_endpoint_policy_id": "reject-exact-probability-endpoints",
+        "train_endpoint_policy_version": 1
+      }
+    }
+  ],
+  "r3_continuity": {
+    "all_match": true,
+    "design_path": "experiments/calibration_transport/r3_protocol_design.json",
+    "procedures": [
+      {
+        "actual_fingerprint": "7a8e13d51e131f2102cca4e00b172c8bbb2eb49e591acd3746aeb64d003c8857",
+        "declared_fingerprint": "7a8e13d51e131f2102cca4e00b172c8bbb2eb49e591acd3746aeb64d003c8857",
+        "expected_fingerprint": "7a8e13d51e131f2102cca4e00b172c8bbb2eb49e591acd3746aeb64d003c8857",
+        "label": "P-low",
+        "match": true,
+        "payload": {
+          "endpoint_policy_id": "exact-raw-probability-accepted",
+          "endpoint_policy_version": 1,
+          "family_id": "research-l2-logistic-fixed-decision-probability",
+          "family_version": 1,
+          "feature_id": "identity-raw-probability",
+          "feature_version": 1,
+          "fitting_data_protocol_id": "paired-frozen-decision-train",
+          "fitting_data_protocol_version": 1,
+          "l2_strength": 0.0001,
+          "label": "P-low",
+          "objective_id": "mean-bernoulli-nll-plus-l2",
+          "objective_version": 1,
+          "procedure_id": "r3-procedure-P-low",
+          "procedure_version": 1,
+          "regularization_rule_id": "fixed-l2-strength",
+          "regularization_rule_version": 1,
+          "selection_rule_id": "fixed-panel-no-selection",
+          "selection_rule_version": 1
+        }
+      },
+      {
+        "actual_fingerprint": "a44e9217dd43e5e29d859c8dd2dc510a5876db4d46a8e0cc2fd4f1df3121a423",
+        "declared_fingerprint": "a44e9217dd43e5e29d859c8dd2dc510a5876db4d46a8e0cc2fd4f1df3121a423",
+        "expected_fingerprint": "a44e9217dd43e5e29d859c8dd2dc510a5876db4d46a8e0cc2fd4f1df3121a423",
+        "label": "P-historical",
+        "match": true,
+        "payload": {
+          "endpoint_policy_id": "exact-raw-probability-accepted",
+          "endpoint_policy_version": 1,
+          "family_id": "research-l2-logistic-fixed-decision-probability",
+          "family_version": 1,
+          "feature_id": "identity-raw-probability",
+          "feature_version": 1,
+          "fitting_data_protocol_id": "paired-frozen-decision-train",
+          "fitting_data_protocol_version": 1,
+          "l2_strength": 0.01,
+          "label": "P-historical",
+          "objective_id": "mean-bernoulli-nll-plus-l2",
+          "objective_version": 1,
+          "procedure_id": "r3-procedure-P-historical",
+          "procedure_version": 1,
+          "regularization_rule_id": "fixed-l2-strength",
+          "regularization_rule_version": 1,
+          "selection_rule_id": "fixed-panel-no-selection",
+          "selection_rule_version": 1
+        }
+      },
+      {
+        "actual_fingerprint": "91d7d506275aade7d4676c39722ac2c4d975de7967a25a808395c056307ad619",
+        "declared_fingerprint": "91d7d506275aade7d4676c39722ac2c4d975de7967a25a808395c056307ad619",
+        "expected_fingerprint": "91d7d506275aade7d4676c39722ac2c4d975de7967a25a808395c056307ad619",
+        "label": "L-low",
+        "match": true,
+        "payload": {
+          "endpoint_policy_id": "reject-exact-probability-endpoints",
+          "endpoint_policy_version": 1,
+          "family_id": "research-l2-logistic-logit-fixed-decision-probability",
+          "family_version": 1,
+          "feature_id": "exact-logit-probability",
+          "feature_version": 1,
+          "fitting_data_protocol_id": "paired-frozen-decision-train",
+          "fitting_data_protocol_version": 1,
+          "l2_strength": 0.0001,
+          "label": "L-low",
+          "objective_id": "mean-bernoulli-nll-plus-l2",
+          "objective_version": 1,
+          "procedure_id": "r3-procedure-L-low",
+          "procedure_version": 1,
+          "regularization_rule_id": "fixed-l2-strength",
+          "regularization_rule_version": 1,
+          "selection_rule_id": "fixed-panel-no-selection",
+          "selection_rule_version": 1
+        }
+      },
+      {
+        "actual_fingerprint": "23ec12bbf4a809ba2f419491df80d1f228d3fd778d848115839aab3697f9dd58",
+        "declared_fingerprint": "23ec12bbf4a809ba2f419491df80d1f228d3fd778d848115839aab3697f9dd58",
+        "expected_fingerprint": "23ec12bbf4a809ba2f419491df80d1f228d3fd778d848115839aab3697f9dd58",
+        "label": "L-historical",
+        "match": true,
+        "payload": {
+          "endpoint_policy_id": "reject-exact-probability-endpoints",
+          "endpoint_policy_version": 1,
+          "family_id": "research-l2-logistic-logit-fixed-decision-probability",
+          "family_version": 1,
+          "feature_id": "exact-logit-probability",
+          "feature_version": 1,
+          "fitting_data_protocol_id": "paired-frozen-decision-train",
+          "fitting_data_protocol_version": 1,
+          "l2_strength": 0.01,
+          "label": "L-historical",
+          "objective_id": "mean-bernoulli-nll-plus-l2",
+          "objective_version": 1,
+          "procedure_id": "r3-procedure-L-historical",
+          "procedure_version": 1,
+          "regularization_rule_id": "fixed-l2-strength",
+          "regularization_rule_version": 1,
+          "selection_rule_id": "fixed-panel-no-selection",
+          "selection_rule_version": 1
+        }
+      }
+    ],
+    "protocol_fingerprint": "3ef63056ae16b18ad65d9c87d1fbec5b43550873a0e3e25ec0a323f954ee974d",
+    "protocol_id": "r3-confirmatory-procedure-conditioned-transport"
+  },
+  "semantic_probes": {
+    "beta": {
+      "eligibility_gate_order": {
+        "endpoint_before_single_class": "INELIGIBLE_ENDPOINT",
+        "insufficient_support_before_separation": "BETA_FIT_INELIGIBLE_INSUFFICIENT_DISTINCT_SCORES",
+        "single_class_before_insufficient_support": "BETA_FIT_INELIGIBLE_SINGLE_CLASS"
+      },
+      "endpoint_limits": {
+        "a_positive_maps_zero_to_zero": true,
+        "a_zero_maps_zero_to_sigmoid_c": true,
+        "b_positive_maps_one_to_one": true,
+        "b_zero_maps_one_to_sigmoid_c": true
+      },
+      "identity_map": {
+        "identity_holds": true,
+        "max_abs_error": 1.1102230246251565e-16
+      },
+      "insufficient_distinct_scores": {
+        "one_distinct_interior_score": "BETA_FIT_INELIGIBLE_INSUFFICIENT_DISTINCT_SCORES",
+        "three_distinct_interior_scores_eligible": "ELIGIBLE",
+        "two_distinct_interior_scores": "BETA_FIT_INELIGIBLE_INSUFFICIENT_DISTINCT_SCORES"
+      },
+      "monotone_separation": {
+        "increasing_complete_separation": "BETA_FIT_INELIGIBLE_MONOTONE_SEPARATION",
+        "increasing_quasi_separation_shared_boundary_score": "BETA_FIT_INELIGIBLE_MONOTONE_SEPARATION",
+        "interleaved_labels_eligible": true,
+        "reversed_orientation_not_pre_rejected": true,
+        "reversed_orientation_state": "ELIGIBLE"
+      },
+      "monotonicity_under_constraints": {
+        "non_decreasing": true
+      },
+      "negative_parameters_rejected": {
+        "all_rejected": true,
+        "rejected_pairs": [
+          [
+            -0.1,
+            1.0
+          ],
+          [
+            1.0,
+            -0.1
+          ]
+        ]
+      },
+      "objective_finite_for_interior_inputs": {
+        "finite": true,
+        "objective": 1.1390950054546647
+      },
+      "parametric_extrapolation_no_clipping": {
+        "equals_identity_outside": true,
+        "no_clip_above": true,
+        "no_clip_below": true,
+        "train_range": [
+          0.2,
+          0.8
+        ],
+        "value_above_train_max": 0.9499999999999998,
+        "value_at_train_min": 0.2,
+        "value_below_train_min": 0.05000000000000002
+      },
+      "single_class_rule": {
+        "all_one": "BETA_FIT_INELIGIBLE_SINGLE_CLASS",
+        "all_zero": "BETA_FIT_INELIGIBLE_SINGLE_CLASS",
+        "mixed_two_distinct_scores": "BETA_FIT_INELIGIBLE_INSUFFICIENT_DISTINCT_SCORES"
+      },
+      "train_endpoint_ineligible": {
+        "both_ineligible": true,
+        "states": [
+          {
+            "score": 0.0,
+            "state": "INELIGIBLE_ENDPOINT"
+          },
+          {
+            "score": 1.0,
+            "state": "INELIGIBLE_ENDPOINT"
+          }
+        ]
+      }
+    },
+    "isotonic": {
+      "all_labels_one": {
+        "constant_one": true,
+        "thresholds": [
+          [
+            0.2,
+            1.0
+          ],
+          [
+            0.5,
+            1.0
+          ],
+          [
+            0.9,
+            1.0
+          ]
+        ]
+      },
+      "all_labels_zero": {
+        "constant_zero": true,
+        "thresholds": [
+          [
+            0.2,
+            0.0
+          ],
+          [
+            0.5,
+            0.0
+          ],
+          [
+            0.9,
+            0.0
+          ]
+        ]
+      },
+      "all_scores_equal": {
+        "constant_at_positive_fraction": true,
+        "thresholds": [
+          [
+            0.4,
+            0.6666666666666666
+          ]
+        ]
+      },
+      "boundary_extension_and_interior": {
+        "above_train_max_constant": true,
+        "below_train_min_constant": true,
+        "exact_input_one_constant": true,
+        "exact_input_zero_constant": true,
+        "interior_is_linear_midpoint": true,
+        "no_parametric_extrapolation": true,
+        "thresholds": [
+          [
+            0.3,
+            0.0
+          ],
+          [
+            0.6,
+            1.0
+          ]
+        ]
+      },
+      "grid_monotonicity_and_range": {
+        "non_decreasing_on_grid": true,
+        "output_within_unit_interval": true
+      },
+      "monotonicity_violation_requires_pooling": {
+        "pooled_into_single_value": true,
+        "thresholds": [
+          [
+            0.1,
+            0.25
+          ],
+          [
+            0.2,
+            0.25
+          ],
+          [
+            0.3,
+            0.25
+          ],
+          [
+            0.4,
+            0.25
+          ]
+        ]
+      },
+      "repeated_exact_scores": {
+        "first_threshold_is_exact_mean": true,
+        "thresholds": [
+          [
+            0.2,
+            0.6666666666666666
+          ],
+          [
+            0.6,
+            1.0
+          ]
+        ]
+      },
+      "strictly_increasing_distinct_scores": {
+        "non_decreasing": true,
+        "thresholds": [
+          [
+            0.1,
+            0.0
+          ],
+          [
+            0.2,
+            0.0
+          ],
+          [
+            0.3,
+            1.0
+          ],
+          [
+            0.4,
+            1.0
+          ],
+          [
+            0.5,
+            1.0
+          ]
+        ]
+      }
+    },
+    "row_order_determinism": {
+      "beta_eligibility": {
+        "as_given": "ELIGIBLE",
+        "reversed": "ELIGIBLE",
+        "rotated": "ELIGIBLE"
+      },
+      "beta_eligibility_identical": true,
+      "candidate_fingerprint_identical": true,
+      "predictions": {
+        "as_given": [
+          0.3333333333333333,
+          0.3333333333333333,
+          0.5833333333333334,
+          1.0,
+          1.0
+        ],
+        "reversed": [
+          0.3333333333333333,
+          0.3333333333333333,
+          0.5833333333333334,
+          1.0,
+          1.0
+        ],
+        "rotated": [
+          0.3333333333333333,
+          0.3333333333333333,
+          0.5833333333333334,
+          1.0,
+          1.0
+        ]
+      },
+      "thresholds": [
+        [
+          0.2,
+          0.3333333333333333
+        ],
+        [
+          0.4,
+          0.5
+        ],
+        [
+          0.7,
+          1.0
+        ],
+        [
+          0.9,
+          1.0
+        ]
+      ],
+      "thresholds_identical_across_orderings": true
+    }
+  },
+  "status": "SEMANTIC CANDIDATE / NOT FROZEN / NO STUDY FITTING / NO EXECUTION AUTHORIZATION"
+}

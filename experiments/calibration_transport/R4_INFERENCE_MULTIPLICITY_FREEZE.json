@@ -1,0 +1,1278 @@
+{
+  "artifact_type": "r4-inference-multiplicity-freeze",
+  "artifact_version": 1,
+  "calibration_family_freeze_identity": {
+    "path": "experiments/calibration_transport/R4_CALIBRATION_FAMILY_FREEZE.md",
+    "sha256": "1fd06ad4804cb64cd9220cc86187e26f6d690fba977bd76918e057bab418cdff",
+    "status": "R4 CALIBRATION-FAMILY SEMANTICS: FROZEN"
+  },
+  "candidate_artifact_identity": {
+    "artifact_type": "r4-inference-multiplicity-semantic-candidate",
+    "artifact_version": 1,
+    "candidate_fingerprint": "5e10be53c8151d10992b70f4940d0e6f6a7aa83dfe4d5cd49e62b485b0c5e267",
+    "fingerprint_version": 1,
+    "status": "CANDIDATE / NOT FROZEN / NO STUDY FITTING / NO EXECUTION AUTHORIZATION"
+  },
+  "candidate_artifacts": [
+    {
+      "lines": 1135,
+      "path": "experiments/calibration_transport/R4_INFERENCE_MULTIPLICITY_SEMANTIC_CANDIDATE.json",
+      "role": "reviewed semantic candidate payload",
+      "sha256": "7307b075370ca478a26aaace932fa7a3a8498342b845a99df7c9ef2b10251a5d"
+    },
+    {
+      "lines": 771,
+      "path": "experiments/calibration_transport/R4_INFERENCE_MULTIPLICITY_SEMANTIC_CANDIDATE.md",
+      "role": "reviewed semantic candidate rationale",
+      "sha256": "724706172c141bc3a533aa32fe2ef3ab62424dde2d2d6cd6e091f6e15e230f53"
+    }
+  ],
+  "candidate_commit": "2ef9d31cda96dfc3bb326625dad0df061bb7063e",
+  "creation_provenance": {
+    "date": "2026-09-30",
+    "freeze_specific_metadata_only": true,
+    "outcome_firewall": "pre-outcome: no model outcome, no calibration fit on real study scores, no bootstrap draw, no Brier/LogLoss/transport result",
+    "semantic_equivalence_audit": {
+      "compared_keys": 33,
+      "differing_keys": [],
+      "result": "EXACT_SEMANTIC_EQUIVALENCE"
+    },
+    "source_candidate_commit": "2ef9d31cda96dfc3bb326625dad0df061bb7063e",
+    "source_candidate_fingerprint": "5e10be53c8151d10992b70f4940d0e6f6a7aa83dfe4d5cd49e62b485b0c5e267",
+    "stage": "semantic freeze",
+    "task": "R4 Inference + Multiplicity Freeze + Pre-outcome Statistical Infrastructure Implementation Engineering"
+  },
+  "fingerprint_version": 1,
+  "freeze_fingerprint": "dcbb7ac9e931145fdee86ab984de1249c1b86ca36ee735b70dafc8cabc06c141",
+  "freeze_scope": {
+    "frozen": [
+      "primary fixed model panel",
+      "legacy secondary role",
+      "estimands R_raw / R_native / R_cross",
+      "deltas Delta_native / Delta_deploy / Delta_transport",
+      "population weighting (MMLU / HellaSwag / MedMCQA)",
+      "TEST bootstrap architecture, modes and replicate count",
+      "TRAIN-refit bootstrap architecture and replicate count",
+      "primary family size and tails",
+      "I/B extension family size and tails",
+      "direction-difference family size and tails",
+      "native-reference family size and tails",
+      "N912 robustness role",
+      "full-fit failure rules",
+      "TRAIN-refit failure rules",
+      "measurement completeness rule",
+      "exact LogLoss extended-real policy",
+      "generalization limits",
+      "scientific non-claims"
+    ],
+    "not_frozen": [
+      "formal R4 measurement execution",
+      "formal R4 bootstrap execution",
+      "formal R4 analysis results",
+      "target-label-free predictor design",
+      "final R4 protocol integration"
+    ]
+  },
+  "frozen_authorities": [
+    {
+      "path": "experiments/calibration_transport/R4_POPULATION_FREEZE.md",
+      "role": "R4 POPULATION LAYER: FROZEN",
+      "sha256": "850b6b24da61f416b76d0bac83a4ba2775d3002e94894f003fd2e0a5488fee2a"
+    },
+    {
+      "path": "experiments/calibration_transport/R4_CALIBRATION_FAMILY_FREEZE.md",
+      "role": "calibration-family semantics frozen (six procedures)",
+      "sha256": "1fd06ad4804cb64cd9220cc86187e26f6d690fba977bd76918e057bab418cdff"
+    },
+    {
+      "path": "experiments/calibration_transport/R4_CALIBRATION_FAMILY_SEMANTIC_CANDIDATE.json",
+      "role": "calibration-family semantic candidate record",
+      "sha256": "41eaf954cfd29eb870d75e59feae34a1af1700b0c0ba3f3984d713bbcc549fe4"
+    },
+    {
+      "path": "experiments/calibration_transport/R4_CALIBRATION_FAMILY_SEMANTIC_CLOSURE.md",
+      "role": "calibration-family semantic closure",
+      "sha256": "10a3ab9e7d0849c0aeeeac29c3b7cb6f0bc1fcb54cac97b6c4ee585d2efe2085"
+    },
+    {
+      "path": "experiments/calibration_transport/R4_CALIBRATION_FAMILY_IMPLEMENTATION_ENGINEERING.md",
+      "role": "calibration production implementation engineering record",
+      "sha256": "812fd873de3ce882d35c6e46aac0edb4b09278a44fecef5088478b796174e6fe"
+    },
+    {
+      "path": "experiments/calibration_transport/R4_CALIBRATION_IMPLEMENTATION_ENVIRONMENT.md",
+      "role": "pinned calibration implementation environment provenance",
+      "sha256": "69af279986353cdc9bce33dd175a1a1f7f198056e445281bc4d13849cc5e104c"
+    },
+    {
+      "path": "experiments/calibration_transport/r4_calibration_families.py",
+      "role": "production I-isotonic / B-beta implementation",
+      "sha256": "e5b00548429b5b0999d5847db47e1f4c1ae113ee19854c053aeaca1058536ec3"
+    },
+    {
+      "path": "experiments/calibration_transport/r3_protocol.py",
+      "role": "R3 protocol implementation (read-only continuity reference)",
+      "sha256": "46a7c0ec8e5da95a37868d89f5fc110687e66e65599ee4ac3d0602100435197e"
+    },
+    {
+      "path": "experiments/calibration_transport/r3_protocol_design.json",
+      "role": "R3 protocol design (read-only continuity reference)",
+      "sha256": "cb54090f08c99c1a666ba297a896ec7be7940f6c295abddd5d594c1dabe90a43"
+    },
+    {
+      "path": "experiments/calibration_transport/r3_analysis.py",
+      "role": "R3 analysis + frozen nearest-rank percentile rule",
+      "sha256": "819f299304703d27ff89af7e8cfc00e6bffcb8d9ae11d8bb1724db0d7cc6a0c5"
+    }
+  ],
+  "frozen_semantic_payload": {
+    "algorithm_ordering": {
+      "deterministic_ordering": [
+        "stratum ordering",
+        "pool ordering",
+        "draw ordering",
+        "cluster expansion ordering",
+        "model ordering",
+        "population ordering",
+        "direction ordering",
+        "procedure ordering"
+      ],
+      "must_not_depend_on": [
+        "dict insertion accident",
+        "filesystem order",
+        "OS locale",
+        "Python hash randomization"
+      ],
+      "replicate_numbering": "0 ... N-1",
+      "uses_frozen_canonical_labels": true
+    },
+    "authority": {
+      "entry_commit": "5185f5044fdccf0d976f953a0ff2d6c93c91a08a",
+      "entry_commit_message": "experiments: implement R4 calibration families",
+      "frozen_artifacts_unchanged": true,
+      "frozen_inputs": [
+        {
+          "path": "experiments/calibration_transport/R4_POPULATION_FREEZE.md",
+          "role": "R4 POPULATION LAYER: FROZEN",
+          "sha256": "850b6b24da61f416b76d0bac83a4ba2775d3002e94894f003fd2e0a5488fee2a"
+        },
+        {
+          "path": "experiments/calibration_transport/R4_CALIBRATION_FAMILY_FREEZE.md",
+          "role": "calibration-family semantics frozen (six procedures)",
+          "sha256": "1fd06ad4804cb64cd9220cc86187e26f6d690fba977bd76918e057bab418cdff"
+        },
+        {
+          "path": "experiments/calibration_transport/R4_CALIBRATION_FAMILY_SEMANTIC_CANDIDATE.json",
+          "role": "calibration-family semantic candidate record",
+          "sha256": "41eaf954cfd29eb870d75e59feae34a1af1700b0c0ba3f3984d713bbcc549fe4"
+        },
+        {
+          "path": "experiments/calibration_transport/R4_CALIBRATION_FAMILY_SEMANTIC_CLOSURE.md",
+          "role": "calibration-family semantic closure",
+          "sha256": "10a3ab9e7d0849c0aeeeac29c3b7cb6f0bc1fcb54cac97b6c4ee585d2efe2085"
+        },
+        {
+          "path": "experiments/calibration_transport/R4_CALIBRATION_FAMILY_IMPLEMENTATION_ENGINEERING.md",
+          "role": "production implementation engineering record",
+          "sha256": "812fd873de3ce882d35c6e46aac0edb4b09278a44fecef5088478b796174e6fe"
+        },
+        {
+          "path": "experiments/calibration_transport/R4_CALIBRATION_IMPLEMENTATION_ENVIRONMENT.md",
+          "role": "pinned environment provenance",
+          "sha256": "69af279986353cdc9bce33dd175a1a1f7f198056e445281bc4d13849cc5e104c"
+        },
+        {
+          "path": "experiments/calibration_transport/r4_calibration_families.py",
+          "role": "production I-isotonic / B-beta implementation",
+          "sha256": "e5b00548429b5b0999d5847db47e1f4c1ae113ee19854c053aeaca1058536ec3"
+        },
+        {
+          "path": "experiments/calibration_transport/r3_protocol.py",
+          "role": "R3 protocol implementation (read-only continuity reference)",
+          "sha256": "46a7c0ec8e5da95a37868d89f5fc110687e66e65599ee4ac3d0602100435197e"
+        },
+        {
+          "path": "experiments/calibration_transport/r3_protocol_design.json",
+          "role": "R3 protocol design (read-only continuity reference)",
+          "sha256": "cb54090f08c99c1a666ba297a896ec7be7940f6c295abddd5d594c1dabe90a43"
+        },
+        {
+          "path": "experiments/calibration_transport/r3_analysis.py",
+          "role": "R3 analysis + frozen nearest-rank percentile rule",
+          "sha256": "819f299304703d27ff89af7e8cfc00e6bffcb8d9ae11d8bb1724db0d7cc6a0c5"
+        }
+      ],
+      "population_manifest_conflicts": 0
+    },
+    "contrast_bootstrap_rule": {
+      "applies_to": [
+        "factorial contrasts",
+        "Delta_deploy",
+        "Delta_transport",
+        "Delta_native",
+        "direction differences",
+        "N912-N456 differences",
+        "panel averages"
+      ],
+      "interval_endpoint_subtraction_or_averaging_forbidden": true,
+      "rule": "for each replicate, calculate the contrast directly"
+    },
+    "estimands": {
+      "cross_application_rule": "g_F^A is fitted on SOURCE measurement A TRAIN probabilities and applied to TARGET measurement B TEST scores S_B. It is never applied to S_A.",
+      "delta_deploy_interpretation": "Delta_deploy < 0 = deployment improvement relative to raw; Delta_deploy > 0 = deployment degradation relative to raw",
+      "delta_native_role": "reference behavior of target-native calibration relative to raw; never a substitute for Delta_deploy or Delta_transport",
+      "delta_transport_interpretation": "Delta_transport > 0 = positive transport penalty; Delta_transport < 0 = cross has lower Brier than native in that condition",
+      "deltas": {
+        "Delta_deploy": "R_cross(m,p,d,F) - R_raw(m,p,d)",
+        "Delta_native": "R_native(m,p,d,F) - R_raw(m,p,d)",
+        "Delta_transport": "R_cross(m,p,d,F) - R_native(m,p,d,F)"
+      },
+      "estimands_kept_separate": [
+        "Delta_deploy",
+        "Delta_transport",
+        "Delta_native"
+      ],
+      "model_population_direction_unit": "m x p x d",
+      "negative_transport_wording_forbidden": [
+        "transport succeeded",
+        "transport bonus",
+        "universal compatibility"
+      ],
+      "risk_definitions": {
+        "R_cross": "mean loss(g_F^A(S_B), Y)",
+        "R_native": "mean loss(g_F^B(S_B), Y)",
+        "R_raw": "mean loss(S_B, Y)"
+      }
+    },
+    "family_fwer_scope": {
+      "bonferroni_guarantee": "within-family FWER only",
+      "cross_family_fwer_claim_forbidden": true,
+      "declared_families": {
+        "primary": 12,
+        "secondary_direction_difference": 6,
+        "secondary_extension": 8,
+        "secondary_native_reference": 12
+      },
+      "primary_scientific_conclusion_owner": "PRIMARY 12",
+      "secondary_families_cannot_rescue_primary": true
+    },
+    "fit_failure_rules": {
+      "dependency_specific_incompleteness": {
+        "complete_case_average_forbidden": true,
+        "eligibility_coverage_matrix_required": true,
+        "isotonic_beta_extension": "if any required current-generation primary-panel cell is ineligible for that procedure, the corresponding panel extension hypothesis = INCOMPLETE",
+        "primary_factorial": "depends on the four logistic-core procedures; if any required primary cell lacks a core procedure full fit, the corresponding direction x estimand primary hypothesis = INCOMPLETE"
+      },
+      "full_train_point_fit_fail_closed": true,
+      "on_failure": [
+        "record exact state",
+        "NO fallback",
+        "NO clipping",
+        "NO row filtering"
+      ],
+      "panel_hypothesis_dependency": "if a panel-level inferential hypothesis depends on any missing cell, that hypothesis = INCOMPLETE",
+      "silent_cell_drop_from_panel_aggregate_forbidden": true,
+      "unaffected_procedures_still_reported": true
+    },
+    "generalization_scope": {
+      "post_hoc_generalization_threshold_forbidden": true,
+      "supported_wording": "within the predeclared current-generation R4 panel and the three declared populations, the panel-averaged contrast ...",
+      "unit_consistency_wording": "observed across multiple declared conditions",
+      "unsupported_wording": [
+        "all models",
+        "all benchmarks",
+        "all calibration settings",
+        "universal directional asymmetry"
+      ]
+    },
+    "heterogeneity_reporting": {
+      "allowed_descriptive": [
+        "per-population 4-model mean",
+        "per-model 3-population mean",
+        "unit min/max",
+        "unit median",
+        "unit IQR",
+        "sign pattern",
+        "complete heatmap/table"
+      ],
+      "forbidden": [
+        "t-test over 24 units",
+        "random-effects meta-analysis",
+        "naive standard error over units",
+        "six procedures treated as independent replication"
+      ],
+      "full_24_unit_reporting_required": true
+    },
+    "implementation_impact_for_later_freeze_stage": [
+      "population-aware bootstrap sampler",
+      "Hella cluster sampler",
+      "TRAIN-refit sampler",
+      "risk matrix",
+      "unit estimands",
+      "factorial transforms",
+      "panel aggregation",
+      "nearest-rank intervals",
+      "family-specific adjusted intervals",
+      "direction contrasts",
+      "fit-failure dependency graph",
+      "exact LogLoss extended-real cells",
+      "N912 paired robustness",
+      "determinism fingerprints"
+    ],
+    "legacy_secondary_panel": {
+      "cannot_alter_primary_multiplicity": true,
+      "cannot_rescue_primary_panel": true,
+      "cannot_retroactively_upgrade_r3_replication": true,
+      "directions": [
+        {
+          "direction_id": "CAT->OVR",
+          "source_measurement": "A",
+          "target_measurement": "B"
+        },
+        {
+          "direction_id": "OVR->CAT",
+          "source_measurement": "B",
+          "target_measurement": "A"
+        }
+      ],
+      "models": [
+        {
+          "model_id": "openbmb/MiniCPM5-2B",
+          "panel_role": "legacy-lineage",
+          "revision": "12a3808a956f869c767195e9266b59c4d21d92e2"
+        },
+        {
+          "model_id": "Qwen/Qwen3.5-2B",
+          "panel_role": "legacy-lineage",
+          "revision": "15852e8c16360a2fea060d615a32b45270f8a8fc"
+        }
+      ],
+      "populations": [
+        "r4-hellaswag-activity-primary",
+        "r4-medmcqa-subject-primary"
+      ],
+      "r3_mmlu_cells_excluded": true,
+      "reports": [
+        "R_raw",
+        "R_native",
+        "R_cross",
+        "Delta_native",
+        "Delta_deploy",
+        "Delta_transport",
+        "all six procedures"
+      ],
+      "role": "secondary-lineage-continuity-extension",
+      "unit_count": 8
+    },
+    "logloss_extended_real_policy": {
+      "always_secondary": true,
+      "bootstrap_contrast_with_undefined": "that secondary LogLoss interval = INCOMPLETE / UNDEFINED",
+      "cannot_rescue_brier_primary_inference": true,
+      "difference_table": {
+        "+inf - +inf": "UNDEFINED_EXTENDED_REAL",
+        "+inf - finite": "+inf",
+        "finite - +inf": "-inf",
+        "finite - finite": "defined"
+      },
+      "infinity_preserved_verbatim": true,
+      "no_epsilon_clipping": true,
+      "no_nextafter": true,
+      "no_post_calibration_clipping": true,
+      "no_smoothing": true,
+      "rows_causing_infinity_must_not_be_removed": true,
+      "successful_subset_interval_after_dropping_replicates_forbidden": true,
+      "zero_mass_for_observed_outcome": "+infinity"
+    },
+    "losses": {
+      "confirmatory_metric_zoo_forbidden": [
+        "ECE",
+        "ACE",
+        "other metrics"
+      ],
+      "primary": "Brier",
+      "reliability": "descriptive only, equal-width 10-bin",
+      "secondary": "exact LogLoss"
+    },
+    "measurement_completeness": {
+      "forbidden": [
+        "row substitution",
+        "complete-case deletion",
+        "winner-agreement filtering",
+        "fresh anchor",
+        "fresh winner"
+      ],
+      "on_incompleteness": "affected model x population block = INCOMPLETE; stop inferential calculation for that block",
+      "requirement": "100% paired fixed-event measurement completeness for every frozen selected row required by that model/population analysis: CAT score available, OVR score available, same frozen Y, same frozen anchor index"
+    },
+    "n912_robustness": {
+      "cannot_redefine_primary": true,
+      "cannot_rescue_N456": true,
+      "computed": [
+        "Delta_deploy_456",
+        "Delta_deploy_912",
+        "Delta_transport_456",
+        "Delta_transport_912",
+        "Delta_N912_minus_N456"
+      ],
+      "guarantees": [
+        "TRAIN_456 subset TRAIN_912",
+        "same TEST",
+        "same model measurement semantics",
+        "same procedures",
+        "same loss",
+        "same direction"
+      ],
+      "if_456_fails_and_912_succeeds": "primary remains failed/incomplete",
+      "legacy_model_912": {
+        "allowed": "same secondary robustness diagnostics if formally measured",
+        "cannot_enter_current_generation_primary_panel": true
+      },
+      "new_confirmatory_multiplicity_family": null,
+      "paired_difference_rule": "subtract directly within the same shared TEST replicate",
+      "primary_remains_N456": true,
+      "reporting": "pointwise 95% interval",
+      "scope": "frozen new-population 912 manifests only (HellaSwag, MedMCQA)",
+      "status": "SECONDARY ROBUSTNESS ONLY"
+    },
+    "native_reference_family": {
+      "alpha": 0.05,
+      "audit_lower_rank": 42,
+      "audit_upper_rank": 19959,
+      "cannot_rescue_primary": true,
+      "composition": "2 target directions/measurements x 6 procedures",
+      "correction": "bonferroni-percentile-interval",
+      "family_size": 12,
+      "lower_tail": "1/480",
+      "name": "native-reference",
+      "percentile_rule": "nearest-rank-percentile",
+      "replicates": 20000,
+      "role": "secondary reference family",
+      "state_rule": {
+        "NATIVE_ADEQUACY_UNRESOLVED": "otherwise",
+        "NATIVE_DEGRADATION_SUPPORTED": "lower > 0",
+        "NATIVE_IMPROVEMENT_SUPPORTED": "upper < 0"
+      },
+      "states": [
+        "NATIVE_IMPROVEMENT_SUPPORTED",
+        "NATIVE_DEGRADATION_SUPPORTED",
+        "NATIVE_ADEQUACY_UNRESOLVED"
+      ],
+      "unit": "R4PanelMean Delta_native(d,F)",
+      "upper_tail": "479/480"
+    },
+    "non_claims": [
+      "R4 does not establish universal CAT/OVR compatibility.",
+      "R4 does not establish universal superiority of any calibration procedure.",
+      "R4 panel-average inference is conditional on the declared fixed current-generation model panel and declared populations.",
+      "R4 TEST bootstrap does not quantify model-selection or population-selection uncertainty.",
+      "R4 TRAIN-refit uncertainty is separate from TEST sampling uncertainty.",
+      "R4 does not combine R3 observed MMLU cells into the new prospective R4 primary multiplicity family.",
+      "Direction-specific significance patterns do not establish between-direction differences without the formal direction contrast.",
+      "I-isotonic and B-beta are standalone extensions, not members of the 2x2 logistic factorial.",
+      "N=912 robustness cannot rescue N=456 primary results.",
+      "Exact LogLoss infinities are not clipped away.",
+      "Hella split_type subgroups are not independent populations.",
+      "No result authorizes production cross-identity calibration reuse."
+    ],
+    "outcome_firewall": {
+      "formal_study_bootstrap_results_produced": false,
+      "gpu_inference": false,
+      "model_loaded": false,
+      "predictor_correlations_produced": false,
+      "r3_official_result_json_read_for_design": false,
+      "r4_brier_outcomes_produced": false,
+      "r4_calibration_fits_on_real_study_scores": false,
+      "r4_cat_probabilities_produced": false,
+      "r4_logloss_outcomes_produced": false,
+      "r4_model_measurement_outcomes_accessed": false,
+      "r4_ovr_probabilities_produced": false,
+      "r4_transport_results_produced": false
+    },
+    "panel_aggregation": {
+      "across_populations": "1/3 * (PopulationMean_MMLU + PopulationMean_HellaSwag + PopulationMean_MedMCQA)",
+      "averaging_interval_endpoints_forbidden": true,
+      "direct_12_cell_average_forbidden": true,
+      "equal_model_weight_within_population": true,
+      "equal_population_weight_across_populations": true,
+      "panel_level_intervals_from": "replicate-level panel statistic distribution",
+      "protocol_id": "r4-equal-population-equal-current-model-panel-aggregation",
+      "protocol_version": 1,
+      "random_effects_meta_analysis_forbidden": true,
+      "within_population": "1/4 * sum over the 4 current-generation models"
+    },
+    "point_estimate_reporting": {
+      "bootstrap_median_substitution_forbidden": true,
+      "official_effect_estimate": "full-data point estimate",
+      "stored_separately": [
+        "full-data point estimate",
+        "bootstrap median",
+        "bootstrap lower",
+        "bootstrap upper"
+      ]
+    },
+    "primary_family": {
+      "alpha": 0.05,
+      "alternative": "effect != 0 (two-sided)",
+      "audit_lower_rank": 42,
+      "audit_upper_rank": 19959,
+      "composition": "2 estimands x 2 directions x 3 logistic-core factorial effects",
+      "correction": "bonferroni-percentile-interval",
+      "directions": [
+        "CAT->OVR",
+        "OVR->CAT"
+      ],
+      "effect_definition": "R4PanelMean factorial contrast (hierarchically equal-weighted)",
+      "effects": [
+        "Feature",
+        "Regularization",
+        "Interaction"
+      ],
+      "estimands": [
+        "Delta_deploy",
+        "Delta_transport"
+      ],
+      "factorial_algebra": {
+        "Feature(X)": "0.5 * (L_low + L_hist - P_low - P_hist)",
+        "Interaction(X)": "(L_low - P_low) - (L_hist - P_hist)",
+        "Regularization(X)": "0.5 * (P_low + L_low - P_hist - L_hist)",
+        "X_in": [
+          "Delta_deploy",
+          "Delta_transport"
+        ]
+      },
+      "family_size": 12,
+      "forbidden_interval_methods": [
+        "BCa",
+        "normal approximation",
+        "studentized bootstrap",
+        "interpolated percentile"
+      ],
+      "lower_tail": "1/480",
+      "lower_tail_decimal": 0.0020833333333333333,
+      "name": "primary-prospective-confirmatory",
+      "null": "effect = 0",
+      "percentile_rule": "nearest-rank-percentile",
+      "r3_continuity_subset": {
+        "algebra_identical_to_r3_primary_family": true,
+        "composition": "Delta_deploy x 2 directions x 3 factorial effects",
+        "r3_outcomes_must_not_enter_r4_bootstrap": true,
+        "separate_primary_correction_forbidden": true,
+        "size": 6
+      },
+      "replicates": 20000,
+      "upper_tail": "479/480",
+      "upper_tail_decimal": 0.9979166666666667
+    },
+    "procedure_roles": {
+      "isotonic_beta_in_factorial_forbidden": true,
+      "r3_continuity_core": [
+        "P-low",
+        "P-historical",
+        "L-low",
+        "L-historical"
+      ],
+      "r3_continuity_core_structure": "2 x 2 feature x regularization",
+      "six_cell_factorial_forbidden": true,
+      "standalone_extensions": [
+        "I-isotonic",
+        "B-beta"
+      ]
+    },
+    "prospective_primary_panel": {
+      "direction_count": 2,
+      "directions": [
+        {
+          "direction_id": "CAT->OVR",
+          "source_measurement": "A",
+          "target_measurement": "B"
+        },
+        {
+          "direction_id": "OVR->CAT",
+          "source_measurement": "B",
+          "target_measurement": "A"
+        }
+      ],
+      "interpretation": "evidence across the declared fixed R4 current-generation panel; not a random-effects superpopulation",
+      "model_count": 4,
+      "model_population_cell_count": 12,
+      "models": [
+        {
+          "model_id": "allenai/Olmo-3-7B-Instruct",
+          "panel_role": "current-generation",
+          "revision": "6e5971d9eba42665f5bd5a0fcf047f299ce1dccc"
+        },
+        {
+          "model_id": "tiiuae/Falcon-H1-7B-Instruct",
+          "panel_role": "current-generation",
+          "revision": "41e72f27effbab80cd45b6e884688452253a3686"
+        },
+        {
+          "model_id": "ibm-granite/granite-4.0-h-tiny",
+          "panel_role": "current-generation",
+          "revision": "791e0d3d28c86e106c9b6e0b4cecdee0375b6124"
+        },
+        {
+          "model_id": "Qwen/Qwen3.5-9B",
+          "panel_role": "current-generation",
+          "revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a"
+        }
+      ],
+      "panel_is_random_sample": false,
+      "population_count": 3,
+      "populations": [
+        {
+          "dataset_id": "cais/mmlu",
+          "dataset_revision": "c30699e8356da336a370243923dbaf21066bb9fe",
+          "estimand_weighting": "equal-subject-mean-of-subject-means",
+          "group_field": null,
+          "manifest_fingerprint": "40cc9753a711314ff3b25ed6e234d0cbda11f3f60cd87f1d3915195a3d1780b8",
+          "n912_manifest": null,
+          "population_id": "r4-mmlu-57-subject",
+          "stratum_count": 57,
+          "stratum_field": "subject",
+          "test_bootstrap_mode": "subject-stratified-row",
+          "test_bootstrap_protocol_id": "r4-mmlu-subject-stratified-paired-test-bootstrap",
+          "test_bootstrap_protocol_version": 1,
+          "test_count": 1140,
+          "train_count": 456
+        },
+        {
+          "dataset_id": "Rowan/hellaswag",
+          "dataset_revision": "218ec52e09a7e7462a5400043bb9a69a41d06b76",
+          "estimand_weighting": "row-weighted-mean",
+          "group_field": "source_id",
+          "manifest_fingerprint": "5c45043ba4f0ec436c16dcf494ff26be435c7857244bcbefa321d1678129c400",
+          "n912_manifest": {
+            "manifest_fingerprint": "6817496f227d9cd57759bf55489cbf8a1dc4dfd27db0ae551e9223d21d02a096",
+            "test_count": 10042,
+            "train_count": 912
+          },
+          "population_id": "r4-hellaswag-activity-primary",
+          "stratum_count": 192,
+          "stratum_field": "activity_label",
+          "test_bootstrap_mode": "activity-stratified-source_id-cluster",
+          "test_bootstrap_protocol_id": "r4-hellaswag-activity-stratified-source-cluster-test-bootstrap",
+          "test_bootstrap_protocol_version": 1,
+          "test_count": 10042,
+          "train_count": 456
+        },
+        {
+          "dataset_id": "openlifescienceai/medmcqa",
+          "dataset_revision": "91c6572c454088bf71b679ad90aa8dffcd0d5868",
+          "estimand_weighting": "row-weighted-mean",
+          "group_field": null,
+          "manifest_fingerprint": "4a4718438d46ab1ba27c59ca46806756ffb62efa05e6103981dffec4dc48c218",
+          "n912_manifest": {
+            "manifest_fingerprint": "e48c37293f196e16d8fba42e7fc255e4ac2e77f81c270ed6f71320981968af12",
+            "test_count": 4162,
+            "train_count": 912
+          },
+          "population_id": "r4-medmcqa-subject-primary",
+          "stratum_count": 21,
+          "stratum_field": "subject_name",
+          "test_bootstrap_mode": "subject_name-stratified-row",
+          "test_bootstrap_protocol_id": "r4-medmcqa-subject-stratified-paired-test-bootstrap",
+          "test_bootstrap_protocol_version": 1,
+          "test_count": 4162,
+          "train_count": 456
+        }
+      ],
+      "primary_unit_count": 24
+    },
+    "r3_continuity": {
+      "nearest_rank_percentile_rule": {
+        "id": "nearest-rank-percentile",
+        "implementation_reference": "experiments/calibration_transport/r3_analysis.py:507-512 nearest_rank_percentile(ordered_values, percentile)",
+        "median_rule": "single nearest-rank order statistic; even n is NOT averaged",
+        "rule": "rank = ceil(percentile/100 * n), clamped to [1, n], value = ordered[rank-1]",
+        "version": 1
+      },
+      "procedure_fingerprints": {
+        "B-beta": "f4b710fb98f7c3056794aa709d53309f462a8f598cef8089d2f9c0ed6f7e37ff",
+        "I-isotonic": "cd13bc07bf92f3375bcd16d57fa5f515cd40f68199b57181791f85c58be8c244",
+        "L-historical": "23ec12bbf4a809ba2f419491df80d1f228d3fd778d848115839aab3697f9dd58",
+        "L-low": "91d7d506275aade7d4676c39722ac2c4d975de7967a25a808395c056307ad619",
+        "P-historical": "a44e9217dd43e5e29d859c8dd2dc510a5876db4d46a8e0cc2fd4f1df3121a423",
+        "P-low": "7a8e13d51e131f2102cca4e00b172c8bbb2eb49e591acd3746aeb64d003c8857"
+      },
+      "protocol_fingerprint": "3ef63056ae16b18ad65d9c87d1fbec5b43550873a0e3e25ec0a323f954ee974d",
+      "protocol_id": "r3-confirmatory-procedure-conditioned-transport",
+      "protocol_version": 1,
+      "r3_measurements": {
+        "input_score": "fixed-decision-semantic-probability",
+        "measurement_a": "direct-categorical-anchor-probability",
+        "measurement_b": "independent-binary-anchor-probability",
+        "target": "fixed-decision-correctness"
+      },
+      "r3_models": [
+        {
+          "model_id": "openbmb/MiniCPM5-2B",
+          "revision": "12a3808a956f869c767195e9266b59c4d21d92e2",
+          "role": "primary-confirmatory"
+        },
+        {
+          "model_id": "Qwen/Qwen3.5-2B",
+          "revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+          "role": "preregistered-replication"
+        }
+      ],
+      "r3_outcome_firewall": "Frozen R3 MMLU outcomes are historical/frozen continuity evidence only. They are NOT pooled into the R4 prospective primary bootstrap, NOT pooled into the R4 prospective primary multiplicity family, and NOT redefined as independent new confirmation.",
+      "r3_population": {
+        "dataset_id": "cais/mmlu",
+        "dataset_revision": "c30699e8356da336a370243923dbaf21066bb9fe",
+        "manifest_fingerprint": "40cc9753a711314ff3b25ed6e234d0cbda11f3f60cd87f1d3915195a3d1780b8",
+        "population_id": "r3-mmlu-57-subject-confirmatory",
+        "test_count": 1140,
+        "train_count": 456
+      }
+    },
+    "secondary_direction_difference_family": {
+      "alpha": 0.05,
+      "audit_lower_rank": 84,
+      "audit_upper_rank": 19917,
+      "ci_overlap_or_separate_significance_inference_forbidden": true,
+      "composition": "3 logistic-core factorial effects x 2 estimands",
+      "correction": "bonferroni-percentile-interval",
+      "definition": "DirectionDifference(E,X) = R4PanelMean_CAT->OVR(E,X) - R4PanelMean_OVR->CAT(E,X)",
+      "effects": [
+        "Feature",
+        "Regularization",
+        "Interaction"
+      ],
+      "estimands": [
+        "Delta_deploy",
+        "Delta_transport"
+      ],
+      "family_size": 6,
+      "isotonic_beta_direction_difference": "descriptive only in R4",
+      "lower_tail": "1/240",
+      "must_be_direct_replicate_difference": true,
+      "name": "formal-between-direction-contrast",
+      "percentile_rule": "nearest-rank-percentile",
+      "replicates": 20000,
+      "upper_tail": "239/240"
+    },
+    "secondary_extension_family": {
+      "alpha": 0.05,
+      "alternative": "panel mean delta != 0 (two-sided)",
+      "audit_lower_rank": 63,
+      "audit_upper_rank": 19938,
+      "cannot_rescue_primary": true,
+      "composition": "2 procedures x 2 directions x 2 estimands",
+      "correction": "bonferroni-percentile-interval",
+      "estimands": [
+        "Delta_deploy",
+        "Delta_transport"
+      ],
+      "family_size": 8,
+      "forbidden_claims": [
+        "isotonic universally best",
+        "beta universally best"
+      ],
+      "lower_tail": "1/320",
+      "name": "standalone-i-isotonic-b-beta-extension",
+      "null": "panel mean delta = 0",
+      "percentile_rule": "nearest-rank-percentile",
+      "procedures": [
+        "I-isotonic",
+        "B-beta"
+      ],
+      "replicates": 20000,
+      "status": "SECONDARY",
+      "unit": "R4PanelMean delta (not a factorial effect)",
+      "upper_tail": "319/320"
+    },
+    "semantic_consistency_checks": {
+      "direction_difference_family_size": 6,
+      "isotonic_beta_in_factorial": false,
+      "legacy_secondary_unit_count": 8,
+      "n912_in_primary": false,
+      "native_reference_family_size": 12,
+      "primary_family_size": 12,
+      "primary_model_population_cell_count": 12,
+      "primary_unit_count": 24,
+      "procedure_treated_as_independent_replication": false,
+      "r3_mmlu_outcomes_in_r4_prospective_primary": false,
+      "secondary_extension_family_size": 8,
+      "split_type_in_population_count": false
+    },
+    "structural_audit": {
+      "hellaswag": {
+        "eligible_train_activity_labels": 178,
+        "extension_item_ids_match": true,
+        "overlap_exclusions": {
+          "train_rows_excluded_by_test_overlap": 0,
+          "train_rows_skipped_for_source_id_reuse": 0
+        },
+        "primary_manifest_fingerprint": "5c45043ba4f0ec436c16dcf494ff26be435c7857244bcbefa321d1678129c400",
+        "primary_missing_from_robustness912": 0,
+        "primary_only_train_strata": [],
+        "primary_train_count": 456,
+        "primary_train_strata": {
+          "max": 45,
+          "median": 1,
+          "min": 1,
+          "n_below_5": 162,
+          "n_strata": 174,
+          "total": 456
+        },
+        "primary_train_subset_of_robustness912": true,
+        "quota_zero_activity_label_names": [
+          "Home,Categories",
+          "Knitting",
+          "Spread mulch",
+          "Windsurfing"
+        ],
+        "quota_zero_activity_label_names_912": [
+          "Home,Categories",
+          "Spread mulch",
+          "Windsurfing"
+        ],
+        "quota_zero_activity_labels": 4,
+        "quota_zero_activity_labels_912": 3,
+        "robustness912_manifest_fingerprint": "6817496f227d9cd57759bf55489cbf8a1dc4dfd27db0ae551e9223d21d02a096",
+        "robustness912_only_train_strata": [
+          "Knitting"
+        ],
+        "robustness912_train_count": 912,
+        "robustness912_train_strata": {
+          "max": 90,
+          "median": 2,
+          "min": 1,
+          "n_below_5": 160,
+          "n_strata": 175,
+          "total": 912
+        },
+        "selected_primary_train_activity_labels": 174,
+        "structural_exclusions": {
+          "test_ineligible_rows": 0,
+          "train_ineligible_rows": 0
+        },
+        "test_activity_label_count": 192,
+        "test_anchor_index_counts": {
+          "0": 2420,
+          "1": 2548,
+          "2": 2542,
+          "3": 2532
+        },
+        "test_cluster_pool_sum": 10042,
+        "test_cluster_size_max": 10,
+        "test_cluster_size_median": 1,
+        "test_cluster_size_min": 1,
+        "test_count": 10042,
+        "test_item_id_sequence_identical": true,
+        "test_only_activity_labels": 18,
+        "test_singleton_clusters": 7505,
+        "test_source_id_maps_to_single_activity_label": true,
+        "test_source_id_max_rows": 10,
+        "test_source_id_repeated": 2537,
+        "test_source_id_to_activity_label_conflicts": 0,
+        "test_source_id_unique": 8407,
+        "test_split_type_counts": {
+          "indomain": 5001,
+          "zeroshot": 5041
+        },
+        "test_strata": {
+          "max": 2627,
+          "median": 11,
+          "min": 1,
+          "n_below_5": 17,
+          "n_strata": 192,
+          "total": 10042
+        },
+        "train_source_id_max_rows": 1,
+        "train_source_id_unique": 456,
+        "train_test_source_id_intersection": 0,
+        "validation_only_activity_labels": 14
+      },
+      "medmcqa": {
+        "extension_item_ids_match": true,
+        "overlap_exclusions": {
+          "train_rows_excluded_by_test_overlap": 0
+        },
+        "primary_manifest_fingerprint": "4a4718438d46ab1ba27c59ca46806756ffb62efa05e6103981dffec4dc48c218",
+        "primary_missing_from_robustness912": 0,
+        "primary_train_count": 456,
+        "primary_train_strata": {
+          "max": 45,
+          "median": 21,
+          "min": 4,
+          "n_below_5": 1,
+          "n_strata": 21,
+          "total": 456
+        },
+        "primary_train_subset_of_robustness912": true,
+        "robustness912_manifest_fingerprint": "e48c37293f196e16d8fba42e7fc255e4ac2e77f81c270ed6f71320981968af12",
+        "robustness912_train_count": 912,
+        "robustness912_train_strata": {
+          "max": 90,
+          "median": 42,
+          "min": 8,
+          "n_below_5": 0,
+          "n_strata": 21,
+          "total": 912
+        },
+        "structural_exclusions": {
+          "test_duplicate_option_by_choice_type": {
+            "multi": 7,
+            "single": 14
+          },
+          "test_rows_by_reason": {
+            "duplicate-option-string": 21
+          },
+          "test_rows_total": 21,
+          "train_duplicate_option_by_choice_type": {
+            "multi": 188,
+            "single": 505
+          },
+          "train_rows_by_reason": {
+            "duplicate-option-string": 693
+          },
+          "train_rows_total": 693
+        },
+        "test_anchor_index_counts": {
+          "0": 1002,
+          "1": 1056,
+          "2": 1065,
+          "3": 1039
+        },
+        "test_choice_type_counts": {
+          "multi": 1360,
+          "single": 2802
+        },
+        "test_count": 4162,
+        "test_item_id_sequence_identical": true,
+        "test_strata": {
+          "max": 1312,
+          "median": 127,
+          "min": 2,
+          "n_below_5": 1,
+          "n_strata": 21,
+          "total": 4162
+        },
+        "test_subject_count": 21,
+        "topic_name_is_not_a_stratum": true
+      },
+      "mmlu": {
+        "dataset_id": "cais/mmlu",
+        "dataset_revision": "c30699e8356da336a370243923dbaf21066bb9fe",
+        "items_per_subject": 28,
+        "manifest_fingerprint": "40cc9753a711314ff3b25ed6e234d0cbda11f3f60cd87f1d3915195a3d1780b8",
+        "subject_count": 57,
+        "test_count": 1140,
+        "test_per_subject": 20,
+        "test_unique_item_ids": 1140,
+        "train_count": 456,
+        "train_per_subject": 8,
+        "train_unique_item_ids": 456
+      },
+      "note": "Pre-outcome structural audits only. No model outcome, no calibration fit, no bootstrap draw. Counts read from the frozen population manifests and the frozen R3 MMLU manifest."
+    },
+    "subgroup_diagnostics": {
+      "hellaswag_split_type": {
+        "allowed": [
+          "counts",
+          "raw/native/cross grouped point estimates",
+          "deltas grouped point estimates"
+        ],
+        "confirmatory_subgroup_multiplicity_family": null,
+        "forbidden": [
+          "independent populations",
+          "primary population count 3 -> 4",
+          "extra predictor independent units",
+          "subgroup result rescuing the aggregate"
+        ],
+        "formal_subgroup_claim_requires_separate_pre_outcome_freeze": true,
+        "role": "secondary subgroup diagnostic only",
+        "values": [
+          "indomain",
+          "zeroshot"
+        ]
+      }
+    },
+    "test_bootstrap": {
+      "across_populations": "same replicate number with a population-specific deterministic hash domain",
+      "deterministic_identity": {
+        "canonical_serialization": "probvenance.fingerprint.canonical_json",
+        "cluster_draw_identity_extra": [
+          "cluster_mode_marker"
+        ],
+        "convention": "repository deterministic fingerprint / SHA256 convention",
+        "forbidden_sources": [
+          "random.Random mutable state",
+          "numpy global RNG state",
+          "system entropy",
+          "wall-clock seed",
+          "Python hash()"
+        ],
+        "index_mapping": "int(fingerprint(identity)[:16], 16) % pool_size",
+        "ordering": {
+          "rows": "sorted deterministically by item_id",
+          "rows_inside_source_id": "sorted deterministically by item_id",
+          "source_ids": "sorted deterministically",
+          "strata": "sorted deterministically by stratum label"
+        },
+        "row_draw_identity_fields": [
+          "protocol_id",
+          "protocol_version",
+          "population_id",
+          "population_fingerprint",
+          "replicate_index",
+          "stratum",
+          "draw_index",
+          "pool_size"
+        ]
+      },
+      "holds_full_train_fitted_calibrators_fixed": true,
+      "independent_bootstrap_rows_per_F_or_direction_forbidden": true,
+      "legacy_secondary_estimates_reuse_same_population_draw": true,
+      "never_refits_calibration_maps": true,
+      "population_modes": [
+        {
+          "mode": "subject-stratified-row",
+          "per_replicate_rule": "for each frozen subject, draw exactly 20 positions with replacement from that subject's 20 TEST rows; all subjects retained",
+          "population_id": "r4-mmlu-57-subject",
+          "protocol_id": "r4-mmlu-subject-stratified-paired-test-bootstrap",
+          "protocol_version": 1,
+          "statistic": "equal-subject mean",
+          "stratum": "subject"
+        },
+        {
+          "mode": "subject_name-stratified-row",
+          "per_replicate_rule": "for each subject_name, draw with replacement exactly the original frozen TEST row count of that subject; concatenate all strata",
+          "population_id": "r4-medmcqa-subject-primary",
+          "protocol_id": "r4-medmcqa-subject-stratified-paired-test-bootstrap",
+          "protocol_version": 1,
+          "statistic": "row-weighted TEST mean",
+          "stratum": "subject_name",
+          "stratum_count": 21,
+          "topic_name_is_not_a_stratum": true
+        },
+        {
+          "cluster": "source_id",
+          "cluster_is_indivisible": true,
+          "cluster_stratum_audit": {
+            "conflicts": 0,
+            "failure_state": "HELLASWAG_CLUSTER_STRATUM_AMBIGUITY",
+            "rule": "within frozen TEST, every source_id maps to exactly one activity_label",
+            "status": "PASS",
+            "test_activity_label_count": 192,
+            "test_source_id_unique": 8407
+          },
+          "equal_cluster_estimator_forbidden": true,
+          "mode": "activity-stratified-source_id-cluster",
+          "per_replicate_rule": "for each activity_label, draw with replacement exactly the original number of unique source_id clusters of that activity_label; a drawn cluster contributes ALL of its rows once per draw; cluster-internal row-level resampling forbidden",
+          "population_id": "r4-hellaswag-activity-primary",
+          "protocol_id": "r4-hellaswag-activity-stratified-source-cluster-test-bootstrap",
+          "protocol_version": 1,
+          "statistic": "row-weighted mean over the expanded resampled row multiset",
+          "stratum": "activity_label",
+          "validation_only_activity_label_count": 14,
+          "validation_only_activity_labels_stay_eligible": true
+        }
+      ],
+      "protocol_id": "r4-population-aware-paired-test-bootstrap",
+      "protocol_version": 1,
+      "purpose": "TEST sampling uncertainty",
+      "replicates": 20000,
+      "shared_draws_within_population": [
+        "all 4 current-generation models",
+        "both directions",
+        "all 6 calibration procedures",
+        "raw / native / cross",
+        "all estimands",
+        "all factorial contrasts"
+      ],
+      "uncertainty_scope": {
+        "does_not_quantify": [
+          "model-selection uncertainty",
+          "population-selection uncertainty",
+          "TRAIN fitting uncertainty",
+          "future-domain uncertainty"
+        ],
+        "quantifies": "sampling uncertainty of the frozen TEST population construction, conditional on fixed model panel, fixed populations, and fixed full-TRAIN fitted calibrators"
+      }
+    },
+    "train_refit_bootstrap": {
+      "budgets": {
+        "per_stratum_rule": "draw with replacement exactly the original selected TRAIN count of that stratum; total N preserved",
+        "primary_N": 456,
+        "secondary_robustness_N": 912
+      },
+      "enters_primary_multiplicity": false,
+      "evaluation_targets": {
+        "delta_deploy_dependency": "source-fitted cross map",
+        "delta_transport_dependency": "both the source-fitted cross map and the target-native map from that replicate",
+        "mixed_dependency_forbidden": true,
+        "refit_rule": "on each refit replicate, refit source and target calibrators on the same paired resampled TRAIN multiset, then evaluate on the full unchanged TEST"
+      },
+      "intervals": {
+        "audit_lower_rank": 50,
+        "audit_median_rank": 1000,
+        "audit_upper_rank": 1950,
+        "levels": [
+          2.5,
+          50,
+          97.5
+        ],
+        "median_rule": "frozen nearest-rank rule; even n is NOT averaged",
+        "replicates": 2000,
+        "reported_fields": [
+          "full-TRAIN reference point",
+          "TRAIN-refit median",
+          "95% interval",
+          "planned replicates",
+          "successful replicates",
+          "failed replicates"
+        ],
+        "rule": "nearest-rank-percentile"
+      },
+      "numeric_combination_forbidden": [
+        "variance addition",
+        "CI convolution",
+        "double bootstrap",
+        "quadrature combination"
+      ],
+      "population_rules": [
+        {
+          "independent_fit_per": "model x measurement x procedure",
+          "per_subject": 8,
+          "population_id": "r4-mmlu-57-subject",
+          "shared_multiset": "across all 4 models, both measurements, all 6 procedures",
+          "stratum": "subject",
+          "total": 456
+        },
+        {
+          "at_most_one_selected_row_per_source_id": true,
+          "n912": "use the frozen nested 912 per-activity selected counts (sum = 912)",
+          "per_stratum_rule": "draw with replacement exactly the original selected count",
+          "population_id": "r4-hellaswag-activity-primary",
+          "stratum": "activity_label",
+          "total": 456,
+          "validation_only_labels_do_not_get_invented_train_rows": true
+        },
+        {
+          "n912": "use the frozen 912 subject counts (sum = 912)",
+          "per_stratum_rule": "draw with replacement exactly the original selected count",
+          "population_id": "r4-medmcqa-subject-primary",
+          "stratum": "subject_name",
+          "topic_name_forbidden": true,
+          "total": 456
+        }
+      ],
+      "protocol_id": "r4-stratum-preserving-paired-train-refit-bootstrap",
+      "protocol_version": 1,
+      "purpose": "calibration fitting-sample instability",
+      "replicates": 2000,
+      "sample_size_rule": "bootstrap sample size = frozen TRAIN sample size",
+      "separate_from_test_bootstrap": true,
+      "shared_draws": {
+        "budget_identity_values": [
+          "N456",
+          "N912"
+        ],
+        "identity_fields": [
+          "train_refit_protocol_id",
+          "train_refit_protocol_version",
+          "population_id",
+          "population_fingerprint",
+          "budget_identity",
+          "replicate_index",
+          "stratum",
+          "draw_index",
+          "pool_size"
+        ],
+        "shared_across": [
+          "all models",
+          "all procedures",
+          "both CAT/OVR fits",
+          "both directions"
+        ]
+      },
+      "test_held_fixed": true
+    },
+    "train_refit_failure_rules": {
+      "fail_closed_per_block": "procedure x model x population",
+      "forbidden_recovery": [
+        "retry with changed solver",
+        "drop failed replicate",
+        "replace failed rows",
+        "change procedure",
+        "change tolerance",
+        "change bootstrap seed"
+      ],
+      "must_record": [
+        "replicate index",
+        "measurement dependency",
+        "failure code",
+        "exception/error type",
+        "exact message"
+      ],
+      "on_any_failed_replicate": "INCOMPLETE",
+      "successful_subset_interval_forbidden": true,
+      "unaffected_blocks_still_reported": true
+    },
+    "unit_level_reporting": {
+      "cherry_picking_forbidden": true,
+      "counting_significant_cells_as_confirmatory_forbidden": true,
+      "interval": "95% pointwise percentile interval",
+      "report_per_unit": [
+        "R_raw",
+        "R_native",
+        "R_cross",
+        "Delta_native",
+        "Delta_deploy",
+        "Delta_transport",
+        "Feature(Delta_deploy)",
+        "Regularization(Delta_deploy)",
+        "Interaction(Delta_deploy)",
+        "Feature(Delta_transport)",
+        "Regularization(Delta_transport)",
+        "Interaction(Delta_transport)"
+      ],
+      "status": "descriptive estimation intervals, NOT members of the primary multiplicity family",
+      "units": "model x population x direction (24 primary units)"
+    },
+    "weighting": {
+      "HellaSwag": {
+        "estimand_weighting": "row-weighted mean over all frozen eligible TEST rows",
+        "forbidden": [
+          "equal-activity-label mean",
+          "equal-source_id mean"
+        ]
+      },
+      "MMLU": {
+        "estimand_weighting": "equal-subject mean of subject means",
+        "note": "numerically equals the row mean because TEST is 20 per subject, but the semantic contract remains equal-subject; not silently rewritten",
+        "subject_count": 57
+      },
+      "MedMCQA": {
+        "estimand_weighting": "row-weighted mean over all frozen eligible TEST rows",
+        "forbidden": [
+          "equal-subject_name mean"
+        ]
+      },
+      "estimand_weighting_vs_bootstrap_stratification": "distinct concepts"
+    }
+  },
+  "population_freeze_identity": {
+    "path": "experiments/calibration_transport/R4_POPULATION_FREEZE.md",
+    "sha256": "850b6b24da61f416b76d0bac83a4ba2775d3002e94894f003fd2e0a5488fee2a",
+    "status": "R4 POPULATION LAYER: FROZEN"
+  },
+  "r3_continuity_identity": {
+    "nearest_rank_percentile_rule_id": "nearest-rank-percentile",
+    "procedure_fingerprints": {
+      "B-beta": "f4b710fb98f7c3056794aa709d53309f462a8f598cef8089d2f9c0ed6f7e37ff",
+      "I-isotonic": "cd13bc07bf92f3375bcd16d57fa5f515cd40f68199b57181791f85c58be8c244",
+      "L-historical": "23ec12bbf4a809ba2f419491df80d1f228d3fd778d848115839aab3697f9dd58",
+      "L-low": "91d7d506275aade7d4676c39722ac2c4d975de7967a25a808395c056307ad619",
+      "P-historical": "a44e9217dd43e5e29d859c8dd2dc510a5876db4d46a8e0cc2fd4f1df3121a423",
+      "P-low": "7a8e13d51e131f2102cca4e00b172c8bbb2eb49e591acd3746aeb64d003c8857"
+    },
+    "protocol_fingerprint": "3ef63056ae16b18ad65d9c87d1fbec5b43550873a0e3e25ec0a323f954ee974d",
+    "protocol_id": "r3-confirmatory-procedure-conditioned-transport",
+    "protocol_version": 1
+  },
+  "status": "FROZEN"
+}

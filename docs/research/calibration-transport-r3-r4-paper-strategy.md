@@ -1655,3 +1655,147 @@ HellaSwag split_type subgroup 与 MedMCQA subject_name
 本节不构成 R4 freeze、不构成 R4 execution authorization。
 R4 仍为 DRAFT / NOT FROZEN / NOT EXECUTION-AUTHORIZED。
 ```
+
+---
+
+# AE. 2026-09-30 PRE-OUTCOME HUMAN CALIBRATION-SAMPLE-SIZE ROBUSTNESS DECISION [PLANNING DECISION]
+
+本节记录 human 在 Gate C primary population candidate 之后、任何 R4 model outcome 之前
+做出的 calibration-sample-size robustness planning decision。
+
+## AE.1 Primary budget immutability [PLANNING DECISION]
+
+```text
+PRIMARY CALIBRATION TRAIN BUDGET = 456
+```
+
+两个 primary manifest 必须保持 byte-identical：
+
+```text
+hellaswag manifest_fingerprint  5c45043ba4f0ec436c16dcf494ff26be435c7857244bcbefa321d1678129c400
+hellaswag file_sha256           0724128b9168b15a8796f260441c89025c3a224faf079cf7177b1c2faaec53cc
+medmcqa   manifest_fingerprint  4a4718438d46ab1ba27c59ca46806756ffb62efa05e6103981dffec4dc48c218
+medmcqa   file_sha256           a3db913227c8b6b32e45d6d6555423fdf6fa34d2b1700bd38fb06515226418f7
+```
+
+禁止：resample primary 456 / change quota / change rank / change selected rows /
+rebalance anchor correctness。
+
+## AE.2 HellaSwag quota-zero strata accepted [PLANNING DECISION]
+
+```text
+Home,Categories / Knitting / Spread mulch / Windsurfing
+=> quota = 0，ACCEPT
+```
+
+不强制 minimum-one allocation。理由：primary TRAIN targets proportional /
+row-weighted source-train population sampling；forcing minimum-one would
+disproportionately oversample very small activity strata。
+
+## AE.3 Validation-only activity labels retained [PLANNING DECISION]
+
+```text
+14 validation-only activity labels are absent from the source train split.
+They are target-only semantic strata,
+not train strata with zero eligible rows.
+```
+
+```text
+train unique = 178
+validation unique = 192
+shared = 178
+validation-only = 14
+train-only = 0
+```
+
+```text
+KEEP IN PRIMARY TEST（不删除；不是 sampling error，不是 invalid rows）
+```
+
+## AE.4 Primary TEST and split_type unchanged [PLANNING DECISION]
+
+```text
+HellaSwag primary TEST = FULL eligible validation（indomain + zeroshot）
+split_type = SECONDARY PREDECLARED SUBGROUP DIAGNOSTIC
+```
+
+两个 subgroup 不得当作两个 independent populations。
+
+## AE.5 Group identity unchanged [PLANNING DECISION]
+
+```text
+HellaSwag source_id = cluster/group identity
+primary TRAIN: at most one selected row per source_id
+future TEST inference: must be group-aware by source_id
+```
+
+本任务不冻结具体 bootstrap implementation。
+
+## AE.6 No anchor-balance optimization [PLANNING DECISION]
+
+```text
+NO ANCHOR-BALANCE OPTIMIZATION
+```
+
+不得因 anchor==GT 的观测值（例如 MedMCQA TRAIN ≈ 0.188596）而 resample / rebalance /
+change hash / change anchor protocol / change row selection。
+
+理由：selection and anchor were frozen without reading ground truth；
+post-observation balancing would introduce ground-truth-conditioned selection。
+
+## AE.7 Secondary nested robustness budget [PLANNING DECISION]
+
+```text
+SECONDARY CALIBRATION-SAMPLE-SIZE ROBUSTNESS
+N = 912
+applies to: HellaSwag, MedMCQA
+role: SECONDARY ROBUSTNESS ONLY
+```
+
+不是 primary，不是 rescue analysis，不是 replacement for N=456。
+
+## AE.8 Nestedness hard requirement [PLANNING DECISION]
+
+```text
+TRAIN_456 ⊂ TRAIN_912   （exact item-id subset）
+additional rows = 456
+456 primary + 456 extension = 912 total
+```
+
+禁止 independent resampling of 912；禁止修改 primary 456。
+
+extension eligibility：same pinned dataset revision / same source TRAIN split /
+same structural eligibility rules；排除全部 primary-456 selected rows。
+
+HellaSwag：at most one row per source_id across the entire 912。
+
+allocation = nested residual extension（primary 冻结 → 剩余 pool 的 strata counts 做
+Hamilton / largest-remainder → additional 456 → within stratum 相同 deterministic rank
+doctrine → append）。
+
+## AE.9 Robustness TEST [PLANNING DECISION]
+
+```text
+912 robustness USES THE SAME PRIMARY TEST
+HellaSwag TEST = same 10042 rows
+MedMCQA   TEST = same 4162 rows
+```
+
+禁止另建 robustness TEST。唯一改变的主要因素 = calibration TRAIN sample size。
+
+## AE.10 Governance and guardrail [PLANNING DECISION]
+
+```text
+N=456 remains the sole primary R3-continuity fitting budget.
+N=912 cannot rescue, override, or redefine the primary conclusion.
+用途：assess calibration-sample-size sensitivity,
+      especially for higher-variance calibration families such as isotonic.
+禁止在看过 calibration outcome 之后才决定是否报告 912。
+```
+
+```text
+本节 decision 先于任何正式 R4 target outcomes。
+本节不产生任何 R4 outcome、不产生任何 scientific selection。
+本节不构成 R4 freeze、不构成 R4 execution authorization。
+R4 仍为 DRAFT / NOT FROZEN / NOT EXECUTION-AUTHORIZED。
+```

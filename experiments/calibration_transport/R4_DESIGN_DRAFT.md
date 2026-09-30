@@ -732,3 +732,85 @@ decision made before any R4 model outcome
 本 decision 不产生任何 R4 outcome、不产生任何 scientific selection、
 不构成 R4 freeze、不构成 R4 execution authorization。
 ```
+
+---
+
+## 20. 2026-09-30 Calibration-sample-size robustness decision（nested 912）[PLANNING DECISION]
+
+本节记录 human 在 Gate C primary population candidate 之后、任何 R4 model outcome 之前
+做出的 calibration-sample-size robustness planning decision。
+
+```text
+E1  PRIMARY CALIBRATION TRAIN BUDGET = 456
+    保持不变，且为唯一 primary、R3-continuity fitting budget。
+    禁止 resample / 改 quota / 改 rank / 改 selected rows / 改 anchor balance。
+
+E2  HellaSwag quota-zero strata ACCEPTED
+    Home,Categories / Knitting / Spread mulch / Windsurfing 配额为 0，接受。
+    不强制 minimum-one allocation：
+    primary TRAIN 目标是 proportional / row-weighted source-train population sampling，
+    强制 minimum-one 会不成比例地过采样极小的 activity strata。
+
+E3  14 个 validation-only activity labels RETAINED IN PRIMARY TEST
+    准确语义：14 个 validation-only activity labels 在 source train split 中不存在，
+    它们是 target-only semantic strata，
+    不是 "train strata with zero eligible rows"。
+    train unique = 178 / validation unique = 192 / shared = 178 /
+    validation-only = 14 / train-only = 0。
+    不得为了让 TRAIN/TEST strata 完全相同而删除。
+
+E4  HellaSwag primary TEST = FULL eligible validation（indomain + zeroshot）保持。
+    split_type = SECONDARY PREDECLARED SUBGROUP DIAGNOSTIC，
+    不是 primary strata，不是 independent population。
+
+E5  HellaSwag source_id = cluster/group identity 保持。
+    primary TRAIN at most one selected row per source_id；
+    未来 TEST inference must be group-aware by source_id
+    （本任务不冻结具体 bootstrap implementation）。
+
+E6  NO ANCHOR-BALANCE OPTIMIZATION
+    不得因 anchor==GT 的观测值（例如 MedMCQA TRAIN ≈ 0.188596）
+    而 resample / rebalance / 改 hash / 改 anchor protocol / 改 row selection。
+    理由：selection 与 anchor 均在未读取 ground truth 的前提下冻结；
+    事后平衡会引入 ground-truth-conditioned selection。
+
+E7  SECONDARY NESTED CALIBRATION-SAMPLE-SIZE ROBUSTNESS TRAIN N = 912
+    角色：SECONDARY ROBUSTNESS ONLY。
+    不是 primary，不是 rescue analysis，不是 N=456 的替代。
+
+E8  NESTEDNESS hard requirement
+    TRAIN_456 ⊂ TRAIN_912（exact item-id subset）。
+    禁止独立重采样 912；禁止修改 primary 456。
+    additional rows = 456；456 primary + 456 extension = 912 total。
+    extension 来自 same pinned revision / same source TRAIN split /
+    same structural eligibility rules，并排除全部 primary-456 selected rows。
+    HellaSwag 继续 at most one row per source_id（across the entire 912）。
+    allocation 使用 nested residual extension：
+    primary 456 冻结 → 对剩余 eligible pool 的 strata counts 做
+    Hamilton / largest-remainder → 分配 additional 456 → within stratum 相同 rank doctrine → append。
+
+E9  ROBUSTNESS TEST = SAME PRIMARY TEST
+    HellaSwag TEST = same 10042 rows；MedMCQA TEST = same 4162 rows。
+    禁止另建 robustness TEST。
+    唯一改变的主要因素 = calibration TRAIN sample size。
+
+E10 Governance
+    N=456 remains the sole primary R3-continuity fitting budget。
+    N=912 cannot rescue, override, or redefine the primary conclusion。
+    用途：assess calibration-sample-size sensitivity，
+    尤其是 higher-variance calibration families（如 isotonic）。
+    禁止在看过 calibration outcome 之后才决定是否报告 912。
+```
+
+状态语言（不得升级）：
+
+```text
+CALIBRATION-SAMPLE-SIZE ROBUSTNESS PLANNING DECISION
+R4 STATUS = DRAFT / NOT FROZEN / NOT EXECUTION-AUTHORIZED
+```
+
+```text
+decision made before any R4 model outcome
+本 decision 不产生任何 R4 outcome、不产生任何 scientific selection、
+不构成 R4 freeze、不构成 R4 execution authorization。
+```

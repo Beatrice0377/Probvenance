@@ -1,0 +1,632 @@
+{
+  "artifact_type": "r4-final-protocol-freeze",
+  "artifact_version": 1,
+  "fingerprint_version": 1,
+  "status": "FROZEN",
+  "formal_execution_authorized": false,
+  "freeze": {
+    "semantic_equivalence": "exact — the frozen `protocol` payload equals the amended final protocol candidate payload verbatim",
+    "candidate_source": "experiments/calibration_transport/R4_FINAL_PROTOCOL_SEMANTIC_CANDIDATE.json",
+    "candidate_fingerprint": "f3a96b7c2847060b1b5422dae800d0871e5bdf6aa9b83ba88cb102c83e44a0b6",
+    "measurement_contract": "experiments/calibration_transport/R4_MEASUREMENT_EXECUTION_CONTRACT.json",
+    "measurement_contract_fingerprint": "7b126d300e774cb44d2c47fcb12513865d03c2b08ffd03a5ce409b2ea976e1e5",
+    "execution_manifest_freeze": "experiments/calibration_transport/R4_EXECUTION_MANIFEST_FREEZE.json",
+    "execution_manifest_fingerprint": "f32381c51db24f5dbeb240b5e0fdf73c59a56a615c8607ad8979e2a7e2586775",
+    "awaiting": "AWAITING EXPLICIT HUMAN / CHATGPT EXECUTION AUTHORIZATION"
+  },
+  "protocol": {
+    "analysis_artifact_contract": {
+      "required_content": [
+        "unit-level estimates",
+        "panel-level estimates",
+        "multiplicity states",
+        "bootstrap provenance",
+        "refit stability",
+        "secondary diagnostics",
+        "completeness / failures"
+      ],
+      "required_references": [
+        "final protocol fingerprint",
+        "population fingerprints",
+        "measurement evidence fingerprints",
+        "calibration fit fingerprints",
+        "inference freeze fingerprint",
+        "predictor freeze fingerprint"
+      ]
+    },
+    "anchor_identity": {
+      "forbidden_inputs": [
+        "ground truth",
+        "label",
+        "cop",
+        "question text",
+        "candidate text",
+        "model output",
+        "CAT",
+        "OVR"
+      ],
+      "protocol_id": "r4-fixed-event-anchor-deterministic-source-index-hash",
+      "protocol_version": 1,
+      "regeneration_of_a_different_rule": "FORBIDDEN",
+      "rule": "anchor_index = int(fingerprint({protocol_id, protocol_version, dataset_id, dataset_revision, source_split, source_row_index})[:16], 16) % 4"
+    },
+    "artifact_type": "r4-final-integrated-protocol-semantic-candidate",
+    "artifact_version": 1,
+    "authority": {
+      "calibration_scientific_fingerprints": {
+        "B-beta": "f4b710fb98f7c3056794aa709d53309f462a8f598cef8089d2f9c0ed6f7e37ff",
+        "I-isotonic": "cd13bc07bf92f3375bcd16d57fa5f515cd40f68199b57181791f85c58be8c244",
+        "L-historical": "23ec12bbf4a809ba2f419491df80d1f228d3fd778d848115839aab3697f9dd58",
+        "L-low": "91d7d506275aade7d4676c39722ac2c4d975de7967a25a808395c056307ad619",
+        "P-historical": "a44e9217dd43e5e29d859c8dd2dc510a5876db4d46a8e0cc2fd4f1df3121a423",
+        "P-low": "7a8e13d51e131f2102cca4e00b172c8bbb2eb49e591acd3746aeb64d003c8857"
+      },
+      "dataset_sources": {
+        "r4-hellaswag-activity-primary": {
+          "dataset_id": "Rowan/hellaswag",
+          "dataset_revision": "218ec52e09a7e7462a5400043bb9a69a41d06b76",
+          "license": "MIT",
+          "test_source_split": "validation",
+          "train_source_split": "train"
+        },
+        "r4-medmcqa-subject-primary": {
+          "dataset_id": "openlifescienceai/medmcqa",
+          "dataset_revision": "91c6572c454088bf71b679ad90aa8dffcd0d5868",
+          "license": "apache-2.0",
+          "test_source_split": "validation",
+          "train_source_split": "train"
+        },
+        "r4-mmlu-57-subject": {
+          "dataset_id": "cais/mmlu",
+          "dataset_revision": "c30699e8356da336a370243923dbaf21066bb9fe",
+          "test_source_split": "test",
+          "train_source_split": "validation"
+        }
+      },
+      "frozen_inputs": {
+        "calibration_family_freeze": {
+          "path": "experiments/calibration_transport/R4_CALIBRATION_FAMILY_FREEZE.md",
+          "sha256": "1fd06ad4804cb64cd9220cc86187e26f6d690fba977bd76918e057bab418cdff",
+          "status": "FROZEN"
+        },
+        "calibration_family_implementation_engineering": {
+          "path": "experiments/calibration_transport/R4_CALIBRATION_FAMILY_IMPLEMENTATION_ENGINEERING.md",
+          "sha256": "812fd873de3ce882d35c6e46aac0edb4b09278a44fecef5088478b796174e6fe",
+          "status": "IMPLEMENTED"
+        },
+        "calibration_implementation_environment": {
+          "path": "experiments/calibration_transport/R4_CALIBRATION_IMPLEMENTATION_ENVIRONMENT.md",
+          "sha256": "69af279986353cdc9bce33dd175a1a1f7f198056e445281bc4d13849cc5e104c",
+          "status": "FROZEN_PROVENANCE"
+        },
+        "inference_implementation_engineering": {
+          "path": "experiments/calibration_transport/R4_INFERENCE_IMPLEMENTATION_ENGINEERING.md",
+          "sha256": "7c391f87662e0ebbb4bb4bddd792520e544e0133067d0a6dac5df4de92942151",
+          "status": "IMPLEMENTED"
+        },
+        "inference_implementation_provenance_closure": {
+          "path": "experiments/calibration_transport/R4_INFERENCE_IMPLEMENTATION_PROVENANCE_CLOSURE.md",
+          "sha256": "22f7f93c742cb7c1b1865c133e635b5e6903d6e879f4e5693bc1eaf2e28438df",
+          "status": "CLOSURE_CANDIDATE"
+        },
+        "inference_implementation_source": {
+          "path": "experiments/calibration_transport/r4_inference.py",
+          "sha256": "44f8ac3fe3ca0e138beb4f755e9ee65582ed0b09c14ba253bb01062d8ffda554"
+        },
+        "inference_multiplicity_freeze": {
+          "freeze_fingerprint": "dcbb7ac9e931145fdee86ab984de1249c1b86ca36ee735b70dafc8cabc06c141",
+          "path": "experiments/calibration_transport/R4_INFERENCE_MULTIPLICITY_FREEZE.json",
+          "sha256": "fdc07904056fd72bdd702e275743839eea741364324bd169ec2bf97504a45ad1",
+          "status": "FROZEN"
+        },
+        "inference_multiplicity_freeze_document": {
+          "path": "experiments/calibration_transport/R4_INFERENCE_MULTIPLICITY_FREEZE.md",
+          "sha256": "a08b8c14d462a348ce6be4d46513f9703126f313758d334e05c085661075cf88"
+        },
+        "population_freeze": {
+          "path": "experiments/calibration_transport/R4_POPULATION_FREEZE.md",
+          "sha256": "850b6b24da61f416b76d0bac83a4ba2775d3002e94894f003fd2e0a5488fee2a",
+          "status": "FROZEN"
+        },
+        "predictor_freeze": {
+          "freeze_fingerprint": "c856fcc161910497a3431593639606682905adcb50fc443455468dfc295d73a9",
+          "path": "experiments/calibration_transport/R4_PREDICTOR_FREEZE.json",
+          "sha256": "423c5cdaf68ce7cdbbb80cf704ed18f67692995e418d0dc8f707871322554f8c",
+          "status": "FROZEN"
+        },
+        "predictor_freeze_document": {
+          "path": "experiments/calibration_transport/R4_PREDICTOR_FREEZE.md",
+          "sha256": "13931f3b95a6afe69195c63a22ad1a460c0cd8ae878e7957009f685693dbf19a"
+        },
+        "predictor_implementation_engineering": {
+          "path": "experiments/calibration_transport/R4_PREDICTOR_IMPLEMENTATION_ENGINEERING.md",
+          "sha256": "93db1636ae250e2fc28058f288a52f414c8ec67d240a6988d83f7a40ab5ebbc9",
+          "status": "IMPLEMENTED"
+        },
+        "predictor_implementation_provenance_closure": {
+          "path": "experiments/calibration_transport/R4_PREDICTOR_IMPLEMENTATION_PROVENANCE_CLOSURE.md",
+          "sha256": "5259a7fc7d3eff02e343bce4b3f9f807e6d2a47208055e83a5678ea48dd90b04",
+          "status": "CLOSURE_CANDIDATE"
+        },
+        "predictor_implementation_source": {
+          "path": "experiments/calibration_transport/r4_predictor.py",
+          "sha256": "ccbfbbd681cf55d0cb1f7d3f12ba19e5cd68aa4c65d0ebf52045dc8f0fb2787e"
+        }
+      },
+      "population_freeze_commit_chain_note": "population, calibration-family, inference/multiplicity and predictor layers were each frozen and committed separately; this candidate integrates them without rewriting any of them",
+      "population_manifest_fingerprints": {
+        "r4-hellaswag-activity-primary": {
+          "n912_manifest_file_sha256": "9920c74071953df24fef760a2878942a17344974bdd341a77e2007f96feb8c4b",
+          "n912_manifest_fingerprint": "6817496f227d9cd57759bf55489cbf8a1dc4dfd27db0ae551e9223d21d02a096",
+          "primary_manifest_file_sha256": "0724128b9168b15a8796f260441c89025c3a224faf079cf7177b1c2faaec53cc",
+          "primary_manifest_fingerprint": "5c45043ba4f0ec436c16dcf494ff26be435c7857244bcbefa321d1678129c400",
+          "test_count": 10042,
+          "train_count": 456
+        },
+        "r4-medmcqa-subject-primary": {
+          "n912_manifest_file_sha256": "f56b09836da06d88f0be0915a9ebbd2bb01de54b2e48cafbeeb5554deab415fc",
+          "n912_manifest_fingerprint": "e48c37293f196e16d8fba42e7fc255e4ac2e77f81c270ed6f71320981968af12",
+          "primary_manifest_file_sha256": "a3db913227c8b6b32e45d6d6555423fdf6fa34d2b1700bd38fb06515226418f7",
+          "primary_manifest_fingerprint": "4a4718438d46ab1ba27c59ca46806756ffb62efa05e6103981dffec4dc48c218",
+          "test_count": 4162,
+          "train_count": 456
+        },
+        "r4-mmlu-57-subject": {
+          "note": "MMLU population identity is carried by the frozen R3 protocol; R4 does not redefine it",
+          "primary_manifest_fingerprint": null,
+          "r3_protocol_fingerprint": "3ef63056ae16b18ad65d9c87d1fbec5b43550873a0e3e25ec0a323f954ee974d",
+          "test_count": 1140,
+          "train_count": 456
+        }
+      },
+      "r3_protocol_fingerprint": "3ef63056ae16b18ad65d9c87d1fbec5b43550873a0e3e25ec0a323f954ee974d"
+    },
+    "calibration_family_panel": {
+      "core_four": [
+        "P-low",
+        "P-historical",
+        "L-low",
+        "L-historical"
+      ],
+      "family_roles": "continuity core plus two standalone extensions; explicitly NOT a six-cell factorial",
+      "panel_id": "r4-calibration-family-panel",
+      "panel_version": 1,
+      "procedures": [
+        {
+          "procedure": "P-low",
+          "role": "logistic-core",
+          "scientific_fingerprint": "7a8e13d51e131f2102cca4e00b172c8bbb2eb49e591acd3746aeb64d003c8857"
+        },
+        {
+          "procedure": "P-historical",
+          "role": "logistic-core",
+          "scientific_fingerprint": "a44e9217dd43e5e29d859c8dd2dc510a5876db4d46a8e0cc2fd4f1df3121a423"
+        },
+        {
+          "procedure": "L-low",
+          "role": "logistic-core",
+          "scientific_fingerprint": "91d7d506275aade7d4676c39722ac2c4d975de7967a25a808395c056307ad619"
+        },
+        {
+          "procedure": "L-historical",
+          "role": "logistic-core",
+          "scientific_fingerprint": "23ec12bbf4a809ba2f419491df80d1f228d3fd778d848115839aab3697f9dd58"
+        },
+        {
+          "procedure": "I-isotonic",
+          "role": "standalone-extension",
+          "scientific_fingerprint": "cd13bc07bf92f3375bcd16d57fa5f515cd40f68199b57181791f85c58be8c244"
+        },
+        {
+          "procedure": "B-beta",
+          "role": "standalone-extension",
+          "scientific_fingerprint": "f4b710fb98f7c3056794aa709d53309f462a8f598cef8089d2f9c0ed6f7e37ff"
+        }
+      ],
+      "seventh_procedure": "FORBIDDEN",
+      "standalone_extensions": [
+        "I-isotonic",
+        "B-beta"
+      ]
+    },
+    "calibration_fit_artifact_contract": {
+      "required_fields": [
+        "model",
+        "population",
+        "budget",
+        "measurement",
+        "procedure",
+        "procedure scientific fingerprint",
+        "implementation id",
+        "training manifest identity",
+        "training row identities",
+        "fitted state",
+        "fit status",
+        "failure status"
+      ],
+      "rule": "solver provenance is never written as a scientific procedure identity"
+    },
+    "candidate_fingerprint": "f3a96b7c2847060b1b5422dae800d0871e5bdf6aa9b83ba88cb102c83e44a0b6",
+    "completeness_gate": {
+      "before_calibration_fitting": "verify required TRAIN rows complete",
+      "before_formal_test_analysis": "verify required TEST paired measurements complete",
+      "forbidden": [
+        "row substitution",
+        "complete-case deletion",
+        "winner agreement filtering"
+      ]
+    },
+    "evidence_grid": {
+      "new_population_legacy_extension": {
+        "directional_units": 8,
+        "directions": [
+          "CAT->OVR",
+          "OVR->CAT"
+        ],
+        "model_population_cells": 4,
+        "models": [
+          "openbmb/MiniCPM5-2B",
+          "Qwen/Qwen3.5-2B"
+        ],
+        "populations": [
+          "r4-hellaswag-activity-primary",
+          "r4-medmcqa-subject-primary"
+        ],
+        "role": "secondary lineage continuity"
+      },
+      "prospective_r4_primary_panel": {
+        "directional_units": 24,
+        "directions": [
+          "CAT->OVR",
+          "OVR->CAT"
+        ],
+        "model_population_cells": 12,
+        "models": [
+          "allenai/Olmo-3-7B-Instruct",
+          "tiiuae/Falcon-H1-7B-Instruct",
+          "ibm-granite/granite-4.0-h-tiny",
+          "Qwen/Qwen3.5-9B"
+        ],
+        "populations": [
+          "r4-mmlu-57-subject",
+          "r4-hellaswag-activity-primary",
+          "r4-medmcqa-subject-primary"
+        ]
+      },
+      "r3_frozen_mmlu_continuity_evidence": {
+        "do_not_rerun": true,
+        "models": [
+          "openbmb/MiniCPM5-2B",
+          "Qwen/Qwen3.5-2B"
+        ],
+        "role": "historical continuity evidence",
+        "status": "FROZEN_EXISTING"
+      }
+    },
+    "execution_dag": [
+      "verify all frozen authorities / hashes",
+      "verify environment / model revisions / tokenizer verbalizers",
+      "perform formal raw fixed-event measurement",
+      "freeze raw measurement evidence artifact",
+      "verify 100% required paired completeness",
+      "fit primary N456 calibrators",
+      "fit secondary N912 robustness calibrators where declared",
+      "compute primary Brier unit risks / deltas",
+      "execute frozen TEST bootstrap inference",
+      "execute TRAIN-refit stability analysis separately",
+      "compute exact LogLoss secondary",
+      "compute descriptive reliability / subgroup diagnostics",
+      "construct frozen predictor X values without target labels",
+      "validate predictor against frozen inference outcomes",
+      "assemble official R4 result artifact",
+      "interpret only after artifact identities are fixed"
+    ],
+    "execution_dag_constraints": [
+      "predictor tuning must never be inserted after outcomes",
+      "no protocol change after outcome access"
+    ],
+    "execution_manifest_reference": {
+      "cycle_resolution": "the manifest references the protocol semantic id/version only; this candidate records the manifest fingerprint — no fingerprint cycle",
+      "manifest_fingerprint": "2195d283b7666a37593a312f4f6abbf8b7d2bd3a4b88737c151255981057f724",
+      "manifest_semantic_id": "r4-execution-manifest",
+      "manifest_semantic_version": 1
+    },
+    "fingerprint_version": 1,
+    "fixed_event_semantics": {
+      "definitions": {
+        "D_i": "externally frozen designated candidate",
+        "GT_i": "source ground truth",
+        "Y_i": "1[D_i = GT_i]"
+      },
+      "measured_quantity": "P(D_i correct)",
+      "measurements": [
+        "CAT",
+        "OVR"
+      ],
+      "winner_event_redefinition": "FORBIDDEN"
+    },
+    "formal_execution_authorized": false,
+    "inference_integration": {
+      "deltas": {
+        "Delta_deploy": "R_cross - R_raw",
+        "Delta_native": "R_native - R_raw",
+        "Delta_transport": "R_cross - R_native"
+      },
+      "family_sizes": {
+        "direction_difference": 6,
+        "extension": 8,
+        "native_reference": 12,
+        "primary": 12
+      },
+      "freeze_fingerprint": "dcbb7ac9e931145fdee86ab984de1249c1b86ca36ee735b70dafc8cabc06c141",
+      "population_resampling_semantics": {
+        "r4-hellaswag-activity-primary": "r4-hellaswag-activity-stratified-source-cluster-test-bootstrap",
+        "r4-medmcqa-subject-primary": "r4-medmcqa-subject-stratified-paired-test-bootstrap",
+        "r4-mmlu-57-subject": "r4-mmlu-subject-stratified-paired-test-bootstrap"
+      },
+      "test_bootstrap_replicates": 20000,
+      "train_refit_protocol": "r4-stratum-preserving-paired-train-refit-bootstrap",
+      "train_refit_replicates": 2000
+    },
+    "measurement_population_roles": {
+      "r4-hellaswag-activity-primary": {
+        "current_generation_models": "primary panel",
+        "legacy_models": "secondary lineage continuity"
+      },
+      "r4-medmcqa-subject-primary": {
+        "current_generation_models": "primary panel",
+        "legacy_models": "secondary lineage continuity"
+      },
+      "r4-mmlu-57-subject": {
+        "current_generation_models": "future R4 measurement",
+        "r3_legacy_rows_and_outcomes": "frozen historical evidence"
+      }
+    },
+    "measurement_protocol": {
+      "CAT": "restricted categorical probability for the frozen designated candidate D_i",
+      "OVR": "independent proposition for the same designated candidate D_i",
+      "per_model_verbalizer_gate": "the frozen tokenizer gate ids above are the Olmo-3 reference; every model in the panel must pass its own exact tokenizer gate before measurement",
+      "verbalizer_gate": {
+        "CAT": {
+          "A": 32,
+          "B": 33,
+          "C": 34,
+          "D": 35
+        },
+        "OVR": {
+          "no": 2201,
+          "yes": 9891
+        },
+        "doctrine": "exact single-token continuation, distinct ids, no leading-space fallback, no capitalization fallback, no multi-token sum, no alternate verbalizer, no tokenizer monkey-patch",
+        "gate": "EXECUTION GATE — a mismatch stops the run"
+      }
+    },
+    "measurement_workload": {
+      "call_count_contract": "experiments/calibration_transport/R4_MEASUREMENT_EXECUTION_CONTRACT.json",
+      "call_count_contract_fingerprint": "7b126d300e774cb44d2c47fcb12513865d03c2b08ffd03a5ce409b2ea976e1e5",
+      "call_count_contract_status": "FROZEN",
+      "calls_per_item": {
+        "cat_forwards_per_item": 1,
+        "ovr_forwards_per_item": 1,
+        "ovr_scope": "designated-candidate-only",
+        "total_forwards_per_item": 2
+      },
+      "r3_call_contract_inheritance": "REJECTED",
+      "derivation": "mechanically derived from the frozen required execution grid and the frozen 2-forward contract",
+      "grid": {
+        "hellaswag_current_generation": {
+          "models": 4,
+          "test_rows_per_model": 10042,
+          "train_rows_per_model": 912,
+          "train_source": "frozen N912 union",
+          "unique_model_item_rows": 43816,
+          "unique_rows_per_model": 10954
+        },
+        "hellaswag_legacy": {
+          "models": 2,
+          "test_rows_per_model": 10042,
+          "train_rows_per_model": 456,
+          "unique_model_item_rows": 20996,
+          "unique_rows_per_model": 10498
+        },
+        "medmcqa_current_generation": {
+          "models": 4,
+          "test_rows_per_model": 4162,
+          "train_rows_per_model": 912,
+          "train_source": "frozen N912 union",
+          "unique_model_item_rows": 20296,
+          "unique_rows_per_model": 5074
+        },
+        "medmcqa_legacy": {
+          "models": 2,
+          "test_rows_per_model": 4162,
+          "train_rows_per_model": 456,
+          "unique_model_item_rows": 9236,
+          "unique_rows_per_model": 4618
+        },
+        "mmlu_current_generation": {
+          "models": 4,
+          "test_rows_per_model": 1140,
+          "train_rows_per_model": 456,
+          "unique_model_item_rows": 6384,
+          "unique_rows_per_model": 1596
+        },
+        "r3_legacy_mmlu": {
+          "do_not_rerun": true,
+          "new_item_measurements": 0,
+          "status": "FROZEN_EXISTING"
+        }
+      },
+      "legacy_n912_semantics": {
+        "legacy_hellaswag_required_train": 456,
+        "legacy_medmcqa_required_train": 456,
+        "legacy_n912": "NOT REQUIRED / NOT MEASURED IN THE FORMAL R4 PLAN"
+      },
+      "n912_extension": {
+        "additional_forwards": 7296,
+        "current_generation_models": 4,
+        "extension_rows_per_model_per_population": 456,
+        "identity": "97080 + 3648 = 100728 ; 194160 + 7296 = 201456",
+        "populations": 2,
+        "unique_model_item_rows": 3648
+      },
+      "n912_semantics": {
+        "current_generation_hellaswag_raw_train_union": 912,
+        "current_generation_medmcqa_raw_train_union": 912,
+        "n912_robustness_consumes": "full N912",
+        "primary_fit_consumes": "selected N456 subset",
+        "raw_scores": "measured once, reused"
+      },
+      "primary_only_audit": {
+        "total_forwards": 194160,
+        "unique_model_item_rows": 97080
+      },
+      "protocol": "r4-measurement-workload-audit",
+      "protocol_version": 2,
+      "rejected_previous_numbers": {
+        "previous_inherited_r3_calls": 521880,
+        "previous_item_measurements": 104376,
+        "reasons": [
+          "the inherited 5-call-per-item R3 contract is not the R4 contract",
+          "the nested N912 must reuse N456 raw measurement rows",
+          "required N912 robustness applies to the current-generation panel, not legacy secondary cells"
+        ],
+        "scientific_estimand_changes": "NONE",
+        "status": "NOT AUTHORITATIVE"
+      },
+      "totals": {
+        "required_cat_forwards": 100728,
+        "required_ovr_forwards": 100728,
+        "required_total_forwards": 201456,
+        "required_unique_model_item_rows": 100728
+      }
+    },
+    "metrics": {
+      "additional_confirmatory_metric": "FORBIDDEN",
+      "output_policy": "no post-calibration epsilon clipping; exact 0.0/1.0 preserved; exact LogLoss may be +infinity",
+      "primary": "Brier",
+      "reliability": "descriptive",
+      "secondary": "exact LogLoss"
+    },
+    "models": {
+      "current_generation": [
+        {
+          "model_id": "allenai/Olmo-3-7B-Instruct",
+          "model_revision": "6e5971d9eba42665f5bd5a0fcf047f299ce1dccc",
+          "role": "current-generation primary"
+        },
+        {
+          "model_id": "tiiuae/Falcon-H1-7B-Instruct",
+          "model_revision": "41e72f27effbab80cd45b6e884688452253a3686",
+          "role": "current-generation primary"
+        },
+        {
+          "model_id": "ibm-granite/granite-4.0-h-tiny",
+          "model_revision": "791e0d3d28c86e106c9b6e0b4cecdee0375b6124",
+          "role": "current-generation primary"
+        },
+        {
+          "model_id": "Qwen/Qwen3.5-9B",
+          "model_revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+          "role": "current-generation primary"
+        }
+      ],
+      "legacy": [
+        {
+          "model_id": "openbmb/MiniCPM5-2B",
+          "model_revision": "12a3808a956f869c767195e9266b59c4d21d92e2",
+          "role": "legacy lineage continuity"
+        },
+        {
+          "model_id": "Qwen/Qwen3.5-2B",
+          "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+          "role": "legacy lineage continuity"
+        }
+      ]
+    },
+    "no_silent_recovery": [
+      "no procedure fallback",
+      "no row fallback",
+      "no score clipping",
+      "no successful-subset refit CI",
+      "no complete-case panel aggregation",
+      "no validation-unit dropping"
+    ],
+    "non_claims": [
+      "Final candidate is not execution authorization.",
+      "R4 primary inference is conditional on its fixed declared panel.",
+      "R3 MMLU legacy results are historical continuity evidence.",
+      "N912 cannot rescue N456.",
+      "Predictor validation is conditional on its fixed 16-unit held-out panel.",
+      "Predictor association is not causal.",
+      "No calibration procedure is universally best.",
+      "No result establishes global CAT/OVR compatibility.",
+      "No result authorizes production calibration-profile transport."
+    ],
+    "population_budgets": {
+      "primary_train": {
+        "budget": "N456",
+        "shared_by": "all primary calibration procedures"
+      },
+      "secondary_robustness_train": {
+        "budget": "N912",
+        "cannot_rescue_primary": true,
+        "same_test": true,
+        "subset_relation": "TRAIN456 subset of TRAIN912"
+      },
+      "test": "full frozen eligible TEST population, no subsampling"
+    },
+    "predictor_anti_leakage": {
+      "predictor_x_may_be_computed_after_raw_scores_exist": true,
+      "protocol_change_after_outcome_access": "FORBIDDEN",
+      "threshold_or_predictor_selection_after_transport_result": "FORBIDDEN"
+    },
+    "predictor_integration": {
+      "fixed_panel": true,
+      "freeze_fingerprint": "c856fcc161910497a3431593639606682905adcb50fc443455468dfc295d73a9",
+      "primary_predictor": "r4-target-range-exceedance-warning",
+      "primary_predictor_target": "r4-core4-mean-transport-penalty",
+      "primary_validation": "16 held-out HellaSwag + MedMCQA current-generation units",
+      "r4_mmlu_role": "development / continuity",
+      "secondary_predictor": "r4-source-target-wasserstein1-warning",
+      "target_label_free": true
+    },
+    "protocol_id": "r4-final-integrated-protocol",
+    "protocol_version": 1,
+    "r3_frozen_result_reuse": {
+      "continuity_evidence": "use the frozen R3 result artifact identity",
+      "forbidden": "re-fit or re-measure R3 legacy cells and call it continuity",
+      "rule": "do not rerun frozen R3 MMLU legacy cells"
+    },
+    "raw_measurement_provenance_contract": {
+      "generation_now": "NOT REQUIRED — this candidate must not produce these outcomes",
+      "required_fields": [
+        "model id",
+        "model revision",
+        "population identity",
+        "item identity",
+        "split",
+        "anchor D_i",
+        "ground truth identity",
+        "Y",
+        "CAT score/state",
+        "OVR score/state",
+        "measurement protocol identities",
+        "runtime provenance"
+      ],
+      "unit": "model x population x item"
+    },
+    "stage_barrier_rule": "a later stage may consume only immutable artifacts produced by an earlier stage; the protocol may never be edited while results are visible",
+    "stage_barriers": [
+      "PRE_MEASUREMENT",
+      "RAW_MEASUREMENT_COMPLETE",
+      "CALIBRATION_FITS_COMPLETE",
+      "PRIMARY_ANALYSIS_COMPLETE",
+      "SECONDARY_ANALYSIS_COMPLETE",
+      "PREDICTOR_VALIDATION_COMPLETE",
+      "FINAL_RESULT_COMPLETE"
+    ],
+    "status": "CANDIDATE"
+  },
+  "final_protocol_fingerprint": "d1b56d702e1f260cef47eee05b7d878ace07a15168e89408e15e7eb741c0ad34"
+}

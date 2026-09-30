@@ -852,3 +852,50 @@ R4 STATUS           = DRAFT / NOT FULLY FROZEN / NOT EXECUTION-AUTHORIZED
 冻结身份记录见 `experiments/calibration_transport/R4_POPULATION_FREEZE.md`。
 本 notice 只冻结 population layer，不构成 calibration-family 语义冻结、
 不构成 predictor inference 规范冻结、不构成 R4 execution authorization。
+
+---
+
+## 22. 2026-09-30 R4 calibration-family semantic freeze [FREEZE NOTICE]
+
+The R4 calibration-family scientific semantics are now frozen.
+
+frozen scope：
+
+```text
+the six-procedure panel (P-low / P-historical / L-low / L-historical /
+I-isotonic / B-beta)
+the four R3 continuity scientific identities
+the two new-family scientific identities
+fitting eligibility / failure / endpoint / support / clipping semantics
+family roles (continuity core + two standalone extensions)
+fitting budgets 456 / 912 nested, equal rows across all six
+no-rescue rule
+output / clipping policy
+```
+
+仍 open：
+
+```text
+final numerical beta solver
+solver convergence / KKT tolerance contract
+production isotonic implementation provenance
+bootstrap / multiplicity
+predictor inferential specification
+formal execution protocol
+```
+
+因此：
+
+```text
+R4 CALIBRATION-FAMILY SCIENTIFIC SEMANTICS : FROZEN
+R4 POPULATION LAYER                        : FROZEN
+R4 OVERALL                                 : NOT FULLY FROZEN
+R4 EXECUTION                               : NOT AUTHORIZED
+R4 STATUS = DRAFT / NOT FULLY FROZEN / NOT EXECUTION-AUTHORIZED
+```
+
+冻结身份记录见
+`experiments/calibration_transport/R4_CALIBRATION_FAMILY_FREEZE.md`。
+本 notice 只冻结 calibration-family scientific semantics；不构成 predictor
+inference 规范冻结、不构成 multiplicity 决策、不构成最终 numerical solver
+契约冻结、不构成 R4 execution authorization。

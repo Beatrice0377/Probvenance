@@ -1841,3 +1841,50 @@ overlap guard、primary/secondary sample-size role、provenance commit chain）
 本 notice 只冻结 population layer；不构成 calibration-family 语义冻结、
 不构成 predictor inference 规范冻结、不构成 multiplicity 决策、
 不构成 R4 execution authorization。
+
+---
+
+# AG. 2026-09-30 R4 CALIBRATION-FAMILY SEMANTIC FREEZE [FREEZE NOTICE]
+
+The R4 calibration-family scientific semantics are now frozen.
+
+frozen scope：
+
+```text
+the six-procedure panel
+the four R3 continuity scientific identities
+the two new-family scientific identities (I-isotonic, B-beta)
+fitting eligibility / failure / endpoint / support / clipping semantics
+family roles (continuity core + two standalone extensions)
+fitting budgets 456 / 912 nested, equal rows across all six
+no-rescue rule
+output / clipping policy
+```
+
+still open：
+
+```text
+final numerical beta solver
+solver convergence / KKT tolerance contract
+production isotonic implementation provenance
+bootstrap / multiplicity
+predictor inferential specification
+formal execution protocol
+```
+
+Therefore：
+
+```text
+R4 CALIBRATION-FAMILY SCIENTIFIC SEMANTICS : FROZEN
+R4 POPULATION LAYER                        : FROZEN
+R4 OVERALL                                 : NOT FULLY FROZEN
+R4 EXECUTION                               : NOT AUTHORIZED
+```
+
+冻结身份（六个 procedure scientific fingerprint、fitting eligibility 与 failure
+规则、budgets 与 sample-size role、no-rescue rule、output/clipping policy）
+记录于 `experiments/calibration_transport/R4_CALIBRATION_FAMILY_FREEZE.md`。
+
+本 notice 只冻结 calibration-family scientific semantics；不构成 predictor
+inference 规范冻结、不构成 multiplicity 决策、不构成最终 numerical solver
+契约冻结、不构成 R4 execution authorization。R3 frozen result sections 未被修改。

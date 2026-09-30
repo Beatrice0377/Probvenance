@@ -814,3 +814,41 @@ decision made before any R4 model outcome
 本 decision 不产生任何 R4 outcome、不产生任何 scientific selection、
 不构成 R4 freeze、不构成 R4 execution authorization。
 ```
+
+---
+
+## 21. 2026-09-30 R4 population layer freeze [FREEZE NOTICE]
+
+The R4 population layer is now frozen.
+
+frozen scope：
+
+```text
+dataset source identity
+population construction protocol
+primary TRAIN 456 identities
+secondary nested TRAIN 912 identities
+fixed-event population-layer anchor protocol
+```
+
+仍 open：
+
+```text
+calibration-family semantics
+predictor inferential specification
+multiplicity
+formal execution protocol
+```
+
+因此：
+
+```text
+R4 POPULATION LAYER : FROZEN
+R4 OVERALL          : NOT FULLY FROZEN
+R4 EXECUTION        : NOT AUTHORIZED
+R4 STATUS           = DRAFT / NOT FULLY FROZEN / NOT EXECUTION-AUTHORIZED
+```
+
+冻结身份记录见 `experiments/calibration_transport/R4_POPULATION_FREEZE.md`。
+本 notice 只冻结 population layer，不构成 calibration-family 语义冻结、
+不构成 predictor inference 规范冻结、不构成 R4 execution authorization。

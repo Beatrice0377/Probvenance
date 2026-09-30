@@ -1,0 +1,656 @@
+{
+  "artifact_type": "r4-target-label-free-predictor-freeze",
+  "artifact_version": 1,
+  "candidate_artifact_identity": {
+    "candidate_commit": "ed2ba62ffdae7b1c9890682e3550b54021df6c99",
+    "candidate_fingerprint": "d3625912fadb5e6c68e20495256aa1f90b53686f13c9d25d1eb9ceb212dfbb06",
+    "candidate_json_path": "experiments/calibration_transport/R4_PREDICTOR_SEMANTIC_CANDIDATE.json",
+    "candidate_json_sha256": "31aa9e0b4bf1a95fddd4cad3250ffe3cbb27fb9ac334129c19e020f791f6bcce",
+    "candidate_md_path": "experiments/calibration_transport/R4_PREDICTOR_SEMANTIC_CANDIDATE.md",
+    "candidate_md_sha256": "b82e87c4b2ce8142bd7d9dd7fa8d8c9cb1a46e901625f6a4289c001c50cd3bef"
+  },
+  "creation_provenance": {
+    "freeze_specific_metadata_only": true,
+    "frozen_semantic_payload_rule": "frozen_semantic_payload = reviewed candidate payload minus artifact identity keys (artifact_type, artifact_version, status, candidate_fingerprint, fingerprint_version)",
+    "inference_amendment_commit": "bdaa088a1f5b508c47875039d2cf2be5df1595a1",
+    "inference_freeze_fingerprint": "dcbb7ac9e931145fdee86ab984de1249c1b86ca36ee735b70dafc8cabc06c141",
+    "semantic_equivalence_audit": {
+      "candidate_semantic_key_count": 19,
+      "comparison": "candidate payload minus candidate identity keys vs frozen_semantic_payload",
+      "differing_keys": [],
+      "frozen_semantic_key_count": 19,
+      "replaced_keys": [
+        "artifact_type",
+        "artifact_version",
+        "candidate_fingerprint",
+        "fingerprint_version",
+        "status"
+      ],
+      "result": "EXACT_SEMANTIC_EQUIVALENCE"
+    },
+    "source_candidate_commit": "ed2ba62ffdae7b1c9890682e3550b54021df6c99",
+    "source_candidate_fingerprint": "d3625912fadb5e6c68e20495256aa1f90b53686f13c9d25d1eb9ceb212dfbb06"
+  },
+  "fingerprint_version": 1,
+  "freeze_fingerprint": "c856fcc161910497a3431593639606682905adcb50fc443455468dfc295d73a9",
+  "freeze_scope": {
+    "frozen": [
+      "primary target-label-free predictor identity and definition",
+      "secondary target-label-free predictor identity and definition",
+      "primary and secondary predictor outcomes (CORE4 means)",
+      "development / validation / legacy unit registries",
+      "predictor TEST-bootstrap validation protocol",
+      "predictor TRAIN-stability protocol",
+      "predictor primary support rule and completeness rules",
+      "N912 robustness role for the predictor layer",
+      "label firewall contract",
+      "score geometry contract"
+    ],
+    "not_frozen": [
+      "predictor implementation engineering",
+      "formal R4 predictor validation execution",
+      "formal R4 bootstrap execution",
+      "final integrated R4 protocol",
+      "formal R4 execution authorization"
+    ]
+  },
+  "frozen_authority_identity": {
+    "calibration_family_freeze_identity": {
+      "path": "experiments/calibration_transport/R4_CALIBRATION_FAMILY_FREEZE.md",
+      "sha256": "1fd06ad4804cb64cd9220cc86187e26f6d690fba977bd76918e057bab418cdff",
+      "status": "R4 CALIBRATION-FAMILY SEMANTICS: FROZEN"
+    },
+    "calibration_scientific_fingerprints": {
+      "B-beta": "f4b710fb98f7c3056794aa709d53309f462a8f598cef8089d2f9c0ed6f7e37ff",
+      "I-isotonic": "cd13bc07bf92f3375bcd16d57fa5f515cd40f68199b57181791f85c58be8c244"
+    },
+    "inference_amendment_commit": "bdaa088a1f5b508c47875039d2cf2be5df1595a1",
+    "inference_candidate_fingerprint": "5e10be53c8151d10992b70f4940d0e6f6a7aa83dfe4d5cd49e62b485b0c5e267",
+    "inference_freeze_identity": {
+      "freeze_fingerprint": "dcbb7ac9e931145fdee86ab984de1249c1b86ca36ee735b70dafc8cabc06c141",
+      "path": "experiments/calibration_transport/R4_INFERENCE_MULTIPLICITY_FREEZE.json",
+      "sha256": "fdc07904056fd72bdd702e275743839eea741364324bd169ec2bf97504a45ad1",
+      "status": "R4 INFERENCE + MULTIPLICITY SEMANTICS: FROZEN"
+    },
+    "population_freeze_identity": {
+      "path": "experiments/calibration_transport/R4_POPULATION_FREEZE.md",
+      "sha256": "850b6b24da61f416b76d0bac83a4ba2775d3002e94894f003fd2e0a5488fee2a",
+      "status": "R4 POPULATION LAYER: FROZEN"
+    },
+    "population_manifest_fingerprints": {
+      "hellaswag_primary": "5c45043ba4f0ec436c16dcf494ff26be435c7857244bcbefa321d1678129c400",
+      "hellaswag_robustness912": "6817496f227d9cd57759bf55489cbf8a1dc4dfd27db0ae551e9223d21d02a096",
+      "medmcqa_primary": "4a4718438d46ab1ba27c59ca46806756ffb62efa05e6103981dffec4dc48c218",
+      "medmcqa_robustness912": "e48c37293f196e16d8fba42e7fc255e4ac2e77f81c270ed6f71320981968af12"
+    },
+    "r3_continuity_identity": {
+      "r3_continuity_procedure_fingerprints": {
+        "L-historical": "23ec12bbf4a809ba2f419491df80d1f228d3fd778d848115839aab3697f9dd58",
+        "L-low": "91d7d506275aade7d4676c39722ac2c4d975de7967a25a808395c056307ad619",
+        "P-historical": "a44e9217dd43e5e29d859c8dd2dc510a5876db4d46a8e0cc2fd4f1df3121a423",
+        "P-low": "7a8e13d51e131f2102cca4e00b172c8bbb2eb49e591acd3746aeb64d003c8857"
+      },
+      "r3_protocol_fingerprint": "3ef63056ae16b18ad65d9c87d1fbec5b43550873a0e3e25ec0a323f954ee974d",
+      "r3_protocol_id": "r3-confirmatory-procedure-conditioned-transport",
+      "r3_protocol_version": 1
+    }
+  },
+  "frozen_semantic_payload": {
+    "authority": {
+      "calibration_family_freeze_identity": {
+        "path": "experiments/calibration_transport/R4_CALIBRATION_FAMILY_FREEZE.md",
+        "sha256": "1fd06ad4804cb64cd9220cc86187e26f6d690fba977bd76918e057bab418cdff",
+        "status": "R4 CALIBRATION-FAMILY SEMANTICS: FROZEN"
+      },
+      "calibration_scientific_fingerprints": {
+        "B-beta": "f4b710fb98f7c3056794aa709d53309f462a8f598cef8089d2f9c0ed6f7e37ff",
+        "I-isotonic": "cd13bc07bf92f3375bcd16d57fa5f515cd40f68199b57181791f85c58be8c244"
+      },
+      "frozen_inputs_read_only": [
+        "experiments/calibration_transport/R4_POPULATION_FREEZE.md",
+        "experiments/calibration_transport/R4_CALIBRATION_FAMILY_FREEZE.md",
+        "experiments/calibration_transport/R4_INFERENCE_MULTIPLICITY_FREEZE.json",
+        "experiments/calibration_transport/R4_INFERENCE_MULTIPLICITY_FREEZE.md",
+        "experiments/calibration_transport/R4_INFERENCE_IMPLEMENTATION_PROVENANCE_CLOSURE.md"
+      ],
+      "inference_amendment_commit": "bdaa088a1f5b508c47875039d2cf2be5df1595a1",
+      "inference_amendment_commit_message": "experiments: harden R4 inference dependency isolation",
+      "inference_candidate_commit": "2ef9d31cda96dfc3bb326625dad0df061bb7063e",
+      "inference_candidate_fingerprint": "5e10be53c8151d10992b70f4940d0e6f6a7aa83dfe4d5cd49e62b485b0c5e267",
+      "inference_freeze_commit": "8fc2f3ae465708aa12b108e838377e745e36116b",
+      "inference_freeze_identity": {
+        "freeze_fingerprint": "dcbb7ac9e931145fdee86ab984de1249c1b86ca36ee735b70dafc8cabc06c141",
+        "path": "experiments/calibration_transport/R4_INFERENCE_MULTIPLICITY_FREEZE.json",
+        "sha256": "fdc07904056fd72bdd702e275743839eea741364324bd169ec2bf97504a45ad1",
+        "status": "R4 INFERENCE + MULTIPLICITY SEMANTICS: FROZEN"
+      },
+      "nearest_rank_percentile_rule": "rank = ceil(fraction * n), clamped to [1, n]; value = ordered[rank-1]; even n is NOT averaged",
+      "nearest_rank_percentile_rule_id": "nearest-rank-percentile",
+      "nearest_rank_percentile_rule_version": 1,
+      "original_inference_implementation_commit": "8c3bb0f0e4367bf7194f22a3f38d66aff3cbbbf7",
+      "population_freeze_identity": {
+        "path": "experiments/calibration_transport/R4_POPULATION_FREEZE.md",
+        "sha256": "850b6b24da61f416b76d0bac83a4ba2775d3002e94894f003fd2e0a5488fee2a",
+        "status": "R4 POPULATION LAYER: FROZEN"
+      },
+      "population_manifest_fingerprints": {
+        "hellaswag_primary": "5c45043ba4f0ec436c16dcf494ff26be435c7857244bcbefa321d1678129c400",
+        "hellaswag_robustness912": "6817496f227d9cd57759bf55489cbf8a1dc4dfd27db0ae551e9223d21d02a096",
+        "medmcqa_primary": "4a4718438d46ab1ba27c59ca46806756ffb62efa05e6103981dffec4dc48c218",
+        "medmcqa_robustness912": "e48c37293f196e16d8fba42e7fc255e4ac2e77f81c270ed6f71320981968af12"
+      },
+      "r3_continuity_procedure_fingerprints": {
+        "L-historical": "23ec12bbf4a809ba2f419491df80d1f228d3fd778d848115839aab3697f9dd58",
+        "L-low": "91d7d506275aade7d4676c39722ac2c4d975de7967a25a808395c056307ad619",
+        "P-historical": "a44e9217dd43e5e29d859c8dd2dc510a5876db4d46a8e0cc2fd4f1df3121a423",
+        "P-low": "7a8e13d51e131f2102cca4e00b172c8bbb2eb49e591acd3746aeb64d003c8857"
+      },
+      "r3_protocol_fingerprint": "3ef63056ae16b18ad65d9c87d1fbec5b43550873a0e3e25ec0a323f954ee974d",
+      "r3_protocol_id": "r3-confirmatory-procedure-conditioned-transport",
+      "r3_protocol_version": 1
+    },
+    "completeness_rules": {
+      "outcome_completeness": {
+        "Y_transport_core_dependencies": [
+          "P-low",
+          "P-historical",
+          "L-low",
+          "L-historical"
+        ],
+        "any_dependency_unavailable": "unit predictor outcome = INCOMPLETE",
+        "any_incomplete_validation_unit": "PRIMARY PREDICTOR VALIDATION = INCOMPLETE",
+        "averaging_remaining_three_forbidden": true,
+        "complete_case_spearman_forbidden": true
+      },
+      "outcome_construction_firewall": {
+        "consume_frozen_inference_semantic_outputs_only": true,
+        "forbidden": [
+          "refit calibration",
+          "redefine Delta_transport",
+          "change procedure eligibility",
+          "recompute a different transport outcome"
+        ]
+      },
+      "predictor_completeness": {
+        "primary_validation_state": "INCOMPLETE",
+        "trigger": "any primary validation unit has incomplete source TRAIN scores or incomplete target TEST raw scores",
+        "unit_dropping_forbidden": true,
+        "unit_state": "INCOMPLETE"
+      }
+    },
+    "development_units": {
+      "r3_mmlu": {
+        "classification": "DEVELOPMENT / CONTINUITY",
+        "is_independent_validation": false,
+        "manuscript_wording_forbidden": [
+          "validated independently on R3 MMLU"
+        ],
+        "reason": "the predictor idea was motivated by R3 MMLU evidence",
+        "units": "all R3 MMLU evidence"
+      },
+      "r4_mmlu_current_generation": {
+        "assignment_made_before_any_r4_outcome_read": true,
+        "cannot_merge_into_24_unit_validation": true,
+        "classification": "R4 DEVELOPMENT / CONTINUITY UNITS",
+        "direction_count": 2,
+        "directions": [
+          "CAT->OVR",
+          "OVR->CAT"
+        ],
+        "is_independent_validation": false,
+        "models": [
+          "allenai/Olmo-3-7B-Instruct",
+          "tiiuae/Falcon-H1-7B-Instruct",
+          "ibm-granite/granite-4.0-h-tiny",
+          "Qwen/Qwen3.5-9B"
+        ],
+        "permitted_future_computation": [
+          "X_range",
+          "X_W1",
+          "Y outcomes",
+          "rho"
+        ],
+        "population_id": "r4-mmlu-57-subject",
+        "reason": "population = MMLU overlaps the predictor development population, even though the models are new",
+        "required_label": "DEVELOPMENT / NOT VALIDATION",
+        "unit_count": 8
+      },
+      "role": "DEVELOPMENT / CONTINUITY ONLY"
+    },
+    "generalization_scope": {
+      "claim_type": "association across the declared fixed panel",
+      "is_random_sample": false,
+      "is_superpopulation_random_effects_inference": false,
+      "panel": "declared fixed held-out validation panel",
+      "universal_behavior_across_models_or_populations": false
+    },
+    "label_firewall": {
+      "allowed_predictor_inputs": [
+        "SOURCE TRAIN raw fixed-event scores",
+        "TARGET TEST raw fixed-event scores",
+        "model identity",
+        "population identity",
+        "direction"
+      ],
+      "forbidden_predictor_inputs": [
+        "TARGET Y",
+        "TARGET correctness",
+        "TARGET ground truth",
+        "TARGET Brier",
+        "TARGET LogLoss",
+        "R_native",
+        "R_cross",
+        "Delta values",
+        "calibrated TARGET probabilities"
+      ],
+      "future_function_signature_requirement": "the primary predictor function must accept only source_train_scores and target_test_scores; it must not require labels, a calibrator, an outcome or ground truth",
+      "future_test_requirement": "future tests must prove by API signature or monkey-free inspection that the predictor X computation takes no label input",
+      "implemented_in_candidate_stage": false,
+      "outcome_validation_uses_labels": true,
+      "predictor_X_never_uses_labels": true,
+      "target_label_free_is_not_label_free_entire_study": true
+    },
+    "legacy_extension_units": {
+      "can_rescue_16_unit_primary": false,
+      "composition": "2 legacy models x 2 held-out populations x 2 directions",
+      "directions": [
+        "CAT->OVR",
+        "OVR->CAT"
+      ],
+      "is_fully_independent_primary_validation": false,
+      "label_forbidden": [
+        "fully independent primary validation"
+      ],
+      "model_lineages_participated_in_r3_development": true,
+      "models": [
+        {
+          "model_id": "openbmb/MiniCPM5-2B",
+          "panel_role": "legacy-lineage",
+          "revision": "12a3808a956f869c767195e9266b59c4d21d92e2"
+        },
+        {
+          "model_id": "Qwen/Qwen3.5-2B",
+          "panel_role": "legacy-lineage",
+          "revision": "15852e8c16360a2fea060d615a32b45270f8a8fc"
+        }
+      ],
+      "populations": [
+        "r4-hellaswag-activity-primary",
+        "r4-medmcqa-subject-primary"
+      ],
+      "populations_are_held_out": true,
+      "role": "SECONDARY LINEAGE-CONTINUITY VALIDATION EXTENSION",
+      "unit_count": 8
+    },
+    "n912_robustness": {
+      "allowed_comparisons": [
+        "X_range_456 vs X_range_912",
+        "X_W1_456 vs X_W1_912 (optional)"
+      ],
+      "n912_cannot_replace_rescue_or_retune_primary": true,
+      "primary_predictor_remains_N456": true,
+      "role": "SECONDARY ROBUSTNESS ONLY"
+    },
+    "non_claims": [
+      "The predictor does not use TARGET labels as input.",
+      "The predictor is an association-based warning signal, not a causal mechanism.",
+      "The predictor does not certify calibration transportability.",
+      "R3 MMLU is development evidence, not independent validation.",
+      "R4 MMLU current-generation units are development/continuity units, not held-out validation.",
+      "Primary held-out validation is restricted to the 16 current-generation HellaSwag/MedMCQA direction units.",
+      "Legacy-model Hella/Med units are secondary lineage-continuity evidence.",
+      "F is not treated as independent predictor replication.",
+      "The primary predictor outcome averages only the four R3-continuity logistic procedures.",
+      "I-isotonic and B-beta cannot rescue primary predictor validation.",
+      "N912 cannot rescue N456 predictor validation.",
+      "The predictor does not establish universal behavior across models or populations."
+    ],
+    "outcomes": {
+      "primary_transport_core": {
+        "I_or_B_can_rescue": false,
+        "core_procedure_count": 4,
+        "core_procedures": [
+          "P-low",
+          "P-historical",
+          "L-low",
+          "L-historical"
+        ],
+        "definition": "Y_transport_core(u) = (1/4) * sum over F in CORE4 of Delta_transport(u, F)",
+        "delta_transport_definition": "R_cross(m,p,d,F) - R_native(m,p,d,F)",
+        "interpretation": "positive larger = larger average transport penalty relative to target-native calibration, across the R3-continuity core",
+        "outcome_id": "r4-core4-mean-transport-penalty",
+        "outcome_version": 1,
+        "role": "PRIMARY",
+        "source_of_delta_values": "consumes frozen formal inference semantic outputs only",
+        "standalone_extensions_excluded": [
+          "I-isotonic",
+          "B-beta"
+        ],
+        "why_core_four_averaging": [
+          "the X predictor has no F dimension, so the same X cannot be treated as several independent observations",
+          "removes F pseudo-replication",
+          "preserves continuity with R3 predictor development",
+          "does not let the newly added I/B extensions redefine the primary predictor outcome",
+          "retains procedure-conditioned outcomes separately elsewhere in inference"
+        ]
+      },
+      "secondary_deploy_core": {
+        "core_procedures": [
+          "P-low",
+          "P-historical",
+          "L-low",
+          "L-historical"
+        ],
+        "definition": "Y_deploy_core(u) = (1/4) * sum over F in CORE4 of Delta_deploy(u, F)",
+        "delta_deploy_definition": "R_cross(m,p,d,F) - R_raw(m,p,d)",
+        "interpretation": "cross vs raw; secondary deployment-warning reading",
+        "must_not_be_merged_with": [
+          "Y_transport_core"
+        ],
+        "outcome_id": "r4-core4-mean-deployment-delta",
+        "outcome_version": 1,
+        "primary_claim_basis": "Y_transport_core only",
+        "role": "SECONDARY PRACTICAL DIAGNOSTIC"
+      }
+    },
+    "predictor_input_identity": {
+      "required_fields_per_predictor_row": [
+        "model_id",
+        "model_revision",
+        "population_id",
+        "population_fingerprint",
+        "direction",
+        "source_measurement",
+        "target_measurement",
+        "source_train_budget",
+        "source_train_manifest_fingerprint",
+        "target_test_identity",
+        "predictor_id",
+        "predictor_version"
+      ],
+      "source_measurement_rule": "direction CAT->OVR: source_measurement A = CAT, target_measurement B = OVR; direction OVR->CAT: source_measurement B = OVR, target_measurement A = CAT"
+    },
+    "predictor_units": {
+      "F_is_not_an_independent_predictor_observation": true,
+      "observational_unit": "model x population x direction",
+      "rule": "each (model, population, direction) unit appears exactly once in any predictor statistic; procedures are aggregated inside the unit outcome",
+      "six_procedure_pseudo_replication_forbidden": true,
+      "unit_id_fields": [
+        "model_id",
+        "population_id",
+        "direction_id"
+      ]
+    },
+    "predictors": {
+      "primary_range_exceedance": {
+        "boundary_rule": "S_B == q_low and S_B == q_high count as INSIDE; the outside test is strict: S_B < q_low or S_B > q_high",
+        "definition": "X_range(u) = fraction of TARGET TEST raw scores S_B such that S_B < q_low or S_B > q_high, where q_low / q_high are the SOURCE TRAIN primary N=456 nearest-rank 2.5th / 97.5th percentiles of S_A^TRAIN",
+        "expected_positive_association": true,
+        "n912_forbidden_for_primary_definition": true,
+        "predictor_id": "r4-target-range-exceedance-warning",
+        "predictor_version": 1,
+        "reads_labels": false,
+        "role": "PRIMARY",
+        "source": "measurement A primary TRAIN N=456 raw fixed-event scores S_A^TRAIN",
+        "source_quantile_levels": {
+          "lower_decimal": 0.025,
+          "lower_fraction": "1/40",
+          "lower_rank_at_N456": 12,
+          "rank_convention": "1-indexed nearest rank; rank = ceil(fraction * 456)",
+          "upper_decimal": 0.975,
+          "upper_fraction": "39/40",
+          "upper_rank_at_N456": 445
+        },
+        "source_quantile_rule": "nearest-rank-percentile",
+        "target": "measurement B full frozen TEST raw fixed-event scores S_B",
+        "uses_calibrated_probabilities": false,
+        "uses_n912": false
+      },
+      "secondary_wasserstein1": {
+        "allowed_computation": "exact sorted-support CDF sweep for 1D empirical measures",
+        "definition": "X_W1(u) = W1(mu, nu), the one-dimensional empirical Wasserstein-1 distance between the SOURCE TRAIN raw-score empirical distribution and the TARGET TEST raw-score empirical distribution, where mu = (1/n) sum delta_{x_i} and nu = (1/m) sum delta_{y_j}",
+        "exact_definition": "W1(mu, nu) = integral |F_mu(t) - F_nu(t)| dt over the real line",
+        "forbidden_computation": [
+          "histogram approximation",
+          "binning approximation",
+          "random subsampling",
+          "quantile-grid approximation"
+        ],
+        "hellaswag_target_distribution": "row-weighted empirical distribution over the frozen TEST rows; NOT an equal-source_id distribution",
+        "implemented_in_candidate_stage": false,
+        "mass_rule": "every row carries equal mass within each side",
+        "predictor_id": "r4-source-target-wasserstein1-warning",
+        "predictor_version": 1,
+        "reads_labels": false,
+        "role": "SECONDARY",
+        "uses_calibrated_probabilities": false
+      }
+    },
+    "primary_support_rule": {
+      "criterion": "rho_primary point statistic > 0 AND 95% TEST-bootstrap lower bound > 0",
+      "does_not_support": [
+        "causal mechanism",
+        "universal predictor",
+        "production guarantee"
+      ],
+      "failure_language": "PRIMARY WARNING-SIGNAL SUPPORT NOT ESTABLISHED",
+      "name": "PRIMARY WARNING-SIGNAL SUPPORT",
+      "supports": [
+        "association / warning-signal evidence"
+      ],
+      "threshold_change_forbidden": true
+    },
+    "primary_validation_statistic": {
+      "causal_claim_forbidden": true,
+      "definition": "rho_primary = Spearman(X_range(u), Y_transport_core(u))",
+      "exact_contract": {
+        "computation": "Pearson correlation of average ranks",
+        "constant_input_condition": "variance(rank(X)) == 0 or variance(rank(Y)) == 0",
+        "constant_input_state": "SPEARMAN_UNDEFINED_CONSTANT_INPUT",
+        "forbidden_returns": [
+          "0",
+          "silent NaN"
+        ],
+        "tie_handling": "average ranks for ties"
+      },
+      "expected_direction": "positive",
+      "observation_count": 16,
+      "observation_set": "the 16 primary held-out validation units",
+      "statistic_id": "spearman-rank-correlation",
+      "statistic_version": 1
+    },
+    "score_geometry": {
+      "clipping_forbidden": true,
+      "endpoint_note": "exact 0 and 1 are legal for the predictor score distribution itself",
+      "exact_endpoint_scores_allowed": [
+        0,
+        1
+      ],
+      "expected_domain": "[0, 1]",
+      "invalid_conditions": [
+        "non-finite",
+        "score < 0",
+        "score > 1"
+      ],
+      "invalid_state": "PREDICTOR_INPUT_INVALID"
+    },
+    "secondary_statistics": {
+      "multiplicity": {
+        "merged_with_inference_primary_12_family": false,
+        "per_direction_descriptive": {
+          "CAT->OVR_units": 8,
+          "OVR->CAT_units": 8,
+          "additional_confirmatory_family": null,
+          "role": "DESCRIPTIVE ONLY"
+        },
+        "per_population_descriptive": {
+          "hellaswag_units": 8,
+          "medmcqa_units": 8,
+          "one_population_success_cannot_claim_primary_validation": true,
+          "role": "DESCRIPTIVE ONLY",
+          "separate_significance_gate": null
+        },
+        "post_hoc_multiplicity_fishing_forbidden": true,
+        "primary_criterion_scope": "frozen 16-unit pooled statistic only",
+        "primary_gate": "alpha-equivalent 95% interval",
+        "primary_predictor_validation_claims": 1,
+        "secondary_cannot_rescue_primary": true
+      },
+      "no_metric_zoo": {
+        "forbidden_additional_metrics": [
+          "Pearson",
+          "Kendall",
+          "mutual information",
+          "AUC",
+          "R2",
+          "threshold optimization",
+          "classification accuracy"
+        ],
+        "predeclared_statistics_only": [
+          "X_range vs Y_transport_core Spearman (PRIMARY)",
+          "X_W1 vs Y_transport_core Spearman (SECONDARY)",
+          "X_range vs Y_deploy_core Spearman (SECONDARY)"
+        ]
+      },
+      "rho_W1_transport": {
+        "can_rescue_primary": false,
+        "definition": "Spearman(X_W1, Y_transport_core)",
+        "observation_count": 16,
+        "reports": [
+          "point statistic",
+          "95% TEST-bootstrap interval"
+        ],
+        "role": "SECONDARY"
+      },
+      "rho_range_deploy": {
+        "can_rescue_primary": false,
+        "definition": "Spearman(X_range, Y_deploy_core)",
+        "observation_count": 16,
+        "role": "SECONDARY PRACTICAL DIAGNOSTIC"
+      }
+    },
+    "test_bootstrap_validation": {
+      "bootstrap_median_substitutes_point": false,
+      "interval": {
+        "lower_rank": 500,
+        "lower_tail": "1/40",
+        "median_rank": 10000,
+        "n": 20000,
+        "rule": "nearest-rank-percentile",
+        "type": "95% two-sided nearest-rank percentile interval",
+        "upper_rank": 19500,
+        "upper_tail": "39/40"
+      },
+      "paired": true,
+      "per_replicate_procedure": [
+        "use that population's already frozen shared TEST resample",
+        "hold SOURCE TRAIN q2.5/q97.5 fixed at the full primary TRAIN",
+        "recompute X_range on the resampled TARGET raw scores",
+        "compute that unit's Y_transport_core with the same TEST resample",
+        "assemble the complete 16-unit replicate table",
+        "compute the pooled Spearman rho"
+      ],
+      "point_statistic": "full-data rho",
+      "population_bootstrap_modes": {
+        "r4-hellaswag-activity-primary": {
+          "cluster": "source_id",
+          "cluster_never_split": true,
+          "predictor_computation": "X_range and X_W1 are computed row-weighted on the expanded cluster-resampled row multiset",
+          "protocol_id": "r4-hellaswag-activity-stratified-source-cluster-test-bootstrap",
+          "protocol_version": 1,
+          "separate_row_bootstrap_forbidden": true
+        },
+        "r4-medmcqa-subject-primary": {
+          "mode": "subject_name-stratified-row",
+          "predictor_computation": "row-weighted target distribution",
+          "protocol_id": "r4-medmcqa-subject-stratified-paired-test-bootstrap",
+          "protocol_version": 1
+        }
+      },
+      "reuse_frozen_test_bootstrap": true,
+      "rho_replicate_count": 20000,
+      "test_bootstrap_replicates": 20000,
+      "undefined_replicate_rule": {
+        "action": "record the count and the replicate indices of every undefined planned replicate",
+        "consequence": "PRIMARY RHO INTERVAL INCOMPLETE",
+        "point_rho_reported_with_its_own_status": true,
+        "state": "SPEARMAN_UNDEFINED_CONSTANT_INPUT",
+        "successful_subset_interval_forbidden": true
+      }
+    },
+    "train_stability": {
+      "failure_rule": {
+        "successful_y_subset_correlation_ci_forbidden": true,
+        "trigger": "a TRAIN-resample causes a dependent calibration fit failure",
+        "x_stability_may_still_be_reported_separately": true,
+        "y_stability_block": "INCOMPLETE"
+      },
+      "per_replicate_procedure": [
+        "resample SOURCE/TRAIN according to the frozen population stratum rule",
+        "recompute the source q2.5/q97.5 quantiles",
+        "recompute X_range on the unchanged full TARGET TEST",
+        "if Y stability is also computed, use the same replicate refitted calibrators"
+      ],
+      "protocol_id": "r4-stratum-preserving-paired-train-refit-bootstrap",
+      "protocol_version": 1,
+      "reuse_frozen_train_refit_bootstrap": true,
+      "role": "SECONDARY STABILITY ONLY",
+      "test_and_train_uncertainty_combination_forbidden": [
+        "variance addition",
+        "CI convolution",
+        "double bootstrap",
+        "quadrature combination"
+      ],
+      "train_refit_replicates": 2000
+    },
+    "validation_units": {
+      "composition": "4 current-generation models x {HellaSwag, MedMCQA} x 2 directions",
+      "direction_count": 2,
+      "directions": [
+        "CAT->OVR",
+        "OVR->CAT"
+      ],
+      "fixed_panel": true,
+      "inference_scope": "association across the declared fixed held-out validation panel; NOT a superpopulation random-effects inference",
+      "model_count": 4,
+      "models": [
+        {
+          "model_id": "allenai/Olmo-3-7B-Instruct",
+          "panel_role": "current-generation",
+          "revision": "6e5971d9eba42665f5bd5a0fcf047f299ce1dccc"
+        },
+        {
+          "model_id": "tiiuae/Falcon-H1-7B-Instruct",
+          "panel_role": "current-generation",
+          "revision": "41e72f27effbab80cd45b6e884688452253a3686"
+        },
+        {
+          "model_id": "ibm-granite/granite-4.0-h-tiny",
+          "panel_role": "current-generation",
+          "revision": "791e0d3d28c86e106c9b6e0b4cecdee0375b6124"
+        },
+        {
+          "model_id": "Qwen/Qwen3.5-9B",
+          "panel_role": "current-generation",
+          "revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a"
+        }
+      ],
+      "population_count": 2,
+      "populations": [
+        "r4-hellaswag-activity-primary",
+        "r4-medmcqa-subject-primary"
+      ],
+      "post_hoc_deletion_forbidden": [
+        "drop a population",
+        "drop a model",
+        "drop a direction"
+      ],
+      "protocol_id": "r4-heldout-population-predictor-validation",
+      "protocol_version": 1,
+      "role": "PRIMARY HELD-OUT VALIDATION",
+      "unit_count": 16,
+      "unit_weighting": "each of the 16 fixed units appears exactly once; HellaSwag and MedMCQA each contribute exactly 8 units, so the pooled rank correlation gives equal unit count per population"
+    }
+  },
+  "status": "FROZEN"
+}

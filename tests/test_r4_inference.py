@@ -1127,6 +1127,28 @@ def test_mandatory_percentile_ranks():
     assert inference.REFIT_AUDIT_UPPER_RANK == 1950
 
 
+def test_refit_level_representation_is_normalization_only():
+    """The refit levels are fractions of the replicate count, not percentages.
+
+    ``1/40``, ``1/2`` and ``39/40`` are numerically identical to 2.5 %, 50 % and
+    97.5 %; this is a representation normalization with no frozen semantic change.
+    """
+    assert Fraction(1, 40) == Fraction(25, 1000)
+    assert float(Fraction(1, 40)) == 0.025
+    assert float(Fraction(1, 2)) == 0.5
+    assert float(Fraction(39, 40)) == 0.975
+    assert Fraction(25, 1000) == inference.REFIT_LOWER_LEVEL
+    assert Fraction(500, 1000) == inference.REFIT_MEDIAN_LEVEL
+    assert Fraction(975, 1000) == inference.REFIT_UPPER_LEVEL
+    assert inference.percentile_rank(inference.REFIT_LOWER_LEVEL, 2000) == 50
+    assert inference.percentile_rank(inference.REFIT_MEDIAN_LEVEL, 2000) == 1000
+    assert inference.percentile_rank(inference.REFIT_UPPER_LEVEL, 2000) == 1950
+    # The confirmatory family tail is a fraction and must never be read as a
+    # percentage: Fraction(1, 480) is rank 42 of 20000, not rank 1.
+    assert Fraction(1, 480) == inference.PRIMARY_LOWER_TAIL
+    assert inference.percentile_rank(inference.PRIMARY_LOWER_TAIL, 20000) == 42
+
+
 def test_interval_structure_keeps_point_estimate_separate_from_the_median():
     samples = [float(value) for value in range(20000)]
     interval = inference.percentile_interval(
@@ -1572,6 +1594,202 @@ def test_panel_test_bootstrap_direction_difference_is_paired():
         for estimand in inference.PRIMARY_FAMILY_ESTIMANDS
         for effect in inference.FACTORIAL_EFFECTS
     )
+
+
+# ---------------------------------------------------------------------------
+# Dependency isolation amendment (primary never blocked by I/B availability)
+# ---------------------------------------------------------------------------
+
+
+def _dependency_panel(
+    models: tuple[str, ...] = ("m-1", "m-2"),
+    populations: tuple[str, ...] = ("pop-a", "pop-b", "pop-c"),
+):
+    rows_by_population = {
+        population: synthetic_row_set(population, {"s0": 2, "s1": 1})
+        for population in populations
+    }
+    metadata_by_population = {
+        population: make_metadata(
+            population,
+            mode=MMLU_MODE,
+            stratum_field="subject",
+            weighting="row-weighted-mean",
+            population_fingerprint=f"fp-{population}",
+        )
+        for population in populations
+    }
+    return rows_by_population, metadata_by_population
+
+
+def _offset_unit_estimator(offsets):
+    def unit_estimator(population, model, direction, procedure, draw):
+        value = offsets.get(procedure, 0.0)
+        if direction == "OVR->CAT":
+            value = value + 10.0
+        return {
+            "Delta_deploy": value,
+            "Delta_transport": value / 2.0,
+            "Delta_native": value / 4.0,
+        }
+
+    return unit_estimator
+
+
+def test_primary_bootstrap_does_not_require_extension_procedures():
+    rows_by_population, metadata_by_population = _dependency_panel()
+    offsets = {
+        name: float(index)
+        for index, name in enumerate(inference.LOGISTIC_CORE_PROCEDURES)
+    }
+    result = inference.run_panel_test_bootstrap(
+        rows_by_population=rows_by_population,
+        metadata_by_population=metadata_by_population,
+        unit_estimator=_offset_unit_estimator(offsets),
+        replicates=3,
+        models=("m-1", "m-2"),
+        populations=("pop-a", "pop-b", "pop-c"),
+        procedures=inference.LOGISTIC_CORE_PROCEDURES,
+    )
+    assert len(result.primary_contrasts) == 12
+    assert len(result.direction_differences) == 6
+    assert len(result.extension_panel) == 0
+    assert len(result.native_reference) == 8  # 2 directions x 4 core procedures
+    interval = result.primary_interval("CAT->OVR", "Delta_deploy", "Feature")
+    assert interval.n == 3
+    assert interval.tail_rule == "1/480/479/480"
+    status = result.family_status()
+    assert status["primary"]["family_size"] == 12
+    assert status["primary"]["status"] == inference.STATUS_COMPLETE
+    assert status["secondary_extension"]["family_size"] == 8
+    assert status["secondary_extension"]["status"] == inference.STATUS_INCOMPLETE
+    assert status["secondary_extension"]["incomplete_count"] == 8
+    assert status["secondary_native_reference"]["family_size"] == 12
+    assert status["secondary_native_reference"]["incomplete_count"] == 4
+    assert result.native_interval("CAT->OVR", "P-low").n == 3
+
+
+def test_extension_incompleteness_does_not_block_primary():
+    rows_by_population, metadata_by_population = _dependency_panel()
+    offsets = {
+        name: float(index)
+        for index, name in enumerate(inference.LOGISTIC_CORE_PROCEDURES)
+    }
+    result = inference.run_panel_test_bootstrap(
+        rows_by_population=rows_by_population,
+        metadata_by_population=metadata_by_population,
+        unit_estimator=_offset_unit_estimator(offsets),
+        replicates=2,
+        models=("m-1", "m-2"),
+        populations=("pop-a", "pop-b", "pop-c"),
+        procedures=inference.LOGISTIC_CORE_PROCEDURES,
+    )
+    # Only the four core procedures were ever evaluated: no fake I/B value.
+    assert {
+        key[3] for key in result.unit_values
+    } == set(inference.LOGISTIC_CORE_PROCEDURES)
+    for procedure in inference.STANDALONE_PROCEDURES:
+        for direction in inference.DIRECTIONS:
+            for estimand in inference.PRIMARY_FAMILY_ESTIMANDS:
+                with pytest.raises(inference.DependencyUnavailable):
+                    result.extension_interval(procedure, direction, estimand)
+    for direction in inference.DIRECTIONS:
+        for effect in inference.FACTORIAL_EFFECTS:
+            assert result.primary_interval(direction, "Delta_transport", effect).n == 2
+
+
+def test_missing_core_blocks_primary_but_not_complete_extension():
+    rows_by_population, metadata_by_population = _dependency_panel()
+    offsets = {name: float(index) for index, name in enumerate(inference.ALL_PROCEDURES)}
+    procedures = ("P-low", "P-historical", "L-low", "I-isotonic", "B-beta")
+    assert "L-historical" not in procedures
+    result = inference.run_panel_test_bootstrap(
+        rows_by_population=rows_by_population,
+        metadata_by_population=metadata_by_population,
+        unit_estimator=_offset_unit_estimator(offsets),
+        replicates=3,
+        models=("m-1", "m-2"),
+        populations=("pop-a", "pop-b", "pop-c"),
+        procedures=procedures,
+    )
+    assert len(result.primary_contrasts) == 0
+    assert len(result.direction_differences) == 0
+    assert len(result.extension_panel) == 8
+    status = result.family_status()
+    assert status["primary"]["status"] == inference.STATUS_INCOMPLETE
+    assert status["primary"]["complete_count"] == 0
+    assert status["secondary_direction_difference"]["status"] == inference.STATUS_INCOMPLETE
+    assert status["secondary_extension"]["status"] == inference.STATUS_COMPLETE
+    assert result.extension_interval("I-isotonic", "CAT->OVR", "Delta_deploy").n == 3
+    with pytest.raises(inference.DependencyUnavailable):
+        result.primary_interval("CAT->OVR", "Delta_deploy", "Feature")
+    # Unrelated descriptive risk cells remain reportable.
+    assert result.unit_values[("m-1", "pop-a", "CAT->OVR", "P-low")]["Delta_deploy"]
+    assert result.panel_values[("CAT->OVR", "P-low")]["Delta_deploy"]
+
+
+def test_native_reference_preserves_fixed_family_when_member_incomplete():
+    rows_by_population, metadata_by_population = _dependency_panel()
+    offsets = {
+        name: float(index)
+        for index, name in enumerate(inference.LOGISTIC_CORE_PROCEDURES)
+    }
+    result = inference.run_panel_test_bootstrap(
+        rows_by_population=rows_by_population,
+        metadata_by_population=metadata_by_population,
+        unit_estimator=_offset_unit_estimator(offsets),
+        replicates=2,
+        models=("m-1", "m-2"),
+        populations=("pop-a", "pop-b", "pop-c"),
+        procedures=inference.LOGISTIC_CORE_PROCEDURES,
+    )
+    status = result.family_status()["secondary_native_reference"]
+    assert status["family_size"] == 12
+    assert status["incomplete_count"] == 4
+    assert set(status["members"]) == {
+        f"native-reference::{direction}::{procedure}"
+        for direction in inference.DIRECTIONS
+        for procedure in inference.ALL_PROCEDURES
+    }
+    assert result.native_interval("OVR->CAT", "L-low").n == 2
+    with pytest.raises(inference.DependencyUnavailable):
+        result.native_interval("OVR->CAT", "B-beta")
+
+
+def test_missing_dependency_uses_domain_state_not_keyerror():
+    rows_by_population, metadata_by_population = _dependency_panel()
+    offsets = {
+        name: float(index)
+        for index, name in enumerate(inference.LOGISTIC_CORE_PROCEDURES)
+    }
+    result = inference.run_panel_test_bootstrap(
+        rows_by_population=rows_by_population,
+        metadata_by_population=metadata_by_population,
+        unit_estimator=_offset_unit_estimator(offsets),
+        replicates=2,
+        models=("m-1", "m-2"),
+        populations=("pop-a", "pop-b", "pop-c"),
+        procedures=inference.LOGISTIC_CORE_PROCEDURES,
+    )
+    with pytest.raises(inference.DependencyUnavailable) as excinfo:
+        result.extension_interval("I-isotonic", "CAT->OVR", "Delta_deploy")
+    assert not isinstance(excinfo.value, KeyError)
+    assert excinfo.value.code == "DEPENDENCY_UNAVAILABLE"
+    assert excinfo.value.family == "standalone-i-isotonic-b-beta-extension"
+    assert "I-isotonic" in excinfo.value.dependency
+    assert excinfo.value.payload()["code"] == "DEPENDENCY_UNAVAILABLE"
+    bootstrap = inference.run_test_bootstrap(
+        rows_by_population={MMLU: synthetic_row_set(MMLU, {"s0": 2})},
+        metadata_by_population={MMLU: mmlu_metadata()},
+        statistic=lambda population_id, draw: 1.0,
+        replicates=2,
+    )
+    with pytest.raises(inference.DependencyUnavailable):
+        bootstrap.interval(
+            HELLA,
+            lower_tail=inference.PRIMARY_LOWER_TAIL,
+            upper_tail=inference.PRIMARY_UPPER_TAIL,
+        )
 
 
 def test_twenty_thousand_replicate_smoke_on_a_tiny_synthetic_pool():

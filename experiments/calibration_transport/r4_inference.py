@@ -182,6 +182,12 @@ FAMILY_SIZES: Mapping[str, int] = {
     "secondary_native_reference": NATIVE_REFERENCE_FAMILY_SIZE,
 }
 
+# Family selection is expressed through the ``procedures`` argument of
+# ``run_panel_test_bootstrap``; these aliases name the two frozen selections.
+# The primary logistic-core family never requires the standalone extensions.
+PRIMARY_FAMILY_PROCEDURES: tuple[str, ...] = LOGISTIC_CORE_PROCEDURES
+EXTENSION_FAMILY_PROCEDURES: tuple[str, ...] = STANDALONE_PROCEDURES
+
 # Frozen formal population structures (used by formal-mode validators only).
 FORMAL_MMLU_SUBJECT_COUNT = 57
 FORMAL_MMLU_TEST_PER_SUBJECT = 20
@@ -259,6 +265,40 @@ class ExtendedRealContractViolation(R4InferenceError, ValueError):
 
 class BootstrapContractViolation(R4InferenceError, ValueError):
     """A bootstrap engine precondition is violated."""
+
+
+DEPENDENCY_UNAVAILABLE = "DEPENDENCY_UNAVAILABLE"
+
+
+class DependencyUnavailable(R4InferenceError):
+    """A required scientific dependency is unavailable.
+
+    This is an *expected domain state* (a frozen family member is INELIGIBLE, or
+    was not requested) and never a programming bug.  A raw ``KeyError`` escaping
+    a formal API would be a bug; this class is deliberately **not** a
+    ``KeyError`` subclass so that the two are machine-distinguishable::
+
+        isinstance(exc, DependencyUnavailable)  ->  expected incompleteness
+        isinstance(exc, KeyError)               ->  programming bug
+    """
+
+    code = DEPENDENCY_UNAVAILABLE
+
+    def __init__(
+        self, *, family: str, dependency: str, message: str | None = None
+    ) -> None:
+        self.family = family
+        self.dependency = dependency
+        text = message or f"{family} requires unavailable dependency {dependency!r}"
+        super().__init__(text)
+
+    def payload(self) -> dict[str, str]:
+        return {
+            "code": self.code,
+            "family": self.family,
+            "dependency": self.dependency,
+            "message": str(self),
+        }
 
 
 # ---------------------------------------------------------------------------
@@ -1467,8 +1507,18 @@ class TestBootstrapResult:
         upper_tail: Fraction,
         point_estimate: float | None = None,
     ) -> Interval:
+        samples = self.samples.get(population_id)
+        if samples is None:
+            raise DependencyUnavailable(
+                family="test-bootstrap-population-sample",
+                dependency=population_id,
+                message=(
+                    f"no TEST bootstrap sample for population {population_id!r}; "
+                    "the population was not part of this bootstrap run"
+                ),
+            )
         return percentile_interval(
-            self.samples[population_id],
+            samples,
             lower_tail=lower_tail,
             upper_tail=upper_tail,
             point_estimate=point_estimate,
@@ -1509,6 +1559,22 @@ def run_test_bootstrap(
     )
 
 
+def _family_block(expected_size: int, members: Mapping[str, str]) -> dict[str, Any]:
+    """Frozen-size family block; an unavailable member is INCOMPLETE, not dropped."""
+    if len(members) != expected_size:
+        raise BootstrapContractViolation(
+            f"frozen family size {expected_size} != declared members {len(members)}"
+        )
+    complete = sum(1 for status in members.values() if status == STATUS_COMPLETE)
+    return {
+        "family_size": len(members),
+        "complete_count": complete,
+        "incomplete_count": len(members) - complete,
+        "status": STATUS_COMPLETE if complete == len(members) else STATUS_INCOMPLETE,
+        "members": dict(members),
+    }
+
+
 @dataclass(frozen=True)
 class PanelBootstrapResult:
     replicates: int
@@ -1524,6 +1590,20 @@ class PanelBootstrapResult:
     extension_panel: Mapping[tuple[str, str, str], tuple[float, ...]]
     native_reference: Mapping[tuple[str, str], tuple[float, ...]]
 
+    # -- dependency presence (never a KeyError) ------------------------------
+    def has_primary_contrast(self, direction: str, estimand: str, effect: str) -> bool:
+        return (direction, estimand, effect) in self.primary_contrasts
+
+    def has_direction_difference(self, estimand: str, effect: str) -> bool:
+        return (estimand, effect) in self.direction_differences
+
+    def has_extension_panel(self, procedure: str, direction: str, estimand: str) -> bool:
+        return (procedure, direction, estimand) in self.extension_panel
+
+    def has_native_reference(self, direction: str, procedure: str) -> bool:
+        return (direction, procedure) in self.native_reference
+
+    # -- interval accessors --------------------------------------------------
     def primary_interval(
         self,
         direction: str,
@@ -1532,8 +1612,18 @@ class PanelBootstrapResult:
         *,
         point_estimate: float | None = None,
     ) -> Interval:
+        key = (direction, estimand, effect)
+        if key not in self.primary_contrasts:
+            raise DependencyUnavailable(
+                family="primary-prospective-confirmatory",
+                dependency=f"{direction}/{estimand}/{effect}",
+                message=(
+                    "primary factorial contrast requires the four logistic-core "
+                    f"procedures; unavailable member {direction}/{estimand}/{effect}"
+                ),
+            )
         return percentile_interval(
-            self.primary_contrasts[(direction, estimand, effect)],
+            self.primary_contrasts[key],
             lower_tail=PRIMARY_LOWER_TAIL,
             upper_tail=PRIMARY_UPPER_TAIL,
             point_estimate=point_estimate,
@@ -1547,8 +1637,18 @@ class PanelBootstrapResult:
         *,
         point_estimate: float | None = None,
     ) -> Interval:
+        key = (procedure, direction, estimand)
+        if key not in self.extension_panel:
+            raise DependencyUnavailable(
+                family="standalone-i-isotonic-b-beta-extension",
+                dependency=f"{procedure}/{direction}/{estimand}",
+                message=(
+                    f"standalone extension {procedure!r} is unavailable for "
+                    f"{direction}/{estimand}"
+                ),
+            )
         return percentile_interval(
-            self.extension_panel[(procedure, direction, estimand)],
+            self.extension_panel[key],
             lower_tail=EXTENSION_LOWER_TAIL,
             upper_tail=EXTENSION_UPPER_TAIL,
             point_estimate=point_estimate,
@@ -1557,8 +1657,18 @@ class PanelBootstrapResult:
     def direction_interval(
         self, estimand: str, effect: str, *, point_estimate: float | None = None
     ) -> Interval:
+        key = (estimand, effect)
+        if key not in self.direction_differences:
+            raise DependencyUnavailable(
+                family="formal-between-direction-contrast",
+                dependency=f"{estimand}/{effect}",
+                message=(
+                    "between-direction contrast requires both target directions; "
+                    f"unavailable member {estimand}/{effect}"
+                ),
+            )
         return percentile_interval(
-            self.direction_differences[(estimand, effect)],
+            self.direction_differences[key],
             lower_tail=DIRECTION_LOWER_TAIL,
             upper_tail=DIRECTION_UPPER_TAIL,
             point_estimate=point_estimate,
@@ -1567,12 +1677,81 @@ class PanelBootstrapResult:
     def native_interval(
         self, direction: str, procedure: str, *, point_estimate: float | None = None
     ) -> Interval:
+        key = (direction, procedure)
+        if key not in self.native_reference:
+            raise DependencyUnavailable(
+                family="native-reference",
+                dependency=f"{direction}/{procedure}",
+                message=(
+                    f"native-reference hypothesis requires procedure {procedure!r} "
+                    f"for direction {direction}"
+                ),
+            )
         return percentile_interval(
-            self.native_reference[(direction, procedure)],
+            self.native_reference[key],
             lower_tail=NATIVE_LOWER_TAIL,
             upper_tail=NATIVE_UPPER_TAIL,
             point_estimate=point_estimate,
         )
+
+    # -- per-family member status -------------------------------------------
+    def family_status(self) -> dict[str, Any]:
+        """Availability of every frozen family member.
+
+        Family sizes are the frozen constants (12 / 8 / 6 / 12); an unavailable
+        member is reported as :data:`STATUS_INCOMPLETE` and is never dropped, so
+        the multiplicity family never silently shrinks.
+        """
+        primary_members = {
+            f"primary::{estimand}::{direction}::{effect}": (
+                STATUS_COMPLETE
+                if self.has_primary_contrast(direction, estimand, effect)
+                else STATUS_INCOMPLETE
+            )
+            for estimand in PRIMARY_FAMILY_ESTIMANDS
+            for direction in DIRECTIONS
+            for effect in FACTORIAL_EFFECTS
+        }
+        direction_members = {
+            f"direction-difference::{estimand}::{effect}": (
+                STATUS_COMPLETE
+                if self.has_direction_difference(estimand, effect)
+                else STATUS_INCOMPLETE
+            )
+            for estimand in PRIMARY_FAMILY_ESTIMANDS
+            for effect in FACTORIAL_EFFECTS
+        }
+        extension_members = {
+            f"extension::{procedure}::{direction}::{estimand}": (
+                STATUS_COMPLETE
+                if self.has_extension_panel(procedure, direction, estimand)
+                else STATUS_INCOMPLETE
+            )
+            for procedure in STANDALONE_PROCEDURES
+            for direction in DIRECTIONS
+            for estimand in PRIMARY_FAMILY_ESTIMANDS
+        }
+        native_members = {
+            f"native-reference::{direction}::{procedure}": (
+                STATUS_COMPLETE
+                if self.has_native_reference(direction, procedure)
+                else STATUS_INCOMPLETE
+            )
+            for direction in DIRECTIONS
+            for procedure in ALL_PROCEDURES
+        }
+        return {
+            "primary": _family_block(PRIMARY_FAMILY_SIZE, primary_members),
+            "secondary_extension": _family_block(
+                EXTENSION_FAMILY_SIZE, extension_members
+            ),
+            "secondary_direction_difference": _family_block(
+                DIRECTION_DIFFERENCE_FAMILY_SIZE, direction_members
+            ),
+            "secondary_native_reference": _family_block(
+                NATIVE_REFERENCE_FAMILY_SIZE, native_members
+            ),
+        }
 
 
 UnitEstimator = Callable[
@@ -1676,12 +1855,20 @@ def run_panel_test_bootstrap(
     extension_panel: dict[tuple[str, str, str], tuple[float, ...]] = {}
     native_reference: dict[tuple[str, str], tuple[float, ...]] = {}
 
+    # Dependency-aware assembly.  A missing member is simply absent from the
+    # corresponding mapping (reported as INCOMPLETE by ``family_status``); the
+    # primary logistic-core family is never blocked by an unavailable standalone
+    # extension, and an unavailable core procedure never blocks the extensions.
     for direction in directions:
         for estimand in PRIMARY_FAMILY_ESTIMANDS:
-            core = {
-                procedure: panel_values[(direction, procedure)][estimand]
-                for procedure in LOGISTIC_CORE_PROCEDURES
-            }
+            core: dict[str, tuple[float, ...]] = {}
+            for procedure in LOGISTIC_CORE_PROCEDURES:
+                series = panel_values.get((direction, procedure), {}).get(estimand)
+                if series is None:
+                    break
+                core[procedure] = series
+            if len(core) != len(LOGISTIC_CORE_PROCEDURES):
+                continue
             for effect in FACTORIAL_EFFECTS:
                 primary_contrasts[(direction, estimand, effect)] = tuple(
                     factorial_contrasts(
@@ -1691,20 +1878,24 @@ def run_panel_test_bootstrap(
                 )
     for estimand in PRIMARY_FAMILY_ESTIMANDS:
         for effect in FACTORIAL_EFFECTS:
-            cat = primary_contrasts[("CAT->OVR", estimand, effect)]
-            ovr = primary_contrasts[("OVR->CAT", estimand, effect)]
+            cat = primary_contrasts.get(("CAT->OVR", estimand, effect))
+            ovr = primary_contrasts.get(("OVR->CAT", estimand, effect))
+            if cat is None or ovr is None:
+                continue
             direction_differences[(estimand, effect)] = contrast_per_replicate(cat, ovr)
     for procedure in STANDALONE_PROCEDURES:
         for direction in directions:
             for estimand in PRIMARY_FAMILY_ESTIMANDS:
-                extension_panel[(procedure, direction, estimand)] = tuple(
-                    panel_values[(direction, procedure)][estimand]
-                )
+                series = panel_values.get((direction, procedure), {}).get(estimand)
+                if series is None:
+                    continue
+                extension_panel[(procedure, direction, estimand)] = tuple(series)
     for direction in directions:
         for procedure in procedures:
-            native_reference[(direction, procedure)] = tuple(
-                panel_values[(direction, procedure)]["Delta_native"]
-            )
+            series = panel_values.get((direction, procedure), {}).get("Delta_native")
+            if series is None:
+                continue
+            native_reference[(direction, procedure)] = tuple(series)
 
     return PanelBootstrapResult(
         replicates=replicates,

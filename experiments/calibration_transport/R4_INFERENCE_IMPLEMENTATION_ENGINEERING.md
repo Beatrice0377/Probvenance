@@ -564,10 +564,10 @@ excludes_zero True, status COMPLETE`. The replicate machinery does not show an o
 | --- | --- |
 | `python -m py_compile r4_inference.py tests/test_r4_inference.py` | exit 0 |
 | `ruff check r4_inference.py tests/test_r4_inference.py` | `All checks passed!` exit 0 |
-| `pytest tests/test_r4_inference.py` (run 1) | 109 passed |
-| `pytest tests/test_r4_inference.py` (run 2) | 109 passed |
+| `pytest tests/test_r4_inference.py` (run 1) | 115 passed |
+| `pytest tests/test_r4_inference.py` (run 2) | 115 passed |
 | `pytest tests/test_r4_calibration_families.py` | 53 passed |
-| `pytest` (full repository) | 2083 passed, 4 skipped, exit 0 |
+| `pytest` (full repository) | 2089 passed, 4 skipped, exit 0 |
 | `python -m json.tool R4_INFERENCE_MULTIPLICITY_FREEZE.json` | exit 0 |
 | `git diff --check` | exit 0 |
 
@@ -590,11 +590,14 @@ hits are docstring sentences that state clipping is forbidden or absent
 
 ## 19. Known warnings and limitations
 
-1. `run_panel_test_bootstrap` assembles the extension and native-reference panels
+1. ~~`run_panel_test_bootstrap` assembles the extension and native-reference panels
    after the replicate loop and therefore requires the standalone procedures to have
    been executed; callers must pass `procedures = ALL_PROCEDURES`. A subset that omits
    `I-isotonic` / `B-beta` raises `KeyError`. This is an engineering constraint of the
-   current implementation, not a semantic choice.
+   current implementation, not a semantic choice.~~ **RESOLVED** by the dependency
+   isolation amendment (§21): the primary logistic-core family is now independent of
+   `I-isotonic` / `B-beta` availability, no formal API leaks `KeyError`, and every
+   frozen family keeps its declared size with unavailable members marked `INCOMPLETE`.
 2. `MISSING_CAT` / `MISSING_OVR` completeness codes are unreachable through the row
    contract (which forbids `None` scores); they are retained for schema completeness.
 3. `torch_dtype` and reference-PyTorch fallbacks are unrelated to this module; this
@@ -622,3 +625,87 @@ R4 INFERENCE IMPLEMENTATION ENGINEERING = COMPLETE (synthetic-only)
 FORMAL R4 INFERENCE EXECUTION = NOT AUTHORIZED
 PREDICTOR PHASE = NOT STARTED
 ```
+
+---
+
+## 21. Dependency Isolation Amendment
+
+**Original implementation provenance.** The implementation described in §1–§20 is
+commit `8c3bb0f0e4367bf7194f22a3f38d66aff3cbbbf7`
+(short `8c3bb0f`), parent `8fc2f3ae465708aa12b108e838377e745e36116b`, exactly three
+paths (`r4_inference.py`, `tests/test_r4_inference.py`,
+`R4_INFERENCE_IMPLEMENTATION_ENGINEERING.md`). Its file identities were
+`r4_inference.py` 2177 lines /
+`662dee0cf66daf7ef1323919cfc65f19c1bb9724d701749e8ba1e195b3bf41c9`,
+`tests/test_r4_inference.py` 2031 lines /
+`6c24a9748d2e0351eaacf90a05dfc7db7c341e6970f272f1c5bd8c94042a6886`.
+
+### 21.1 Old issue
+
+`run_panel_test_bootstrap` assembled `extension_panel` and `native_reference` after
+the replicate loop by indexing `panel_values[(direction, procedure)]` for every
+`procedure in ALL_PROCEDURES` (and `primary_contrasts` for every core procedure),
+regardless of which procedures the caller had actually requested. A caller that
+omitted `I-isotonic` / `B-beta` therefore hit a raw `KeyError`.
+
+### 21.2 Scientific reason
+
+The frozen dependency doctrine is that the primary logistic-core inference depends
+only on `P-low`, `P-historical`, `L-low`, `L-historical`, while `I-isotonic` and
+`B-beta` are a standalone secondary extension. An unavailable / ineligible / omitted
+extension must not make an otherwise-complete logistic-core primary block fail, and a
+failure of one secondary extension must not silently shrink any multiplicity family.
+Equally, an unavailable core procedure must block only the hypotheses that depend on
+it, leaving complete extensions and unrelated descriptive cells reportable.
+
+### 21.3 Code change
+
+- New domain error `DependencyUnavailable(R4InferenceError)` with a fixed
+  `code = "DEPENDENCY_UNAVAILABLE"` and `family` / `dependency` attributes. It is
+  deliberately **not** a `KeyError` subclass, so `isinstance(exc, DependencyUnavailable)`
+  (expected incompleteness) and `isinstance(exc, KeyError)` (programming bug) are
+  machine-distinguishable.
+- `PanelBootstrapResult` gained presence predicates (`has_primary_contrast`,
+  `has_direction_difference`, `has_extension_panel`, `has_native_reference`) and a
+  `family_status()` method that reports every frozen family member as `COMPLETE` /
+  `INCOMPLETE` against the frozen sizes 12 / 8 / 6 / 12.
+- The four interval accessors (`primary_interval`, `extension_interval`,
+  `direction_interval`, `native_interval`) and `TestBootstrapResult.interval` now raise
+  `DependencyUnavailable` (with family and dependency) instead of `KeyError`.
+- Assembly in `run_panel_test_bootstrap` is now dependency-aware: it derives
+  availability from what was actually computed, so the primary contrasts are built iff
+  all four core procedures are present, the extension panel contains only the
+  standalone procedures that were computed, and `native_reference` contains only the
+  procedures that were computed.
+- `PRIMARY_FAMILY_PROCEDURES` / `EXTENSION_FAMILY_PROCEDURES` name the two frozen
+  selections; family selection is expressed through the `procedures` argument.
+
+### 21.4 Dependency behaviour matrix
+
+| Scenario | Primary 12 | Direction-difference 6 | Extension 8 | Native-reference 12 |
+| --- | --- | --- | --- | --- |
+| All six procedures | COMPLETE | COMPLETE | COMPLETE | COMPLETE |
+| Core four only (I/B unavailable) | COMPLETE | COMPLETE | INCOMPLETE (8/8) | 8 COMPLETE, 4 INCOMPLETE |
+| One core missing (e.g. `L-historical`), I/B complete | INCOMPLETE (0/12) | INCOMPLETE (0/6) | COMPLETE | 10 COMPLETE, 2 INCOMPLETE |
+
+No family size changes; no interval tail changes; no KeyError is reachable.
+
+### 21.5 Tests
+
+Six new tests were added to `tests/test_r4_inference.py` (109 → 115):
+
+- `test_primary_bootstrap_does_not_require_extension_procedures`
+- `test_extension_incompleteness_does_not_block_primary`
+- `test_missing_core_blocks_primary_but_not_complete_extension`
+- `test_native_reference_preserves_fixed_family_when_member_incomplete`
+- `test_missing_dependency_uses_domain_state_not_keyerror`
+- `test_refit_level_representation_is_normalization_only`
+
+### 21.6 No frozen semantic change
+
+`R4_INFERENCE_MULTIPLICITY_FREEZE.json` / `.md` and the candidate were not modified.
+Family sizes 12 / 8 / 6 / 12, tails, bootstrap counts, weighting, estimands and failure
+rules are unchanged. The synthetic determinism probe is byte-identical
+(`STATE_SHA256 07b37954eeb4e4b1a920de10b06cc18727d70c1c6b0afe2d370184a13b66c83a`,
+`ARTIFACT_FINGERPRINT 691e91222c36ec68ff4ed3f45eebff9536ef89e4ca28b296a0612d82c3c96dcf`),
+because the amendment only changes behaviour when a dependency is absent.

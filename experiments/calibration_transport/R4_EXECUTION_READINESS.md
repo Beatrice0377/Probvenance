@@ -1,7 +1,7 @@
 # R4 Execution Readiness
 
 ```text
-status = TECHNICALLY PASS / OPERATIONAL DECISION REQUIRED
+status = PASS
 epoch  = 1
 ```
 
@@ -27,8 +27,9 @@ PREDECLARED NUMERICAL THRESHOLDS = UNCHANGED
 ALL-REFERENCE EXECUTION REMAINS THE ONLY QUALIFIED PATH
 
 R4 EXECUTION ENVIRONMENT — EPOCH 1 = FROZEN (ALL-REFERENCE MAP)
-R4 EXECUTION READINESS — EPOCH 1 = TECHNICALLY PASS / OPERATIONAL DECISION REQUIRED
-FORMAL R4 EPOCH 1 EXECUTION = NOT AUTHORIZED
+R4 EPOCH 1 PRE-ROW1 CODE DEFECT CORRECTION = PASS
+R4 EXECUTION READINESS — EPOCH 1 = PASS
+FORMAL R4 EPOCH 1 EXECUTION = NOT YET AUTHORIZED
 ```
 
 Current Epoch 1 situation:
@@ -208,6 +209,16 @@ study row was executed. Because no affected model received qualified acceleratio
 slow all-reference execution is **not** auto-reauthorised — see
 `R4_EXECUTION_READINESS_EPOCH1.md` §6 for the decision the human must take.
 
+The formal Epoch 1 launch (attempt 0) was subsequently started and was **blocked
+before the first study forward** by an MMLU population-adapter defect
+(`KeyError: 'question'`; 0 committed rows, 0 study forwards). The blocked attempt
+was quarantined read-only, the one-field adapter defect was corrected, a
+model-free population-adapter structural gate was added, and the six-model
+synthetic preflight was re-run (**6/6 PASS**). Epoch 1 remains Epoch 1
+(attempt 0 = blocked, attempt 1 = the post-fix measurement code commit). See
+`R4_EPOCH1_PRE_ROW1_CODE_DEFECT_RECEIPT.md` and
+`R4_EPOCH1_PRE_ROW1_MMLU_ADAPTER_FIX.md`.
+
 Current status (Epoch 1):
 
 ```text
@@ -224,9 +235,12 @@ PREDECLARED NUMERICAL THRESHOLDS = UNCHANGED
 ALL-REFERENCE EXECUTION REMAINS THE ONLY QUALIFIED PATH
 R4 EXECUTION ENVIRONMENT — EPOCH 1 = FROZEN (ALL-REFERENCE MAP)
 
-R4 EXECUTION READINESS — EPOCH 1 = TECHNICALLY PASS / OPERATIONAL DECISION REQUIRED
-FORMAL R4 EPOCH 1 EXECUTION = NOT AUTHORIZED
+R4 EPOCH 1 PRE-ROW1 CODE DEFECT CORRECTION = PASS
+MMLU ROW ADAPTER CONTRACT = RESTORED
+R4 EXECUTION READINESS — EPOCH 1 = PASS
+FORMAL R4 EPOCH 1 EXECUTION = NOT YET AUTHORIZED
 EPOCH 1 REAL STUDY ROWS EXECUTED = 0
 AWAITING HUMAN DECISION (option A: authorise the reference environment;
 option B: re-predeclare the equivalence gate and re-run the ablation)
+AND REMOTE PRE-OUTCOME PUSH OF THE POST-FIX MEASUREMENT CODE COMMIT
 ```

@@ -45,8 +45,13 @@ CLI configuration.
     --model-key falcon-h1-7b-instruct --print-interpreter
 
 # dispatch one cell (runner arguments after --)
+# NOTE: --model-role is the runner's model-key flag (it selects the frozen
+# model cell); it is required by run_r4_measurements.main(). The dispatcher's
+# --model-key is used only to resolve the frozen interpreter and is NOT
+# forwarded to the runner.
 <env>/bin/python experiments/calibration_transport/r4_epoch1_launch.py \
     --model-key falcon-h1-7b-instruct -- \
+    --model-role falcon-h1-7b-instruct \
     --population hellaswag --staging-root /root/rivermind-data/r4-formal-measurements --resume
 ```
 

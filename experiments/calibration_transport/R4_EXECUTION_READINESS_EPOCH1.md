@@ -1,15 +1,15 @@
 # R4 Execution Readiness — Epoch 1
 
 ```text
-STATUS: TECHNICALLY PASS / OPERATIONAL DECISION REQUIRED
-R4 EXECUTION READINESS — EPOCH 1 = TECHNICALLY PASS / OPERATIONAL DECISION REQUIRED
+STATUS: PASS
+R4 EXECUTION READINESS — EPOCH 1 = PASS
 QUALIFIED ACCELERATION = NONE
 ALL-REFERENCE EXECUTION REMAINS THE ONLY QUALIFIED PATH
-FORMAL R4 EPOCH 1 EXECUTION = NOT AUTHORIZED
+FORMAL R4 EPOCH 1 EXECUTION = NOT YET AUTHORIZED
 EPOCH 1 REAL STUDY ROWS EXECUTED = 0
 ```
 
-This document is the Epoch 1 readiness closure. It covers two consecutive
+This document is the Epoch 1 readiness closure. It covers three consecutive
 operational amendments:
 
 1. *"R4 Formal Measurement Epoch 0 Abort + Fast-Kernel Dependency Audit +
@@ -20,9 +20,13 @@ operational amendments:
    Model-Specific Fast-Path Selection + Mixed Execution Environment
    Qualification + Epoch 1 Readiness Candidate"* (result: no qualified
    acceleration, all-reference map frozen, readiness technically pass with an
-   open operational decision).
+   open operational decision);
+3. *"R4 Epoch 1 Pre-Row1 Code Defect Correction — MMLU Row Adapter Minimal Fix +
+   Regression Closure + Readiness Reclosure"* (result: the blocked pre-row1
+   launch was quarantined, the one-field adapter defect was corrected, structural
+   adapter validation was added, readiness reclosed to PASS).
 
-Both are **outcome-blind operational artifacts**. No scientific outcome was
+All three are **outcome-blind operational artifacts**. No scientific outcome was
 inspected; no model, revision, population, manifest, anchor, ground truth, prompt,
 verbalizer, measurement contract, calibration family, estimand, metric,
 multiplicity rule or predictor semantic was changed.
@@ -86,17 +90,26 @@ qualified acceleration. No Epoch 1 study row was executed.
 | 12 | full repository tests PASS | PASS (0 failed) |
 | 13 | scientific freezes unchanged | PASS (byte-identical) |
 | 14 | Epoch 1 staging root clean | PASS (no cell directories, no rows) |
+| 15 | pre-row1 blocked attempt quarantined read-only | PASS (attempt 0 preserved; 0 forwards, 0 rows) |
+| 16 | population adapter → measurement row contract | PASS (MMLU 456/1140 with `question`; cross-population contract test) |
+| 17 | post-fix six-model synthetic preflight | PASS (6/6, `study_items_used = 0`) |
 
-Conditions 1–7 and 10–14 pass; condition 8 fails for every candidate and
-condition 9 is therefore not applicable. The map is nevertheless a **fully
-qualified** all-reference map, because `R0` is itself a legitimate formal
+Conditions 1–7 and 10–17 pass; condition 8 fails for every acceleration
+candidate and condition 9 is therefore not applicable. The map is nevertheless a
+**fully qualified** all-reference map, because `R0` is itself a legitimate formal
 environment. The verdict is therefore
 
 ```text
-R4 EPOCH 1 EXECUTION READINESS = TECHNICALLY PASS / OPERATIONAL DECISION REQUIRED
+R4 EPOCH 1 EXECUTION READINESS = PASS
 ```
 
-and **not** an automatic re-authorisation of the slow all-reference plan.
+Two things this verdict does **not** mean:
+
+* it is **not** an automatic re-authorisation of the slow all-reference plan —
+  see §6; and
+* it is **not** an authorisation to execute. `FORMAL R4 EPOCH 1 EXECUTION =
+  NOT YET AUTHORIZED`, because the post-fix measurement code commit must first
+  receive a remote pre-outcome timestamp.
 
 ## 4. Why no acceleration was adopted
 
@@ -147,6 +160,62 @@ pinned revision, and the frozen verbalizer ids reproduced exactly.
 
 The preflight used invented synthetic content only: `study_items_used = 0`.
 
+## 4c. Pre-row1 code defect correction (MMLU row adapter)
+
+The formal Epoch 1 all-reference launch (attempt 0) was started from the frozen
+authority commit `8121fcd4a802651a51bde76d1697ac2e50bdf5a5` and was **blocked
+before the first study forward** by an implementation defect:
+
+```text
+cell:     olmo-3-7b-instruct__r4-mmlu-57-subject (first cell in the frozen order)
+failure:  KeyError: 'question'  (run_r4_measurements.py:810, measure_item)
+exit:     1 after 63 s
+rows:     0 committed
+forwards: 0 study forwards
+```
+
+Root cause: `_mmlu_rows()` omitted the frozen `question` field from the
+normalized measurement row, while `measure_item()` requires it. HellaSwag and
+MedMCQA normalize through `_normalize_manifest_row()`, which already carried the
+field. Only the 4 MMLU cells were affected.
+
+The blocked attempt was quarantined read-only (never deleted):
+
+```text
+path:      /root/rivermind-data/r4-formal-measurements-aborted/epoch1-pre-row1-code-defect-attempt0/
+manifest:  manifest_fingerprint 8636a765f1d2808acec0b6b73bdec73f11dd252671eab1bbb126412d79cfddfb
+           sha256 459b7762ee4e6f01f132ef113ecb7f1749a7af25e21867f2a5bd684f522d914c
+policy:    DO_NOT_RESUME / DO_NOT_MERGE / DO_NOT_ANALYZE
+evidence:  study_forwards 0, committed_study_rows 0, scientific_evidence NONE
+```
+
+The correction was a **one-field adapter insertion** in `_mmlu_rows()`
+(`"question": str(item["question"]),`). No prompt, candidate, `D_i`, ground
+truth, `item_id`, order, split, or stratum value changed; the only schema
+difference is the presence of `question`.
+
+Model-free structural validation:
+
+```text
+MMLU TRAIN normalized rows = 456
+MMLU TEST  normalized rows = 1140
+rows with a present, non-empty string `question` = 1596 / 1596
+cross-population row contract (mmlu / hellaswag / medmcqa) = PASS
+16/16 dispatcher commands structurally valid, all -> R0 interpreter
+```
+
+The full six-model synthetic preflight was re-run after the fix in `R0` and
+again returned **6/6 PASS** with the frozen verbalizer ids (identical table to
+§4b), with `study_items_used = 0`.
+
+The Epoch 1 staging root was recreated empty (`entries = 0`). The scientific
+epoch remains **Epoch 1**: launch attempt 0 = `BLOCKED`, attempt 1 = the post-fix
+measurement code commit. All 16 formal cells will use one single post-fix
+measurement code commit; no HellaSwag/MedMCQA cell was run first.
+
+See `R4_EPOCH1_PRE_ROW1_CODE_DEFECT_RECEIPT.md` and
+`R4_EPOCH1_PRE_ROW1_MMLU_ADAPTER_FIX.md`.
+
 ## 5. What remains valid
 
 * The **frozen reference environment** `/root/rivermind-data/envs/probvenance-r4`
@@ -172,7 +241,8 @@ execution is **not** auto-reauthorised. The human reviewer must choose:
   scientific justification and re-run the ablation before any Epoch 1 row.
 
 This document does not choose between them and does not authorize any Epoch 1
-execution.
+execution. Whichever option is chosen, the Epoch 1 launch must use the post-fix
+measurement code commit.
 
 ## 7. Status block
 
@@ -190,9 +260,11 @@ PREDECLARED NUMERICAL THRESHOLDS = UNCHANGED
 ALL-REFERENCE EXECUTION REMAINS THE ONLY QUALIFIED PATH
 
 R4 EXECUTION ENVIRONMENT — EPOCH 1 = FROZEN (ALL-REFERENCE MAP)
-R4 EPOCH 1 EXECUTION READINESS = TECHNICALLY PASS / OPERATIONAL DECISION REQUIRED
+R4 EPOCH 1 PRE-ROW1 CODE DEFECT CORRECTION = PASS
+MMLU ROW ADAPTER CONTRACT = RESTORED
+R4 EPOCH 1 EXECUTION READINESS = PASS
 
-FORMAL R4 EPOCH 1 EXECUTION = NOT AUTHORIZED
+FORMAL R4 EPOCH 1 EXECUTION = NOT YET AUTHORIZED
 EPOCH 1 REAL STUDY ROWS EXECUTED = 0
 
 PUSH PERFORMED = NO

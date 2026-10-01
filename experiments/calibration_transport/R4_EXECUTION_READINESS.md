@@ -1,18 +1,42 @@
 # R4 Execution Readiness
 
 ```text
-status = PASS
+status = BLOCKED
+epoch  = 1
 ```
 
-R4 的 scientific protocol、measurement implementation、以及 execution-side
-operational hardening 已经全部 closure；**6/6 model cache 完整**且
-**6/6 synthetic preflight PASS**。因此 execution readiness 可以宣告 PASS。
+> **Superseded history.** The first version of this document declared
+> `R4 EXECUTION READINESS = PASS` on the frozen reference environment. That was
+> accurate at the time, but it is **no longer the current status**. Epoch 0 of the
+> formal raw measurement was aborted for a predeclared operational performance
+> reason and quarantined as `DO_NOT_USE`
+> (`R4_FORMAL_EXECUTION_EPOCH0_ABORT_RECEIPT.md`), and the proposed fast-kernel
+> remedy failed the predeclared numerical-equivalence gate
+> (`R4_FAST_KERNEL_NUMERICAL_EQUIVALENCE.md`). Current Epoch 1 status lives in
+> `R4_EXECUTION_READINESS_EPOCH1.md`.
 
 ```text
-R4 EXECUTION READINESS = PASS
+R4 FORMAL EXECUTION EPOCH 0 = ABORTED_FOR_PREDECLARED_OPERATIONAL_PERFORMANCE_REASON
+EPOCH 0 SCIENTIFIC ELIGIBILITY = DO_NOT_USE
 
-FORMAL R4 EXECUTION = NOT YET AUTHORIZED
+R4 EXECUTION READINESS — EPOCH 1 = BLOCKED
+FORMAL R4 EPOCH 1 EXECUTION = NOT AUTHORIZED
 ```
+
+Current Epoch 1 blocker:
+
+```text
+FAST-KERNEL EXECUTION ENVIRONMENT = NOT ADOPTED
+  numerical equivalence FAIL on 4/4 affected models
+  mamba_ssm / causal_conv1d path non-deterministic for Falcon-H1 and granite-4
+=> no Epoch 1 execution environment is frozen
+=> HUMAN DECISION REQUIRED
+   (A: run Epoch 1 on the frozen reference environment;
+    B: re-predeclare the numerical-equivalence contract and re-run PHASE F)
+```
+
+The historical sections below (gates 1–21, model cache, accepted risks) describe
+the *reference* environment and remain accurate for it.
 
 `NOT YET AUTHORIZED` 的原因 **不是** 技术 blocker，而是流程：
 
@@ -140,6 +164,10 @@ multi-worker
 
 ## 5. Status
 
+The block below records the **historical** reference-environment readiness, as it
+stood before Epoch 0 started. It is retained verbatim for provenance and is
+superseded by the Epoch 1 block that follows it.
+
 ```text
 R4 MEASUREMENT EXECUTION CONTRACT = FROZEN
 R4 MEASUREMENT IMPLEMENTATION ENGINEERING = PASS
@@ -152,9 +180,26 @@ R4 LEGACY MODEL CACHE = COMPLETE
 R4 SIX-MODEL SYNTHETIC PREFLIGHT = 6/6 PASS
 R4 MEASUREMENT CRASH-SAFE RESUME HARDENING = PASS
 
-R4 EXECUTION READINESS = PASS
+R4 EXECUTION READINESS = PASS          [historical, reference environment]
 
 FORMAL R4 EXECUTION = NOT YET AUTHORIZED
 AWAITING HUMAN / CHATGPT FINAL REVIEW, REMOTE PUSH,
 AND EXPLICIT EXECUTION AUTHORIZATION
+```
+
+Current status (Epoch 1):
+
+```text
+R4 FORMAL EXECUTION EPOCH 0 = ABORTED_AND_QUARANTINED
+EPOCH 0 SCIENTIFIC ELIGIBILITY = DO_NOT_USE
+
+R4 FAST-KERNEL DEPENDENCY AUDIT = PASS
+R4 FAST-KERNEL NUMERICAL EQUIVALENCE = FAIL
+FAST-KERNEL EXECUTION ENVIRONMENT = NOT ADOPTED
+R4 EXECUTION ENVIRONMENT — EPOCH 1 = NOT FROZEN
+
+R4 EXECUTION READINESS — EPOCH 1 = BLOCKED
+FORMAL R4 EPOCH 1 EXECUTION = NOT AUTHORIZED
+EPOCH 1 REAL STUDY ROWS EXECUTED = 0
+AWAITING HUMAN DECISION (option A: reference env; option B: re-predeclare the gate)
 ```

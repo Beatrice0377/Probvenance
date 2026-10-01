@@ -437,6 +437,7 @@ def _mmlu_rows() -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
             "split": str(item["split"]),
             "stratum": str(item["subject"]),
             "group_id": None,
+            "question": str(item["question"]),
             "candidate_names": list(r3_population.R3_CANDIDATE_NAMES),
             "candidate_descriptions": [str(choice) for choice in item["choices"]],
             "ground_truth_index": int(item["answer_index"]),

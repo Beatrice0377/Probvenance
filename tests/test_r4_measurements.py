@@ -1338,3 +1338,106 @@ def test_resume_is_deterministic(monkeypatch, tmp_path):
         return r4_staging.dump_canonical(r4_staging.load_final(directory))
 
     assert _run(tmp_path / "a") == _run(tmp_path / "b")
+
+
+# --------------------------------------------------------------------------- #
+# Pre-row1 defect closure: population adapter -> measurement row contract
+#
+# The formal Epoch 1 launch was blocked before the first study forward by
+# `KeyError: 'question'`: the MMLU adapter `_mmlu_rows()` omitted the frozen
+# `question` field that `measure_item()` requires. HellaSwag / MedMCQA go
+# through `_normalize_manifest_row()`, which already carried it. These tests
+# pin the shared row contract for every population so a schema-adapter
+# omission is caught before any model is loaded.
+# --------------------------------------------------------------------------- #
+
+MEASUREMENT_REQUIRED_ROW_FIELDS = (
+    "item_id",
+    "question",
+    "candidate_names",
+    "candidate_descriptions",
+    "anchor_index",
+    "ground_truth_index",
+    "split",
+)
+
+
+def _r3_mmlu_source_items():
+    r3_population = runner._load_sibling("r3_population")
+    manifest = r3_population.load_manifest()
+    return {str(item["item_id"]): item for item in r3_population.manifest_items(manifest)}
+
+
+def test_mmlu_normalized_rows_carry_the_frozen_question():
+    source = _r3_mmlu_source_items()
+    train_rows, test_rows = runner._mmlu_rows()
+    assert len(train_rows) == 456
+    assert len(test_rows) == 1140
+    for row in [*train_rows[:10], *test_rows[:10]]:
+        assert "question" in row
+        assert isinstance(row["question"], str)
+        assert row["question"] != ""
+        assert row["question"] == source[row["item_id"]]["question"]
+
+
+def test_mmlu_normalized_rows_are_structurally_complete():
+    train_rows, test_rows = runner._mmlu_rows()
+    assert len(train_rows) == 456
+    assert len(test_rows) == 1140
+    for row in [*train_rows, *test_rows]:
+        assert isinstance(row["question"], str)
+        assert row["question"] != ""
+        assert isinstance(row["item_id"], str)
+        assert row["item_id"] != ""
+        assert isinstance(row["source_split"], str)
+        assert row["source_split"] != ""
+        assert row["split"] in {"TRAIN", "TEST"}
+        assert row["candidate_names"] == ["option-0", "option-1", "option-2", "option-3"]
+        assert len(row["candidate_descriptions"]) == 4
+        assert all(isinstance(desc, str) and desc for desc in row["candidate_descriptions"])
+        assert 0 <= int(row["anchor_index"]) < 4
+        assert 0 <= int(row["ground_truth_index"]) < 4
+
+
+def test_mmlu_normalized_row_order_and_identity_are_stable():
+    source = _r3_mmlu_source_items()
+    train_rows, test_rows = runner._mmlu_rows()
+    assert [row["item_id"] for row in train_rows] == [
+        str(item["item_id"])
+        for item in runner._load_sibling("r3_population").manifest_items(
+            runner._load_sibling("r3_population").load_manifest()
+        )
+        if str(item["split"]) == "TRAIN"
+    ]
+    for row in [*train_rows, *test_rows]:
+        item = source[row["item_id"]]
+        assert row["candidate_descriptions"] == [str(c) for c in item["choices"]]
+        assert row["ground_truth_index"] == int(item["answer_index"])
+        assert row["stratum"] == str(item["subject"])
+        assert row["source_row_index"] == int(item["source_row_index"])
+
+
+@pytest.mark.parametrize("population_key", ["mmlu", "hellaswag", "medmcqa"])
+def test_every_population_adapter_exposes_the_measurement_row_contract(population_key):
+    cell = runner.resolve_cell("olmo-3-7b-instruct", population_key)
+    assert cell["required_rows"]
+    for row in cell["required_rows"][:5]:
+        for field in MEASUREMENT_REQUIRED_ROW_FIELDS:
+            assert field in row, (population_key, field)
+        assert isinstance(row["question"], str)
+        assert row["question"] != ""
+        assert len(row["candidate_names"]) == 4
+        assert len(row["candidate_descriptions"]) == 4
+
+
+def test_mmlu_normalized_row_measures_through_the_fake_backend():
+    """The original defect raised KeyError before any forward; pin the closure."""
+    train_rows, _ = runner._mmlu_rows()
+    row = dict(train_rows[0])
+    runtime = FakeRuntime()
+    item = _measure(runtime, row, population_id="r4-mmlu-57-subject")
+    assert len(runtime.calls) == 2
+    assert len(runtime.cat_calls) == 1
+    assert len(runtime.ovr_calls) == 1
+    assert item["item_id"] == row["item_id"]
+    assert item["anchor"] == row["candidate_names"][int(row["anchor_index"])]

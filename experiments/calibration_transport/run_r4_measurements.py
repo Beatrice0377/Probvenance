@@ -54,6 +54,12 @@ CHAT_TEMPLATE_KWARGS: dict[str, Any] = {"enable_thinking": False}
 MEASUREMENT_CONTRACT_PATH = CAL_DIR / "R4_MEASUREMENT_EXECUTION_CONTRACT.json"
 FINAL_PROTOCOL_CANDIDATE_PATH = CAL_DIR / "R4_FINAL_PROTOCOL_SEMANTIC_CANDIDATE.json"
 EXECUTION_MANIFEST_CANDIDATE_PATH = CAL_DIR / "R4_EXECUTION_MANIFEST_CANDIDATE.json"
+FINAL_PROTOCOL_FREEZE_PATH = CAL_DIR / "R4_FINAL_PROTOCOL_FREEZE.json"
+EXECUTION_MANIFEST_FREEZE_PATH = CAL_DIR / "R4_EXECUTION_MANIFEST_FREEZE.json"
+
+# Operational staging (crash-safe resume). Never part of the scientific fingerprint.
+# Mirrors r4_staging.DEFAULT_STAGING_ROOT (that module is loaded further below).
+DEFAULT_STAGING_ROOT = "/root/rivermind-data/r4-formal-measurements"
 
 # Frozen R4 anchor rule (see R4_FINAL_PROTOCOL_SEMANTIC_CANDIDATE.json anchor_identity).
 ANCHOR_PROTOCOL_ID = "r4-fixed-event-anchor-deterministic-source-index-hash"
@@ -122,6 +128,7 @@ def _load_semantic_module(name: str) -> Any:
 
 
 r4_raw_evidence = _load_sibling("r4_raw_evidence")
+r4_staging = _load_sibling("r4_staging")
 measurements = r4_raw_evidence._measurements
 integrity = r4_raw_evidence.integrity
 MeasurementStatus = integrity.MeasurementStatus
@@ -461,11 +468,19 @@ def load_frozen_authority() -> dict[str, Any]:
     contract = _read_json(MEASUREMENT_CONTRACT_PATH)
     protocol = _read_json(FINAL_PROTOCOL_CANDIDATE_PATH)
     manifest = _read_json(EXECUTION_MANIFEST_CANDIDATE_PATH)
+    protocol_freeze = _read_json(FINAL_PROTOCOL_FREEZE_PATH)
+    manifest_freeze = _read_json(EXECUTION_MANIFEST_FREEZE_PATH)
     return {
         "measurement_contract_fingerprint": str(contract["measurement_contract_fingerprint"]),
         "measurement_contract_status": str(contract["status"]),
         "final_protocol_candidate_fingerprint": str(protocol["candidate_fingerprint"]),
         "execution_manifest_candidate_fingerprint": str(manifest["manifest_fingerprint"]),
+        "final_protocol_fingerprint": str(protocol_freeze["final_protocol_fingerprint"]),
+        "final_protocol_status": str(protocol_freeze["status"]),
+        "execution_manifest_fingerprint": str(
+            manifest_freeze["execution_manifest_fingerprint"]
+        ),
+        "execution_manifest_status": str(manifest_freeze["status"]),
     }
 
 
@@ -906,6 +921,293 @@ def run_cell(
     return payload
 
 
+def _cell_model_meta(cell: Mapping[str, Any]) -> dict[str, Any]:
+    entry = cell["model"]
+    return {
+        "model": entry["model_id"],
+        "revision": entry["revision"],
+        "dtype": DTYPE,
+        "rendering_config": dict(CHAT_TEMPLATE_KWARGS),
+    }
+
+
+def _build_cell_payload(
+    *,
+    cell: Mapping[str, Any],
+    authority: Mapping[str, Any],
+    runtime_provenance: Mapping[str, Any],
+    items: Sequence[Mapping[str, Any]],
+    measurement_code: str,
+) -> dict[str, Any]:
+    entry = cell["model"]
+    return r4_raw_evidence.build_evidence_payload(
+        model_key=str(cell["model_key"]),
+        model_id=entry["model_id"],
+        model_revision=entry["revision"],
+        model_role=entry["role"],
+        adapter=entry["adapter"],
+        population_id=cell["population_id"],
+        population_manifest_fingerprint=cell["population_manifest_fingerprint"],
+        dataset_id=cell["dataset_id"],
+        dataset_revision=cell["dataset_revision"],
+        train_budget=cell["train_budget"],
+        planned_train_rows=len(cell["train_rows"]),
+        planned_test_rows=len(cell["test_rows"]),
+        measurement_contract_fingerprint=str(authority["measurement_contract_fingerprint"]),
+        final_protocol_candidate_fingerprint=str(
+            authority["final_protocol_candidate_fingerprint"]
+        ),
+        execution_manifest_candidate_fingerprint=str(
+            authority["execution_manifest_candidate_fingerprint"]
+        ),
+        measurement_code_commit=measurement_code,
+        runtime=runtime_provenance,
+        items=items,
+    )
+
+
+_REQUIRED_ROW_KEYS = (
+    "item_id",
+    "population_id",
+    "population_manifest_fingerprint",
+    "split",
+    "anchor",
+    "ground_truth_value",
+    "fixed_event",
+    "cat",
+    "ovr",
+)
+
+
+def _validate_row_shape(item: Mapping[str, Any]) -> Mapping[str, Any]:
+    """A row becomes COMMITTED only once its schema is structurally complete."""
+    missing = [key for key in _REQUIRED_ROW_KEYS if key not in item]
+    if missing:
+        raise r4_staging.R4StagingError(f"measured row is missing required keys {missing}")
+    for block in ("cat", "ovr"):
+        if "status" not in item[block]:
+            raise r4_staging.R4StagingError(f"measured row {block!r} block has no status")
+    return item
+
+
+def cell_identity_header(
+    *,
+    cell: Mapping[str, Any],
+    authority: Mapping[str, Any],
+    measurement_code: str,
+) -> dict[str, Any]:
+    """The immutable per-cell identity every resume must match exactly."""
+    entry = cell["model"]
+    ordered = [str(row["item_id"]) for row in cell["required_rows"]]
+    return {
+        "resume_policy_id": r4_staging.RESUME_POLICY_ID,
+        "resume_policy_version": r4_staging.RESUME_POLICY_VERSION,
+        "final_protocol_fingerprint": str(authority["final_protocol_fingerprint"]),
+        "execution_manifest_fingerprint": str(authority["execution_manifest_fingerprint"]),
+        "measurement_contract_fingerprint": str(authority["measurement_contract_fingerprint"]),
+        "measurement_code_commit": str(measurement_code),
+        "model_key": str(cell["model_key"]),
+        "model_id": str(entry["model_id"]),
+        "model_revision": str(entry["revision"]),
+        "model_role": str(entry["role"]),
+        "adapter": str(entry["adapter"]),
+        "population_key": str(cell["population_key"]),
+        "population_id": str(cell["population_id"]),
+        "population_manifest_fingerprint": str(cell["population_manifest_fingerprint"]),
+        "dataset_id": str(cell["dataset_id"]),
+        "dataset_revision": str(cell["dataset_revision"]),
+        "required_train_budget": str(cell["train_budget"]),
+        "required_test_identity": "frozen population manifest TEST rows (all eligible)",
+        "expected_item_count": len(ordered),
+        "expected_item_ids": ordered,
+    }
+
+
+def _verify_existing_final(
+    final: Mapping[str, Any], identity: Mapping[str, Any], directory: str | Path
+) -> None:
+    """Fail closed when a published final artifact does not match the frozen cell."""
+    if str(final.get("evidence_fingerprint")) != str(
+        r4_raw_evidence.evidence_fingerprint(final)
+    ):
+        raise r4_staging.R4ExistingFinalArtifactConflict(
+            f"existing final artifact fingerprint does not recompute: {directory}"
+        )
+    checks = (
+        ("model", "model_revision", "model_revision"),
+        ("population", "population_id", "population_id"),
+        ("population", "population_manifest_fingerprint", "population_manifest_fingerprint"),
+    )
+    for section, key, identity_key in checks:
+        if str(final.get(section, {}).get(key)) != str(identity[identity_key]):
+            raise r4_staging.R4ExistingFinalArtifactConflict(
+                f"existing final artifact {section}.{key} does not match identity: {directory}"
+            )
+    if str(final.get("measurement_contract_fingerprint")) != str(
+        identity["measurement_contract_fingerprint"]
+    ):
+        raise r4_staging.R4ExistingFinalArtifactConflict(
+            f"existing final artifact measurement contract mismatch: {directory}"
+        )
+    if len(final.get("items", [])) != int(identity["expected_item_count"]):
+        raise r4_staging.R4ExistingFinalArtifactConflict(
+            f"existing final artifact item count mismatch: {directory}"
+        )
+
+
+def run_cell_resumable(
+    *,
+    model_key: str,
+    population_key: str,
+    device: str,
+    authority: Mapping[str, Any],
+    staging_root: str | Path = DEFAULT_STAGING_ROOT,
+    resume: bool = True,
+    verify_environment_contract: bool = True,
+) -> dict[str, Any]:
+    """Measure (or crash-safely resume) one frozen cell under durable staging.
+
+    Crash-safe, deterministic and outcome-blind: the pending set is derived only
+    from transaction state (committed / inflight), never from any score.
+    """
+    cell = resolve_cell(model_key, population_key)
+    directory = r4_staging.ensure_cell_dir(staging_root, model_key, cell["population_id"])
+    lock = r4_staging.acquire_cell_lock(directory)
+    try:
+        measurement_code = measurement_code_commit()
+        identity = cell_identity_header(
+            cell=cell, authority=authority, measurement_code=measurement_code
+        )
+        r4_staging.verify_or_write_identity(directory, identity)
+
+        existing_final = r4_staging.load_final(directory)
+        if existing_final is not None:
+            _verify_existing_final(existing_final, identity, directory)
+            return {
+                "status": "ALREADY_COMPLETE",
+                "model_key": model_key,
+                "population_id": cell["population_id"],
+                "staging_dir": str(directory),
+                "evidence_fingerprint": str(existing_final["evidence_fingerprint"]),
+                "committed_rows": len(identity["expected_item_ids"]),
+                "new_forwards": 0,
+            }
+
+        committed = r4_staging.committed_item_ids(directory)
+        expected = set(identity["expected_item_ids"])
+        unknown = committed - expected
+        if unknown:
+            raise r4_staging.R4ResumeIdentityMismatch(
+                f"staging holds rows outside the frozen item set: {sorted(unknown)[:3]}"
+            )
+        if committed and not resume:
+            raise r4_staging.R4StagingError(
+                f"staging already holds committed rows; pass --resume: {directory}"
+            )
+
+        inflight = r4_staging.load_inflight_item_ids(directory)
+        plan = r4_staging.compute_pending(
+            ordered_item_ids=identity["expected_item_ids"],
+            committed_ids=committed,
+            inflight_ids=inflight,
+        )
+        operations = r4_staging.load_operations(directory)
+        operations["planned_logical_forwards"] = 2 * len(identity["expected_item_ids"])
+        operations["recovery_replay_count"] += len(plan["recovery_replay"])
+        r4_staging.save_operations(directory, operations)
+
+        runtime_provenance = r4_staging.load_runtime(directory)
+        if plan["pending"]:
+            cache = verify_model_cache(model_key)
+            environment = (
+                verify_environment(device=device) if verify_environment_contract else None
+            )
+            offline = verify_offline_environment()
+            backend = load_backend(model_key, device=device)
+            try:
+                verbalizers = verify_verbalizers(backend, model_key)
+                observed_runtime = {
+                    "device": device,
+                    "dtype": DTYPE,
+                    "chat_template_kwargs": dict(CHAT_TEMPLATE_KWARGS),
+                    "batch_size": 1,
+                    "environment": environment,
+                    "offline": offline,
+                    "cache": cache,
+                    "verbalizers": verbalizers,
+                }
+                if runtime_provenance is None:
+                    runtime_provenance = r4_staging.verify_or_write_runtime(
+                        directory, observed_runtime
+                    )
+                elif runtime_provenance != observed_runtime:
+                    raise r4_staging.R4ResumeIdentityMismatch(
+                        f"observed runtime does not match the staged runtime: {directory}"
+                    )
+                rows_by_id = {str(row["item_id"]): row for row in cell["required_rows"]}
+                runtime = Probvenance(backend=backend, capture_rendered_input=True)
+                for item_id in plan["pending"]:
+                    # Mark inflight before measuring: if the process dies mid-row the
+                    # marker makes the whole row a RECOVERY_REPLAY on resume.
+                    r4_staging.mark_inflight(directory, item_id)
+                    try:
+                        item = measure_item(
+                            runtime=runtime,
+                            row=rows_by_id[item_id],
+                            model_meta=_cell_model_meta(cell),
+                            population_id=cell["population_id"],
+                            population_manifest_fingerprint=cell[
+                                "population_manifest_fingerprint"
+                            ],
+                        )
+                        _validate_row_shape(item)
+                        r4_staging.commit_row(directory, item)
+                    finally:
+                        r4_staging.clear_inflight(directory, item_id)
+                    operations["operational_attempts"] += 2
+            finally:
+                unload_backend(backend)
+            r4_staging.save_operations(directory, operations)
+        if runtime_provenance is None:  # pragma: no cover - defensive
+            raise r4_staging.R4StagingError(
+                f"no runtime provenance available for {directory}"
+            )
+
+        rows_by_id = {
+            str(row["item_id"]): row for row in r4_staging.load_committed_rows(directory)
+        }
+        items = [rows_by_id[item_id] for item_id in identity["expected_item_ids"]]
+        payload = _build_cell_payload(
+            cell=cell,
+            authority=authority,
+            runtime_provenance=runtime_provenance,
+            items=items,
+            measurement_code=measurement_code,
+        )
+        r4_raw_evidence.validate_raw_evidence(
+            payload,
+            required_items=cell["required_rows"],
+            expected_contract_fingerprint=str(authority["measurement_contract_fingerprint"]),
+            expected_model_key=model_key,
+            expected_population_id=cell["population_id"],
+        )
+        r4_staging.publish_final(directory, payload)
+        operations["finalizations"] += 1
+        r4_staging.save_operations(directory, operations)
+        return {
+            "status": "COMPLETE",
+            "model_key": model_key,
+            "population_id": cell["population_id"],
+            "staging_dir": str(directory),
+            "evidence_fingerprint": str(payload["evidence_fingerprint"]),
+            "committed_rows": len(items),
+            "new_forwards": 2 * len(plan["pending"]),
+            "recovery_replay": list(plan["recovery_replay"]),
+        }
+    finally:
+        r4_staging.release_cell_lock(lock)
+
+
 def synthetic_preflight(*, model_keys: Sequence[str], device: str) -> list[dict[str, Any]]:
     """Synthetic-only real-model check: 1 CAT + 1 OVR forward per frozen model.
 
@@ -973,6 +1275,19 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--model-role", choices=tuple(MODEL_REGISTRY), default=None)
     parser.add_argument("--population", choices=tuple(POPULATION_REGISTRY), default=None)
     parser.add_argument("--output", default=None)
+    parser.add_argument(
+        "--staging-root",
+        default=None,
+        help=(
+            "crash-safe staging root for the formal run (enables durable per-row "
+            "commits and resume); selects the resumable execution path"
+        ),
+    )
+    parser.add_argument(
+        "--resume",
+        action="store_true",
+        help="resume an existing staged cell instead of refusing to inherit partial state",
+    )
     parser.add_argument("--device", default=DEVICE_DEFAULT)
     parser.add_argument(
         "--synthetic-preflight",
@@ -990,15 +1305,34 @@ def main(argv: Sequence[str] | None = None) -> int:
         report = synthetic_preflight(model_keys=ALL_MODEL_KEYS, device=args.device)
         print(json.dumps({"synthetic_preflight": report}, ensure_ascii=False, indent=2))
         return 0
-    if not args.model_role or not args.population or not args.output:
+    if not args.model_role or not args.population or not (args.output or args.staging_root):
         raise SystemExit(
-            "formal measurement requires --model-role, --population and --output "
+            "formal measurement requires --model-role, --population and either "
+            "--staging-root (crash-safe formal path) or --output (single-shot path) "
             "(or use --synthetic-preflight)"
         )
     verify_git_state(require_clean=True)
     authority = load_frozen_authority()
     if authority["measurement_contract_status"] != "FROZEN":
         raise R4MeasurementError("the measurement execution contract is not frozen")
+    if (
+        authority["final_protocol_status"] != "FROZEN"
+        or authority["execution_manifest_status"] != "FROZEN"
+    ):
+        raise R4MeasurementError(
+            "the final protocol / execution manifest freeze is not FROZEN"
+        )
+    if args.staging_root:
+        summary = run_cell_resumable(
+            model_key=args.model_role,
+            population_key=args.population,
+            device=args.device,
+            authority=authority,
+            staging_root=args.staging_root,
+            resume=args.resume,
+        )
+        print(json.dumps(summary, ensure_ascii=False, indent=2))
+        return 0
     payload = run_cell(
         model_key=args.model_role,
         population_key=args.population,

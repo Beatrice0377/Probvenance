@@ -53,6 +53,7 @@ def _load_runner():
 runner = _load_runner()
 measurements = runner.measurements
 r4_raw_evidence = runner.r4_raw_evidence
+r4_staging = runner.r4_staging
 
 
 # --------------------------------------------------------------------------- #
@@ -1030,3 +1031,310 @@ def test_determinism_across_two_processes(tmp_path):
         outputs.append(result.stdout.strip())
     assert outputs[0] == outputs[1]
     assert len(outputs[0]) == 64
+
+
+# --------------------------------------------------------------------------- #
+# Crash-safe resume / staging semantics (operational, outcome-blind)
+# --------------------------------------------------------------------------- #
+
+
+def _authority():
+    return {
+        "measurement_contract_fingerprint": "c" * 64,
+        "final_protocol_candidate_fingerprint": "p" * 64,
+        "execution_manifest_candidate_fingerprint": "m" * 64,
+        "final_protocol_fingerprint": "d" * 64,
+        "execution_manifest_fingerprint": "e" * 64,
+    }
+
+
+class _FailOneCatRuntime(FakeRuntime):
+    """Fails exactly one CAT forward (a terminal, classified failure state)."""
+
+    def __init__(self, *, fail_on_index):
+        super().__init__()
+        self.fail_on_index = fail_on_index
+        self.cat_seen = 0
+
+    def evaluate_with_trace(self, decision):
+        if isinstance(decision, ChoiceDecision):
+            self.cat_seen += 1
+            if self.cat_seen == self.fail_on_index:
+                self.calls.append(decision)
+                raise ScoringLabelError("synthetic CAT failure")
+        return super().evaluate_with_trace(decision)
+
+
+def _cell_dir(tmp_path, cell):
+    return r4_staging.ensure_cell_dir(tmp_path, "olmo-3-7b-instruct", cell["population_id"])
+
+
+def _write_runtime(directory, *, device="cpu"):
+    """Mirror the runner's observed runtime so resume can match it exactly."""
+    backend = FakeBackend()
+    observed = {
+        "device": device,
+        "dtype": runner.DTYPE,
+        "chat_template_kwargs": dict(runner.CHAT_TEMPLATE_KWARGS),
+        "batch_size": 1,
+        "environment": runner.verify_environment(device=device),
+        "offline": runner.verify_offline_environment(),
+        "cache": runner.verify_model_cache("olmo-3-7b-instruct"),
+        "verbalizers": runner.verify_verbalizers(backend, "olmo-3-7b-instruct"),
+    }
+    return r4_staging.verify_or_write_runtime(directory, observed)
+
+
+def _write_identity(tmp_path, cell, authority, *, measurement_code="0" * 40):
+    directory = _cell_dir(tmp_path, cell)
+    r4_staging.verify_or_write_identity(
+        directory,
+        runner.cell_identity_header(
+            cell=cell, authority=authority, measurement_code=measurement_code
+        ),
+    )
+    _write_runtime(directory)
+    return directory
+
+
+def _commit_row(directory, runtime, cell, row):
+    item = runner.measure_item(
+        runtime=runtime,
+        row=row,
+        model_meta=runner._cell_model_meta(cell),
+        population_id=cell["population_id"],
+        population_manifest_fingerprint=cell["population_manifest_fingerprint"],
+    )
+    r4_staging.commit_row(directory, item)
+    return item
+
+
+def _resume(tmp_path, *, resume=True):
+    return runner.run_cell_resumable(
+        model_key="olmo-3-7b-instruct",
+        population_key="hellaswag",
+        device="cpu",
+        authority=_authority(),
+        staging_root=tmp_path,
+        resume=resume,
+    )
+
+
+def test_frozen_authority_exposes_the_freeze_fingerprints():
+    authority = runner.load_frozen_authority()
+    assert authority["final_protocol_status"] == "FROZEN"
+    assert authority["execution_manifest_status"] == "FROZEN"
+    assert (
+        authority["final_protocol_fingerprint"]
+        == "d1b56d702e1f260cef47eee05b7d878ace07a15168e89408e15e7eb741c0ad34"
+    )
+    assert (
+        authority["execution_manifest_fingerprint"]
+        == "f32381c51db24f5dbeb240b5e0fdf73c59a56a615c8607ad8979e2a7e2586775"
+    )
+
+
+def test_cell_identity_header_records_the_frozen_identities(monkeypatch):
+    cell = _patch_cell(monkeypatch, FakeRuntime(), FakeBackend())
+    header = runner.cell_identity_header(
+        cell=cell, authority=_authority(), measurement_code="0" * 40
+    )
+    assert header["final_protocol_fingerprint"] == "d" * 64
+    assert header["execution_manifest_fingerprint"] == "e" * 64
+    assert header["measurement_contract_fingerprint"] == "c" * 64
+    assert header["model_revision"] == "6e5971d9eba42665f5bd5a0fcf047f299ce1dccc"
+    assert header["expected_item_count"] == 4
+    assert header["expected_item_ids"] == [row["item_id"] for row in cell["required_rows"]]
+
+
+def test_cli_exposes_operational_staging_controls():
+    args = runner.parse_args(
+        [
+            "--model-role",
+            "olmo-3-7b-instruct",
+            "--population",
+            "hellaswag",
+            "--staging-root",
+            "/tmp/x",
+            "--resume",
+        ]
+    )
+    assert args.staging_root == "/tmp/x"
+    assert args.resume is True
+
+
+def test_pending_set_is_derived_only_from_transaction_state():
+    plan = r4_staging.compute_pending(
+        ordered_item_ids=["a", "b", "c", "d"],
+        committed_ids={"a", "c"},
+        inflight_ids={"b"},
+    )
+    assert plan["pending"] == ["b", "d"]
+    assert plan["fresh"] == ["d"]
+    assert plan["recovery_replay"] == ["b"]
+    assert plan["committed"] == ["a", "c"]
+
+
+def test_resumable_fresh_run_completes_the_cell(monkeypatch, tmp_path):
+    runtime = FakeRuntime()
+    cell = _patch_cell(monkeypatch, runtime, FakeBackend())
+    summary = _resume(tmp_path, resume=False)
+    assert summary["status"] == "COMPLETE"
+    assert summary["new_forwards"] == 8
+    assert len(runtime.calls) == 8
+    final = r4_staging.load_final(_cell_dir(tmp_path, cell))
+    assert final["paired_complete"] is True
+    assert len(final["items"]) == 4
+
+
+def test_already_complete_cell_is_not_rerun(monkeypatch, tmp_path):
+    runtime = FakeRuntime()
+    _patch_cell(monkeypatch, runtime, FakeBackend())
+    _resume(tmp_path, resume=False)
+    calls_after_first = len(runtime.calls)
+    second = _resume(tmp_path, resume=True)
+    assert second["status"] == "ALREADY_COMPLETE"
+    assert second["new_forwards"] == 0
+    assert len(runtime.calls) == calls_after_first
+
+
+def test_resume_after_committed_rows_skips_them(monkeypatch, tmp_path):
+    runtime = FakeRuntime()
+    cell = _patch_cell(monkeypatch, runtime, FakeBackend())
+    directory = _write_identity(tmp_path, cell, _authority())
+    _commit_row(directory, runtime, cell, cell["required_rows"][0])
+    _commit_row(directory, runtime, cell, cell["required_rows"][1])
+    runtime.calls.clear()
+    summary = _resume(tmp_path, resume=True)
+    assert summary["new_forwards"] == 4
+    assert len(runtime.calls) == 4
+    assert summary["committed_rows"] == 4
+
+
+def test_mid_row_crash_recovery_replays_the_whole_row(monkeypatch, tmp_path):
+    runtime = FakeRuntime()
+    cell = _patch_cell(monkeypatch, runtime, FakeBackend())
+    directory = _write_identity(tmp_path, cell, _authority())
+    _commit_row(directory, runtime, cell, cell["required_rows"][0])
+    crashed_id = cell["required_rows"][1]["item_id"]
+    r4_staging.mark_inflight(directory, crashed_id)
+    runtime.calls.clear()
+    summary = _resume(tmp_path, resume=True)
+    assert summary["recovery_replay"] == [crashed_id]
+    assert summary["new_forwards"] == 6
+    rows = r4_staging.load_committed_rows(directory)
+    assert [row["item_id"] for row in rows] == [
+        row["item_id"] for row in cell["required_rows"]
+    ]
+    replayed = next(row for row in rows if row["item_id"] == crashed_id)
+    # the whole row was replayed: both blocks come from the same fresh attempt
+    assert replayed["cat"]["status"] == "scored"
+    assert replayed["ovr"]["status"] == "scored"
+    assert r4_staging.load_inflight_item_ids(directory) == set()
+
+
+def test_finalize_after_crash_uses_zero_new_forwards(monkeypatch, tmp_path):
+    runtime = FakeRuntime()
+    cell = _patch_cell(monkeypatch, runtime, FakeBackend())
+    directory = _write_identity(tmp_path, cell, _authority())
+    for row in cell["required_rows"]:
+        _commit_row(directory, runtime, cell, row)
+    runtime.calls.clear()
+    summary = _resume(tmp_path, resume=True)
+    assert summary["status"] == "COMPLETE"
+    assert summary["new_forwards"] == 0
+    assert runtime.calls == []
+
+
+def test_terminal_failure_row_is_never_retried(monkeypatch, tmp_path):
+    runtime = _FailOneCatRuntime(fail_on_index=1)
+    cell = _patch_cell(monkeypatch, runtime, FakeBackend())
+    first = _resume(tmp_path, resume=False)
+    assert first["new_forwards"] == 8
+    directory = _cell_dir(tmp_path, cell)
+    rows = {row["item_id"]: row for row in r4_staging.load_committed_rows(directory)}
+    failed_id = cell["required_rows"][0]["item_id"]
+    assert rows[failed_id]["cat"]["status"] != "scored"
+    calls_after_first = len(runtime.calls)
+    second = _resume(tmp_path, resume=True)
+    assert second["status"] == "ALREADY_COMPLETE"
+    assert second["new_forwards"] == 0
+    assert len(runtime.calls) == calls_after_first
+
+
+def test_fresh_run_refuses_to_inherit_partial_staging(monkeypatch, tmp_path):
+    runtime = FakeRuntime()
+    cell = _patch_cell(monkeypatch, runtime, FakeBackend())
+    directory = _write_identity(tmp_path, cell, _authority())
+    _commit_row(directory, runtime, cell, cell["required_rows"][0])
+    with pytest.raises(r4_staging.R4StagingError, match="committed rows"):
+        _resume(tmp_path, resume=False)
+
+
+def test_duplicate_committed_row_fails_closed(monkeypatch, tmp_path):
+    runtime = FakeRuntime()
+    cell = _patch_cell(monkeypatch, runtime, FakeBackend())
+    directory = _write_identity(tmp_path, cell, _authority())
+    item = _commit_row(directory, runtime, cell, cell["required_rows"][0])
+    duplicate = r4_staging.rows_dir(directory) / "duplicate.json"
+    r4_staging.write_atomic(duplicate, r4_staging.dump_canonical(item))
+    with pytest.raises(r4_staging.R4DuplicateCommittedRow):
+        _resume(tmp_path, resume=True)
+
+
+def test_identity_mismatch_fails_closed(monkeypatch, tmp_path):
+    runtime = FakeRuntime()
+    cell = _patch_cell(monkeypatch, runtime, FakeBackend())
+    directory = _write_identity(tmp_path, cell, _authority())
+    stored = r4_staging.read_json(r4_staging.identity_path(directory))
+    stored["model_revision"] = "f" * 40
+    r4_staging.write_atomic(
+        r4_staging.identity_path(directory), r4_staging.dump_canonical(stored)
+    )
+    with pytest.raises(r4_staging.R4ResumeIdentityMismatch):
+        _resume(tmp_path, resume=True)
+
+
+def test_single_writer_lock_blocks_a_second_writer(monkeypatch, tmp_path):
+    runtime = FakeRuntime()
+    cell = _patch_cell(monkeypatch, runtime, FakeBackend())
+    directory = _write_identity(tmp_path, cell, _authority())
+    lock = r4_staging.acquire_cell_lock(directory)
+    try:
+        with pytest.raises(r4_staging.R4CellLockedError):
+            _resume(tmp_path, resume=True)
+    finally:
+        r4_staging.release_cell_lock(lock)
+
+
+def test_atomic_finalization_leaves_no_partial_json(monkeypatch, tmp_path):
+    runtime = FakeRuntime()
+    cell = _patch_cell(monkeypatch, runtime, FakeBackend())
+    _resume(tmp_path, resume=False)
+    directory = _cell_dir(tmp_path, cell)
+    assert [p.name for p in directory.iterdir() if p.name.endswith(".tmp")] == []
+    rows_dir = r4_staging.rows_dir(directory)
+    assert [p.name for p in rows_dir.iterdir() if p.name.endswith(".tmp")] == []
+    assert list(rows_dir.glob("*.inflight")) == []
+    final = r4_staging.load_final(directory)
+    assert final["evidence_fingerprint"] == r4_raw_evidence.evidence_fingerprint(final)
+
+
+def test_resume_is_deterministic(monkeypatch, tmp_path):
+    def _run(root):
+        runtime = FakeRuntime()
+        cell = _patch_cell(monkeypatch, runtime, FakeBackend())
+        directory = _write_identity(root, cell, _authority())
+        _commit_row(directory, runtime, cell, cell["required_rows"][0])
+        r4_staging.mark_inflight(directory, cell["required_rows"][1]["item_id"])
+        runner.run_cell_resumable(
+            model_key="olmo-3-7b-instruct",
+            population_key="hellaswag",
+            device="cpu",
+            authority=_authority(),
+            staging_root=root,
+            resume=True,
+        )
+        return r4_staging.dump_canonical(r4_staging.load_final(directory))
+
+    assert _run(tmp_path / "a") == _run(tmp_path / "b")

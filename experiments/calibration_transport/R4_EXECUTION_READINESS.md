@@ -1,7 +1,7 @@
 # R4 Execution Readiness
 
 ```text
-status = BLOCKED
+status = TECHNICALLY PASS / OPERATIONAL DECISION REQUIRED
 epoch  = 1
 ```
 
@@ -10,29 +10,40 @@ epoch  = 1
 > accurate at the time, but it is **no longer the current status**. Epoch 0 of the
 > formal raw measurement was aborted for a predeclared operational performance
 > reason and quarantined as `DO_NOT_USE`
-> (`R4_FORMAL_EXECUTION_EPOCH0_ABORT_RECEIPT.md`), and the proposed fast-kernel
-> remedy failed the predeclared numerical-equivalence gate
-> (`R4_FAST_KERNEL_NUMERICAL_EQUIVALENCE.md`). Current Epoch 1 status lives in
+> (`R4_FORMAL_EXECUTION_EPOCH0_ABORT_RECEIPT.md`); the proposed full-stack
+> fast-kernel remedy failed the predeclared numerical-equivalence gate
+> (`R4_FAST_KERNEL_NUMERICAL_EQUIVALENCE.md`); and the follow-up bounded kernel
+> ablation found **no** numerically eligible acceleration candidate at all
+> (`R4_KERNEL_ABLATION_QUALIFICATION.md`). Current Epoch 1 status lives in
 > `R4_EXECUTION_READINESS_EPOCH1.md`.
 
 ```text
 R4 FORMAL EXECUTION EPOCH 0 = ABORTED_FOR_PREDECLARED_OPERATIONAL_PERFORMANCE_REASON
 EPOCH 0 SCIENTIFIC ELIGIBILITY = DO_NOT_USE
 
-R4 EXECUTION READINESS — EPOCH 1 = BLOCKED
+R4 BOUNDED KERNEL ABLATION = COMPLETE
+QUALIFIED ACCELERATION = NONE
+PREDECLARED NUMERICAL THRESHOLDS = UNCHANGED
+ALL-REFERENCE EXECUTION REMAINS THE ONLY QUALIFIED PATH
+
+R4 EXECUTION ENVIRONMENT — EPOCH 1 = FROZEN (ALL-REFERENCE MAP)
+R4 EXECUTION READINESS — EPOCH 1 = TECHNICALLY PASS / OPERATIONAL DECISION REQUIRED
 FORMAL R4 EPOCH 1 EXECUTION = NOT AUTHORIZED
 ```
 
-Current Epoch 1 blocker:
+Current Epoch 1 situation:
 
 ```text
-FAST-KERNEL EXECUTION ENVIRONMENT = NOT ADOPTED
-  numerical equivalence FAIL on 4/4 affected models
-  mamba_ssm / causal_conv1d path non-deterministic for Falcon-H1 and granite-4
-=> no Epoch 1 execution environment is frozen
+NO QUALIFIED ACCELERATION EXISTS
+  C1 (causal-conv1d only)        FAIL on all four affected models
+  C2 (causal-conv1d + mamba-ssm) degenerate: numerically identical to C1
+  C3 (causal-conv1d + FLA)       FAIL on both Qwen3.5 models
+  F0 (all five)                  rejected and remains rejected
+  => every model is bound to the reference environment R0
+  => the slow all-reference plan is NOT auto-reauthorised
 => HUMAN DECISION REQUIRED
-   (A: run Epoch 1 on the frozen reference environment;
-    B: re-predeclare the numerical-equivalence contract and re-run PHASE F)
+   (A: authorise Epoch 1 on the reference environment;
+    B: re-predeclare the numerical-equivalence contract and re-run the ablation)
 ```
 
 The historical sections below (gates 1–21, model cache, accepted risks) describe
@@ -187,6 +198,16 @@ AWAITING HUMAN / CHATGPT FINAL REVIEW, REMOTE PUSH,
 AND EXPLICIT EXECUTION AUTHORIZATION
 ```
 
+Current situation (Epoch 1): Epoch 0 was aborted and quarantined; a bounded
+kernel ablation (R0 / C1 / C2 / C3, with F0 kept as a historical control) found
+**no numerically eligible acceleration candidate**, so the predeclared selection
+rule froze an **all-reference** model → environment map. The selected path was
+then re-preflighted in `R0` (`--synthetic-preflight --device cuda:0`, offline):
+**6/6 PASS**, 2 synthetic forwards each, frozen verbalizer ids exactly. No Epoch 1
+study row was executed. Because no affected model received qualified acceleration,
+slow all-reference execution is **not** auto-reauthorised — see
+`R4_EXECUTION_READINESS_EPOCH1.md` §6 for the decision the human must take.
+
 Current status (Epoch 1):
 
 ```text
@@ -194,12 +215,18 @@ R4 FORMAL EXECUTION EPOCH 0 = ABORTED_AND_QUARANTINED
 EPOCH 0 SCIENTIFIC ELIGIBILITY = DO_NOT_USE
 
 R4 FAST-KERNEL DEPENDENCY AUDIT = PASS
-R4 FAST-KERNEL NUMERICAL EQUIVALENCE = FAIL
+R4 FAST-KERNEL NUMERICAL EQUIVALENCE (FULL STACK) = FAIL
 FAST-KERNEL EXECUTION ENVIRONMENT = NOT ADOPTED
-R4 EXECUTION ENVIRONMENT — EPOCH 1 = NOT FROZEN
 
-R4 EXECUTION READINESS — EPOCH 1 = BLOCKED
+R4 BOUNDED KERNEL ABLATION = COMPLETE
+QUALIFIED ACCELERATION = NONE
+PREDECLARED NUMERICAL THRESHOLDS = UNCHANGED
+ALL-REFERENCE EXECUTION REMAINS THE ONLY QUALIFIED PATH
+R4 EXECUTION ENVIRONMENT — EPOCH 1 = FROZEN (ALL-REFERENCE MAP)
+
+R4 EXECUTION READINESS — EPOCH 1 = TECHNICALLY PASS / OPERATIONAL DECISION REQUIRED
 FORMAL R4 EPOCH 1 EXECUTION = NOT AUTHORIZED
 EPOCH 1 REAL STUDY ROWS EXECUTED = 0
-AWAITING HUMAN DECISION (option A: reference env; option B: re-predeclare the gate)
+AWAITING HUMAN DECISION (option A: authorise the reference environment;
+option B: re-predeclare the equivalence gate and re-run the ablation)
 ```

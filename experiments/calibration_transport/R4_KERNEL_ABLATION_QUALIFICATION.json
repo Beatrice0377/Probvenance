@@ -1,0 +1,967 @@
+{
+  "activation_matrix_fingerprint": "ab43db8fcabd3f7e064e184889d51de583a1e5702429fa2c018afb65de8c14ca",
+  "battery": {
+    "anchors_balanced": true,
+    "battery_fingerprint": "c1e9d6488ec68cb44afb4d32d7468dc6b4acb70822f8f019389183cc1e4699bd",
+    "battery_id": "r4-fast-kernel-synthetic-equivalence-battery",
+    "battery_version": 1,
+    "items": 12,
+    "reused_unchanged_from_previous_round": true
+  },
+  "candidate_definitions": {
+    "C1": {
+      "added_packages": [
+        "causal-conv1d==1.7.0"
+      ],
+      "dependency_set_size": 1,
+      "environment_path": "/root/rivermind-data/envs/probvenance-r4-kernel-c1",
+      "label": "causal-conv1d only"
+    },
+    "C2": {
+      "added_packages": [
+        "causal-conv1d==1.7.0",
+        "mamba-ssm==2.3.1"
+      ],
+      "benchmark_for_adoption": false,
+      "construction_status": "BLOCKED_UNDECLARED_DEPENDENCY",
+      "dependency_set_size": 2,
+      "eligibility_status": "INELIGIBLE_DIAGNOSTIC_ONLY_NOT_SELECTABLE",
+      "enters_selection": false,
+      "environment_path": "/root/rivermind-data/envs/probvenance-r4-kernel-c2",
+      "label": "causal-conv1d + mamba-ssm",
+      "note": "declared set cannot import mamba_ssm (einops missing); adding einops would violate the declared candidate set, so C2 is functionally identical to C1 and cannot be an independent candidate; adjudicated by the human reviewer"
+    },
+    "C3": {
+      "added_packages": [
+        "causal-conv1d==1.7.0",
+        "flash-linear-attention==0.5.2",
+        "fla-core==0.5.2",
+        "einops==0.8.2"
+      ],
+      "dependency_set_size": 4,
+      "environment_path": "/root/rivermind-data/envs/probvenance-r4-kernel-c3",
+      "label": "causal-conv1d + flash-linear-attention + fla-core + einops"
+    },
+    "F0": {
+      "eligible": false,
+      "environment_path": "/root/rivermind-data/envs/probvenance-r4-fast",
+      "label": "original full fast stack (historical control)",
+      "note": "must never be selected, re-built, or re-qualified",
+      "status": "REJECTED_AND_REMAINS_REJECTED"
+    },
+    "R0": {
+      "added_packages": [],
+      "dependency_set_size": 0,
+      "environment_path": "/root/rivermind-data/envs/probvenance-r4",
+      "label": "reference"
+    }
+  },
+  "capture_sha256": {
+    "C1-rep1": "0d684f2e844c2f95b3804f616e23cd739bd3b4a759bf189bc4957e324b717fd9",
+    "C1-rep2": "0d684f2e844c2f95b3804f616e23cd739bd3b4a759bf189bc4957e324b717fd9",
+    "C1-rep3": "0d684f2e844c2f95b3804f616e23cd739bd3b4a759bf189bc4957e324b717fd9",
+    "C2-rep1": "1b3e08aa7d9d2779b05e2da8aa6c2408245e1f61fbcad6ffa424da13489a64d7",
+    "C2-rep2": "1b3e08aa7d9d2779b05e2da8aa6c2408245e1f61fbcad6ffa424da13489a64d7",
+    "C2-rep3": "1b3e08aa7d9d2779b05e2da8aa6c2408245e1f61fbcad6ffa424da13489a64d7",
+    "C3-rep1": "31e49150cc59e7fd7acba88dde2506f1a713d508b73d87d513914e14d449ed24",
+    "C3-rep2": "31e49150cc59e7fd7acba88dde2506f1a713d508b73d87d513914e14d449ed24",
+    "C3-rep3": "31e49150cc59e7fd7acba88dde2506f1a713d508b73d87d513914e14d449ed24",
+    "R0-rep1": "abaf4fa270b1c7744aa50fa74d03312754a6a7b3493158deb79770f1edf43d32",
+    "R0-rep1u": "6eab648220b6d85d1229d810dc64e70c118be42894d964227843131d6a971ee4",
+    "R0-rep2": "abaf4fa270b1c7744aa50fa74d03312754a6a7b3493158deb79770f1edf43d32",
+    "R0-rep3": "abaf4fa270b1c7744aa50fa74d03312754a6a7b3493158deb79770f1edf43d32"
+  },
+  "eligible_candidates_per_model": {
+    "falcon-h1-7b-instruct": [],
+    "granite-4-0-h-tiny": [],
+    "minicpm5-2b": [],
+    "olmo-3-7b-instruct": [],
+    "qwen3-5-2b": [],
+    "qwen3-5-9b": []
+  },
+  "environment_identities": {
+    "C1": {
+      "added_packages": [
+        "causal-conv1d==1.7.0"
+      ],
+      "cuda": "12.8",
+      "environment_id": "r4-epoch1-c1",
+      "environment_label": "causal-conv1d only",
+      "environment_path": "/root/rivermind-data/envs/probvenance-r4-kernel-c1",
+      "execution_environment_fingerprint": "8a16fc055215c89a2b6df713fb84223f206c834dd32d498c7ee44c2da7ad3835",
+      "fingerprint_version": 1,
+      "package_count": 183,
+      "package_freeze_sha256_excluding_editable_vcs_line": "15ce1a94ab36e18c43cf700b867acdfdae78a8997ec0b628848b20754b6cc410",
+      "protected_core": {
+        "safetensors": "0.8.0",
+        "scipy": "1.16.3",
+        "tokenizers": "0.23.2",
+        "torch": "2.8.0+cu128",
+        "transformers": "5.17.0",
+        "triton": "3.4.0"
+      },
+      "python": "3.11.13"
+    },
+    "C2": {
+      "added_packages": [
+        "causal-conv1d==1.7.0",
+        "mamba-ssm==2.3.1"
+      ],
+      "cuda": "12.8",
+      "environment_id": "r4-epoch1-c2",
+      "environment_label": "causal-conv1d + mamba-ssm",
+      "environment_path": "/root/rivermind-data/envs/probvenance-r4-kernel-c2",
+      "execution_environment_fingerprint": "7f3e555920c6aa1f91562f99aa75ef49a1053731335321520d210707d08cb4bd",
+      "fingerprint_version": 1,
+      "package_count": 184,
+      "package_freeze_sha256_excluding_editable_vcs_line": "5420f116aef6fbd30ecd7ef9ae0c8184914186c7a294e561482fcc4c5d466743",
+      "protected_core": {
+        "safetensors": "0.8.0",
+        "scipy": "1.16.3",
+        "tokenizers": "0.23.2",
+        "torch": "2.8.0+cu128",
+        "transformers": "5.17.0",
+        "triton": "3.4.0"
+      },
+      "python": "3.11.13"
+    },
+    "C3": {
+      "added_packages": [
+        "causal-conv1d==1.7.0",
+        "flash-linear-attention==0.5.2",
+        "fla-core==0.5.2",
+        "einops==0.8.2"
+      ],
+      "cuda": "12.8",
+      "environment_id": "r4-epoch1-c3",
+      "environment_label": "causal-conv1d + flash-linear-attention + fla-core + einops",
+      "environment_path": "/root/rivermind-data/envs/probvenance-r4-kernel-c3",
+      "execution_environment_fingerprint": "4fd78ae7c888be20b4db3622667de48b7bf07978d0d1f6b61c2f0f6f6583763e",
+      "fingerprint_version": 1,
+      "package_count": 186,
+      "package_freeze_sha256_excluding_editable_vcs_line": "815360615f68f886c558ec8401d66deb83313d03b139f7ca028dcfda42990274",
+      "protected_core": {
+        "safetensors": "0.8.0",
+        "scipy": "1.16.3",
+        "tokenizers": "0.23.2",
+        "torch": "2.8.0+cu128",
+        "transformers": "5.17.0",
+        "triton": "3.4.0"
+      },
+      "python": "3.11.13"
+    },
+    "R0": {
+      "added_packages": [],
+      "cuda": "12.8",
+      "environment_id": "r4-epoch1-r0",
+      "environment_label": "reference",
+      "environment_path": "/root/rivermind-data/envs/probvenance-r4",
+      "execution_environment_fingerprint": "46424eac4c734ee9adece0fc6e1e5394421ccdb1e50718b94144010fbf61c5c7",
+      "fingerprint_version": 1,
+      "package_count": 182,
+      "package_freeze_sha256_excluding_editable_vcs_line": "dddf9ebf3c8cb787433ea14dda4c842076931a49c3d96ffe4020dfff7d0733db",
+      "protected_core": {
+        "safetensors": "0.8.0",
+        "scipy": "1.16.3",
+        "tokenizers": "0.23.2",
+        "torch": "2.8.0+cu128",
+        "transformers": "5.17.0",
+        "triton": "3.4.0"
+      },
+      "python": "3.11.13"
+    }
+  },
+  "epoch": 1,
+  "findings": [
+    "Every candidate environment is bit-exact reproducible across 3 independent fresh processes (all three repeat captures are byte-identical and all pairwise differences are exactly 0.000e+00).",
+    "causal_conv1d alone (C1) already exceeds the frozen thresholds for all four affected models, so the drift is not attributable to mamba_ssm.",
+    "C1 and C2 are numerically identical for falcon-h1 and granite, confirming that C2 degenerates to C1 because mamba_ssm cannot be imported without einops.",
+    "C3 (causal_conv1d + FLA) reproduces the previously rejected full-stack value for qwen3-5-9b exactly (3.328e-2), and also fails.",
+    "The earlier full-stack non-determinism for falcon-h1 and granite is attributable to mamba_ssm: it is absent from C1, whose repeats are byte-identical."
+  ],
+  "immutable_thresholds": {
+    "max_abs_centered_restricted_logit_difference": 0.1,
+    "max_abs_designated_score_difference": 0.005,
+    "max_abs_restricted_probability_difference": 0.005,
+    "max_total_variation_distance": 0.01
+  },
+  "memory": {
+    "cgroup_memory_max_bytes": 62277025792,
+    "cgroup_peak_current_bytes_during_captures": 53682606080,
+    "effective_headroom_min_observed_bytes": 36521357312,
+    "hard_gate_bytes": 12884901888,
+    "status": "PASS"
+  },
+  "nature": "OUTCOME-BLIND OPERATIONAL QUALIFICATION",
+  "numerical_equivalence": {
+    "C1": {
+      "falcon-h1-7b-instruct": {
+        "any_non_finite": false,
+        "reps": {
+          "rep1": {
+            "max_abs_centered_restricted_logit_difference": 0.4097290039062502,
+            "max_abs_designated_score_difference": 0.015018282401597638,
+            "max_abs_restricted_probability_difference": 0.14718924608807377,
+            "max_total_variation_distance": 0.14844536053897828,
+            "non_finite_values": [],
+            "status": "FAIL"
+          },
+          "rep2": {
+            "max_abs_centered_restricted_logit_difference": 0.4097290039062502,
+            "max_abs_designated_score_difference": 0.015018282401597638,
+            "max_abs_restricted_probability_difference": 0.14718924608807377,
+            "max_total_variation_distance": 0.14844536053897828,
+            "non_finite_values": [],
+            "status": "FAIL"
+          },
+          "rep3": {
+            "max_abs_centered_restricted_logit_difference": 0.4097290039062502,
+            "max_abs_designated_score_difference": 0.015018282401597638,
+            "max_abs_restricted_probability_difference": 0.14718924608807377,
+            "max_total_variation_distance": 0.14844536053897828,
+            "non_finite_values": [],
+            "status": "FAIL"
+          }
+        },
+        "status": "FAIL",
+        "worst": {
+          "max_abs_centered_restricted_logit_difference": 0.4097290039062502,
+          "max_abs_designated_score_difference": 0.015018282401597638,
+          "max_abs_restricted_probability_difference": 0.14718924608807377,
+          "max_total_variation_distance": 0.14844536053897828
+        }
+      },
+      "granite-4-0-h-tiny": {
+        "any_non_finite": false,
+        "reps": {
+          "rep1": {
+            "max_abs_centered_restricted_logit_difference": 0.59375,
+            "max_abs_designated_score_difference": 0.10292399739779745,
+            "max_abs_restricted_probability_difference": 0.10292399739779745,
+            "max_total_variation_distance": 0.10292399739779746,
+            "non_finite_values": [],
+            "status": "FAIL"
+          },
+          "rep2": {
+            "max_abs_centered_restricted_logit_difference": 0.59375,
+            "max_abs_designated_score_difference": 0.10292399739779745,
+            "max_abs_restricted_probability_difference": 0.10292399739779745,
+            "max_total_variation_distance": 0.10292399739779746,
+            "non_finite_values": [],
+            "status": "FAIL"
+          },
+          "rep3": {
+            "max_abs_centered_restricted_logit_difference": 0.59375,
+            "max_abs_designated_score_difference": 0.10292399739779745,
+            "max_abs_restricted_probability_difference": 0.10292399739779745,
+            "max_total_variation_distance": 0.10292399739779746,
+            "non_finite_values": [],
+            "status": "FAIL"
+          }
+        },
+        "status": "FAIL",
+        "worst": {
+          "max_abs_centered_restricted_logit_difference": 0.59375,
+          "max_abs_designated_score_difference": 0.10292399739779745,
+          "max_abs_restricted_probability_difference": 0.10292399739779745,
+          "max_total_variation_distance": 0.10292399739779746
+        }
+      },
+      "qwen3-5-2b": {
+        "any_non_finite": false,
+        "reps": {
+          "rep1": {
+            "max_abs_centered_restricted_logit_difference": 0.09375000000000022,
+            "max_abs_designated_score_difference": 0.028895533464199707,
+            "max_abs_restricted_probability_difference": 0.029460888273875496,
+            "max_total_variation_distance": 0.030301655880187503,
+            "non_finite_values": [],
+            "status": "FAIL"
+          },
+          "rep2": {
+            "max_abs_centered_restricted_logit_difference": 0.09375000000000022,
+            "max_abs_designated_score_difference": 0.028895533464199707,
+            "max_abs_restricted_probability_difference": 0.029460888273875496,
+            "max_total_variation_distance": 0.030301655880187503,
+            "non_finite_values": [],
+            "status": "FAIL"
+          },
+          "rep3": {
+            "max_abs_centered_restricted_logit_difference": 0.09375000000000022,
+            "max_abs_designated_score_difference": 0.028895533464199707,
+            "max_abs_restricted_probability_difference": 0.029460888273875496,
+            "max_total_variation_distance": 0.030301655880187503,
+            "non_finite_values": [],
+            "status": "FAIL"
+          }
+        },
+        "status": "FAIL",
+        "worst": {
+          "max_abs_centered_restricted_logit_difference": 0.09375000000000022,
+          "max_abs_designated_score_difference": 0.028895533464199707,
+          "max_abs_restricted_probability_difference": 0.029460888273875496,
+          "max_total_variation_distance": 0.030301655880187503
+        }
+      },
+      "qwen3-5-9b": {
+        "any_non_finite": false,
+        "reps": {
+          "rep1": {
+            "max_abs_centered_restricted_logit_difference": 0.15624999999999978,
+            "max_abs_designated_score_difference": 0.027625446904863293,
+            "max_abs_restricted_probability_difference": 0.027625446904863293,
+            "max_total_variation_distance": 0.030924836028405765,
+            "non_finite_values": [],
+            "status": "FAIL"
+          },
+          "rep2": {
+            "max_abs_centered_restricted_logit_difference": 0.15624999999999978,
+            "max_abs_designated_score_difference": 0.027625446904863293,
+            "max_abs_restricted_probability_difference": 0.027625446904863293,
+            "max_total_variation_distance": 0.030924836028405765,
+            "non_finite_values": [],
+            "status": "FAIL"
+          },
+          "rep3": {
+            "max_abs_centered_restricted_logit_difference": 0.15624999999999978,
+            "max_abs_designated_score_difference": 0.027625446904863293,
+            "max_abs_restricted_probability_difference": 0.027625446904863293,
+            "max_total_variation_distance": 0.030924836028405765,
+            "non_finite_values": [],
+            "status": "FAIL"
+          }
+        },
+        "status": "FAIL",
+        "worst": {
+          "max_abs_centered_restricted_logit_difference": 0.15624999999999978,
+          "max_abs_designated_score_difference": 0.027625446904863293,
+          "max_abs_restricted_probability_difference": 0.027625446904863293,
+          "max_total_variation_distance": 0.030924836028405765
+        }
+      }
+    },
+    "C2": {
+      "falcon-h1-7b-instruct": {
+        "any_non_finite": false,
+        "reps": {
+          "rep1": {
+            "max_abs_centered_restricted_logit_difference": 0.4097290039062502,
+            "max_abs_designated_score_difference": 0.015018282401597638,
+            "max_abs_restricted_probability_difference": 0.14718924608807377,
+            "max_total_variation_distance": 0.14844536053897828,
+            "non_finite_values": [],
+            "status": "FAIL"
+          },
+          "rep2": {
+            "max_abs_centered_restricted_logit_difference": 0.4097290039062502,
+            "max_abs_designated_score_difference": 0.015018282401597638,
+            "max_abs_restricted_probability_difference": 0.14718924608807377,
+            "max_total_variation_distance": 0.14844536053897828,
+            "non_finite_values": [],
+            "status": "FAIL"
+          },
+          "rep3": {
+            "max_abs_centered_restricted_logit_difference": 0.4097290039062502,
+            "max_abs_designated_score_difference": 0.015018282401597638,
+            "max_abs_restricted_probability_difference": 0.14718924608807377,
+            "max_total_variation_distance": 0.14844536053897828,
+            "non_finite_values": [],
+            "status": "FAIL"
+          }
+        },
+        "status": "FAIL",
+        "worst": {
+          "max_abs_centered_restricted_logit_difference": 0.4097290039062502,
+          "max_abs_designated_score_difference": 0.015018282401597638,
+          "max_abs_restricted_probability_difference": 0.14718924608807377,
+          "max_total_variation_distance": 0.14844536053897828
+        }
+      },
+      "granite-4-0-h-tiny": {
+        "any_non_finite": false,
+        "reps": {
+          "rep1": {
+            "max_abs_centered_restricted_logit_difference": 0.59375,
+            "max_abs_designated_score_difference": 0.10292399739779745,
+            "max_abs_restricted_probability_difference": 0.10292399739779745,
+            "max_total_variation_distance": 0.10292399739779746,
+            "non_finite_values": [],
+            "status": "FAIL"
+          },
+          "rep2": {
+            "max_abs_centered_restricted_logit_difference": 0.59375,
+            "max_abs_designated_score_difference": 0.10292399739779745,
+            "max_abs_restricted_probability_difference": 0.10292399739779745,
+            "max_total_variation_distance": 0.10292399739779746,
+            "non_finite_values": [],
+            "status": "FAIL"
+          },
+          "rep3": {
+            "max_abs_centered_restricted_logit_difference": 0.59375,
+            "max_abs_designated_score_difference": 0.10292399739779745,
+            "max_abs_restricted_probability_difference": 0.10292399739779745,
+            "max_total_variation_distance": 0.10292399739779746,
+            "non_finite_values": [],
+            "status": "FAIL"
+          }
+        },
+        "status": "FAIL",
+        "worst": {
+          "max_abs_centered_restricted_logit_difference": 0.59375,
+          "max_abs_designated_score_difference": 0.10292399739779745,
+          "max_abs_restricted_probability_difference": 0.10292399739779745,
+          "max_total_variation_distance": 0.10292399739779746
+        }
+      }
+    },
+    "C3": {
+      "qwen3-5-2b": {
+        "any_non_finite": false,
+        "reps": {
+          "rep1": {
+            "max_abs_centered_restricted_logit_difference": 0.12500000000000044,
+            "max_abs_designated_score_difference": 0.029792731247784754,
+            "max_abs_restricted_probability_difference": 0.029756237914947525,
+            "max_total_variation_distance": 0.030301655880187503,
+            "non_finite_values": [],
+            "status": "FAIL"
+          },
+          "rep2": {
+            "max_abs_centered_restricted_logit_difference": 0.12500000000000044,
+            "max_abs_designated_score_difference": 0.029792731247784754,
+            "max_abs_restricted_probability_difference": 0.029756237914947525,
+            "max_total_variation_distance": 0.030301655880187503,
+            "non_finite_values": [],
+            "status": "FAIL"
+          },
+          "rep3": {
+            "max_abs_centered_restricted_logit_difference": 0.12500000000000044,
+            "max_abs_designated_score_difference": 0.029792731247784754,
+            "max_abs_restricted_probability_difference": 0.029756237914947525,
+            "max_total_variation_distance": 0.030301655880187503,
+            "non_finite_values": [],
+            "status": "FAIL"
+          }
+        },
+        "status": "FAIL",
+        "worst": {
+          "max_abs_centered_restricted_logit_difference": 0.12500000000000044,
+          "max_abs_designated_score_difference": 0.029792731247784754,
+          "max_abs_restricted_probability_difference": 0.029756237914947525,
+          "max_total_variation_distance": 0.030301655880187503
+        }
+      },
+      "qwen3-5-9b": {
+        "any_non_finite": false,
+        "reps": {
+          "rep1": {
+            "max_abs_centered_restricted_logit_difference": 0.18749999999999956,
+            "max_abs_designated_score_difference": 0.03327516608367781,
+            "max_abs_restricted_probability_difference": 0.03327516608367781,
+            "max_total_variation_distance": 0.03327516608367798,
+            "non_finite_values": [],
+            "status": "FAIL"
+          },
+          "rep2": {
+            "max_abs_centered_restricted_logit_difference": 0.18749999999999956,
+            "max_abs_designated_score_difference": 0.03327516608367781,
+            "max_abs_restricted_probability_difference": 0.03327516608367781,
+            "max_total_variation_distance": 0.03327516608367798,
+            "non_finite_values": [],
+            "status": "FAIL"
+          },
+          "rep3": {
+            "max_abs_centered_restricted_logit_difference": 0.18749999999999956,
+            "max_abs_designated_score_difference": 0.03327516608367781,
+            "max_abs_restricted_probability_difference": 0.03327516608367781,
+            "max_total_variation_distance": 0.03327516608367798,
+            "non_finite_values": [],
+            "status": "FAIL"
+          }
+        },
+        "status": "FAIL",
+        "worst": {
+          "max_abs_centered_restricted_logit_difference": 0.18749999999999956,
+          "max_abs_designated_score_difference": 0.03327516608367781,
+          "max_abs_restricted_probability_difference": 0.03327516608367781,
+          "max_total_variation_distance": 0.03327516608367798
+        }
+      }
+    }
+  },
+  "package_lock_fingerprint": "c22ff1d3b8df9dc7ee64b6a0da9c41434be0127bdf7ad7266ae5a45ee5fc46dd",
+  "performance": {
+    "executed": false,
+    "reason": "no candidate passed numerical equivalence; adoption benchmarking of an ineligible candidate is forbidden",
+    "speedup_vs_R0": null
+  },
+  "qualification_fingerprint": "1f5ebeceaee5b18d5a23be700ee049e76deb6d121749a75a2e17af649c98a556",
+  "qualification_id": "r4-bounded-kernel-ablation-qualification",
+  "qualification_version": 1,
+  "qualified_acceleration": "NONE",
+  "reference_self_consistency": {
+    "R0_repeats_byte_identical": true,
+    "R0_vs_previously_frozen_reference_capture": "PASS 0.000e+00 on all four affected models"
+  },
+  "repeatability": {
+    "C1": {
+      "falcon-h1-7b-instruct": {
+        "any_non_finite": false,
+        "pairs": {
+          "1v2": {
+            "max_abs_centered_restricted_logit_difference": 0.0,
+            "max_abs_designated_score_difference": 0.0,
+            "max_abs_restricted_probability_difference": 0.0,
+            "max_total_variation_distance": 0.0,
+            "non_finite_values": [],
+            "status": "PASS"
+          },
+          "1v3": {
+            "max_abs_centered_restricted_logit_difference": 0.0,
+            "max_abs_designated_score_difference": 0.0,
+            "max_abs_restricted_probability_difference": 0.0,
+            "max_total_variation_distance": 0.0,
+            "non_finite_values": [],
+            "status": "PASS"
+          },
+          "2v3": {
+            "max_abs_centered_restricted_logit_difference": 0.0,
+            "max_abs_designated_score_difference": 0.0,
+            "max_abs_restricted_probability_difference": 0.0,
+            "max_total_variation_distance": 0.0,
+            "non_finite_values": [],
+            "status": "PASS"
+          }
+        },
+        "status": "PASS",
+        "worst": {
+          "max_abs_centered_restricted_logit_difference": 0.0,
+          "max_abs_designated_score_difference": 0.0,
+          "max_abs_restricted_probability_difference": 0.0,
+          "max_total_variation_distance": 0.0
+        }
+      },
+      "granite-4-0-h-tiny": {
+        "any_non_finite": false,
+        "pairs": {
+          "1v2": {
+            "max_abs_centered_restricted_logit_difference": 0.0,
+            "max_abs_designated_score_difference": 0.0,
+            "max_abs_restricted_probability_difference": 0.0,
+            "max_total_variation_distance": 0.0,
+            "non_finite_values": [],
+            "status": "PASS"
+          },
+          "1v3": {
+            "max_abs_centered_restricted_logit_difference": 0.0,
+            "max_abs_designated_score_difference": 0.0,
+            "max_abs_restricted_probability_difference": 0.0,
+            "max_total_variation_distance": 0.0,
+            "non_finite_values": [],
+            "status": "PASS"
+          },
+          "2v3": {
+            "max_abs_centered_restricted_logit_difference": 0.0,
+            "max_abs_designated_score_difference": 0.0,
+            "max_abs_restricted_probability_difference": 0.0,
+            "max_total_variation_distance": 0.0,
+            "non_finite_values": [],
+            "status": "PASS"
+          }
+        },
+        "status": "PASS",
+        "worst": {
+          "max_abs_centered_restricted_logit_difference": 0.0,
+          "max_abs_designated_score_difference": 0.0,
+          "max_abs_restricted_probability_difference": 0.0,
+          "max_total_variation_distance": 0.0
+        }
+      },
+      "qwen3-5-2b": {
+        "any_non_finite": false,
+        "pairs": {
+          "1v2": {
+            "max_abs_centered_restricted_logit_difference": 0.0,
+            "max_abs_designated_score_difference": 0.0,
+            "max_abs_restricted_probability_difference": 0.0,
+            "max_total_variation_distance": 0.0,
+            "non_finite_values": [],
+            "status": "PASS"
+          },
+          "1v3": {
+            "max_abs_centered_restricted_logit_difference": 0.0,
+            "max_abs_designated_score_difference": 0.0,
+            "max_abs_restricted_probability_difference": 0.0,
+            "max_total_variation_distance": 0.0,
+            "non_finite_values": [],
+            "status": "PASS"
+          },
+          "2v3": {
+            "max_abs_centered_restricted_logit_difference": 0.0,
+            "max_abs_designated_score_difference": 0.0,
+            "max_abs_restricted_probability_difference": 0.0,
+            "max_total_variation_distance": 0.0,
+            "non_finite_values": [],
+            "status": "PASS"
+          }
+        },
+        "status": "PASS",
+        "worst": {
+          "max_abs_centered_restricted_logit_difference": 0.0,
+          "max_abs_designated_score_difference": 0.0,
+          "max_abs_restricted_probability_difference": 0.0,
+          "max_total_variation_distance": 0.0
+        }
+      },
+      "qwen3-5-9b": {
+        "any_non_finite": false,
+        "pairs": {
+          "1v2": {
+            "max_abs_centered_restricted_logit_difference": 0.0,
+            "max_abs_designated_score_difference": 0.0,
+            "max_abs_restricted_probability_difference": 0.0,
+            "max_total_variation_distance": 0.0,
+            "non_finite_values": [],
+            "status": "PASS"
+          },
+          "1v3": {
+            "max_abs_centered_restricted_logit_difference": 0.0,
+            "max_abs_designated_score_difference": 0.0,
+            "max_abs_restricted_probability_difference": 0.0,
+            "max_total_variation_distance": 0.0,
+            "non_finite_values": [],
+            "status": "PASS"
+          },
+          "2v3": {
+            "max_abs_centered_restricted_logit_difference": 0.0,
+            "max_abs_designated_score_difference": 0.0,
+            "max_abs_restricted_probability_difference": 0.0,
+            "max_total_variation_distance": 0.0,
+            "non_finite_values": [],
+            "status": "PASS"
+          }
+        },
+        "status": "PASS",
+        "worst": {
+          "max_abs_centered_restricted_logit_difference": 0.0,
+          "max_abs_designated_score_difference": 0.0,
+          "max_abs_restricted_probability_difference": 0.0,
+          "max_total_variation_distance": 0.0
+        }
+      }
+    },
+    "C2": {
+      "falcon-h1-7b-instruct": {
+        "any_non_finite": false,
+        "pairs": {
+          "1v2": {
+            "max_abs_centered_restricted_logit_difference": 0.0,
+            "max_abs_designated_score_difference": 0.0,
+            "max_abs_restricted_probability_difference": 0.0,
+            "max_total_variation_distance": 0.0,
+            "non_finite_values": [],
+            "status": "PASS"
+          },
+          "1v3": {
+            "max_abs_centered_restricted_logit_difference": 0.0,
+            "max_abs_designated_score_difference": 0.0,
+            "max_abs_restricted_probability_difference": 0.0,
+            "max_total_variation_distance": 0.0,
+            "non_finite_values": [],
+            "status": "PASS"
+          },
+          "2v3": {
+            "max_abs_centered_restricted_logit_difference": 0.0,
+            "max_abs_designated_score_difference": 0.0,
+            "max_abs_restricted_probability_difference": 0.0,
+            "max_total_variation_distance": 0.0,
+            "non_finite_values": [],
+            "status": "PASS"
+          }
+        },
+        "status": "PASS",
+        "worst": {
+          "max_abs_centered_restricted_logit_difference": 0.0,
+          "max_abs_designated_score_difference": 0.0,
+          "max_abs_restricted_probability_difference": 0.0,
+          "max_total_variation_distance": 0.0
+        }
+      },
+      "granite-4-0-h-tiny": {
+        "any_non_finite": false,
+        "pairs": {
+          "1v2": {
+            "max_abs_centered_restricted_logit_difference": 0.0,
+            "max_abs_designated_score_difference": 0.0,
+            "max_abs_restricted_probability_difference": 0.0,
+            "max_total_variation_distance": 0.0,
+            "non_finite_values": [],
+            "status": "PASS"
+          },
+          "1v3": {
+            "max_abs_centered_restricted_logit_difference": 0.0,
+            "max_abs_designated_score_difference": 0.0,
+            "max_abs_restricted_probability_difference": 0.0,
+            "max_total_variation_distance": 0.0,
+            "non_finite_values": [],
+            "status": "PASS"
+          },
+          "2v3": {
+            "max_abs_centered_restricted_logit_difference": 0.0,
+            "max_abs_designated_score_difference": 0.0,
+            "max_abs_restricted_probability_difference": 0.0,
+            "max_total_variation_distance": 0.0,
+            "non_finite_values": [],
+            "status": "PASS"
+          }
+        },
+        "status": "PASS",
+        "worst": {
+          "max_abs_centered_restricted_logit_difference": 0.0,
+          "max_abs_designated_score_difference": 0.0,
+          "max_abs_restricted_probability_difference": 0.0,
+          "max_total_variation_distance": 0.0
+        }
+      }
+    },
+    "C3": {
+      "qwen3-5-2b": {
+        "any_non_finite": false,
+        "pairs": {
+          "1v2": {
+            "max_abs_centered_restricted_logit_difference": 0.0,
+            "max_abs_designated_score_difference": 0.0,
+            "max_abs_restricted_probability_difference": 0.0,
+            "max_total_variation_distance": 0.0,
+            "non_finite_values": [],
+            "status": "PASS"
+          },
+          "1v3": {
+            "max_abs_centered_restricted_logit_difference": 0.0,
+            "max_abs_designated_score_difference": 0.0,
+            "max_abs_restricted_probability_difference": 0.0,
+            "max_total_variation_distance": 0.0,
+            "non_finite_values": [],
+            "status": "PASS"
+          },
+          "2v3": {
+            "max_abs_centered_restricted_logit_difference": 0.0,
+            "max_abs_designated_score_difference": 0.0,
+            "max_abs_restricted_probability_difference": 0.0,
+            "max_total_variation_distance": 0.0,
+            "non_finite_values": [],
+            "status": "PASS"
+          }
+        },
+        "status": "PASS",
+        "worst": {
+          "max_abs_centered_restricted_logit_difference": 0.0,
+          "max_abs_designated_score_difference": 0.0,
+          "max_abs_restricted_probability_difference": 0.0,
+          "max_total_variation_distance": 0.0
+        }
+      },
+      "qwen3-5-9b": {
+        "any_non_finite": false,
+        "pairs": {
+          "1v2": {
+            "max_abs_centered_restricted_logit_difference": 0.0,
+            "max_abs_designated_score_difference": 0.0,
+            "max_abs_restricted_probability_difference": 0.0,
+            "max_total_variation_distance": 0.0,
+            "non_finite_values": [],
+            "status": "PASS"
+          },
+          "1v3": {
+            "max_abs_centered_restricted_logit_difference": 0.0,
+            "max_abs_designated_score_difference": 0.0,
+            "max_abs_restricted_probability_difference": 0.0,
+            "max_total_variation_distance": 0.0,
+            "non_finite_values": [],
+            "status": "PASS"
+          },
+          "2v3": {
+            "max_abs_centered_restricted_logit_difference": 0.0,
+            "max_abs_designated_score_difference": 0.0,
+            "max_abs_restricted_probability_difference": 0.0,
+            "max_total_variation_distance": 0.0,
+            "non_finite_values": [],
+            "status": "PASS"
+          }
+        },
+        "status": "PASS",
+        "worst": {
+          "max_abs_centered_restricted_logit_difference": 0.0,
+          "max_abs_designated_score_difference": 0.0,
+          "max_abs_restricted_probability_difference": 0.0,
+          "max_total_variation_distance": 0.0
+        }
+      }
+    },
+    "R0": {
+      "falcon-h1-7b-instruct": {
+        "any_non_finite": false,
+        "pairs": {
+          "1v2": {
+            "max_abs_centered_restricted_logit_difference": 0.0,
+            "max_abs_designated_score_difference": 0.0,
+            "max_abs_restricted_probability_difference": 0.0,
+            "max_total_variation_distance": 0.0,
+            "non_finite_values": [],
+            "status": "PASS"
+          },
+          "1v3": {
+            "max_abs_centered_restricted_logit_difference": 0.0,
+            "max_abs_designated_score_difference": 0.0,
+            "max_abs_restricted_probability_difference": 0.0,
+            "max_total_variation_distance": 0.0,
+            "non_finite_values": [],
+            "status": "PASS"
+          },
+          "2v3": {
+            "max_abs_centered_restricted_logit_difference": 0.0,
+            "max_abs_designated_score_difference": 0.0,
+            "max_abs_restricted_probability_difference": 0.0,
+            "max_total_variation_distance": 0.0,
+            "non_finite_values": [],
+            "status": "PASS"
+          }
+        },
+        "status": "PASS",
+        "worst": {
+          "max_abs_centered_restricted_logit_difference": 0.0,
+          "max_abs_designated_score_difference": 0.0,
+          "max_abs_restricted_probability_difference": 0.0,
+          "max_total_variation_distance": 0.0
+        }
+      },
+      "granite-4-0-h-tiny": {
+        "any_non_finite": false,
+        "pairs": {
+          "1v2": {
+            "max_abs_centered_restricted_logit_difference": 0.0,
+            "max_abs_designated_score_difference": 0.0,
+            "max_abs_restricted_probability_difference": 0.0,
+            "max_total_variation_distance": 0.0,
+            "non_finite_values": [],
+            "status": "PASS"
+          },
+          "1v3": {
+            "max_abs_centered_restricted_logit_difference": 0.0,
+            "max_abs_designated_score_difference": 0.0,
+            "max_abs_restricted_probability_difference": 0.0,
+            "max_total_variation_distance": 0.0,
+            "non_finite_values": [],
+            "status": "PASS"
+          },
+          "2v3": {
+            "max_abs_centered_restricted_logit_difference": 0.0,
+            "max_abs_designated_score_difference": 0.0,
+            "max_abs_restricted_probability_difference": 0.0,
+            "max_total_variation_distance": 0.0,
+            "non_finite_values": [],
+            "status": "PASS"
+          }
+        },
+        "status": "PASS",
+        "worst": {
+          "max_abs_centered_restricted_logit_difference": 0.0,
+          "max_abs_designated_score_difference": 0.0,
+          "max_abs_restricted_probability_difference": 0.0,
+          "max_total_variation_distance": 0.0
+        }
+      },
+      "qwen3-5-2b": {
+        "any_non_finite": false,
+        "pairs": {
+          "1v2": {
+            "max_abs_centered_restricted_logit_difference": 0.0,
+            "max_abs_designated_score_difference": 0.0,
+            "max_abs_restricted_probability_difference": 0.0,
+            "max_total_variation_distance": 0.0,
+            "non_finite_values": [],
+            "status": "PASS"
+          },
+          "1v3": {
+            "max_abs_centered_restricted_logit_difference": 0.0,
+            "max_abs_designated_score_difference": 0.0,
+            "max_abs_restricted_probability_difference": 0.0,
+            "max_total_variation_distance": 0.0,
+            "non_finite_values": [],
+            "status": "PASS"
+          },
+          "2v3": {
+            "max_abs_centered_restricted_logit_difference": 0.0,
+            "max_abs_designated_score_difference": 0.0,
+            "max_abs_restricted_probability_difference": 0.0,
+            "max_total_variation_distance": 0.0,
+            "non_finite_values": [],
+            "status": "PASS"
+          }
+        },
+        "status": "PASS",
+        "worst": {
+          "max_abs_centered_restricted_logit_difference": 0.0,
+          "max_abs_designated_score_difference": 0.0,
+          "max_abs_restricted_probability_difference": 0.0,
+          "max_total_variation_distance": 0.0
+        }
+      },
+      "qwen3-5-9b": {
+        "any_non_finite": false,
+        "pairs": {
+          "1v2": {
+            "max_abs_centered_restricted_logit_difference": 0.0,
+            "max_abs_designated_score_difference": 0.0,
+            "max_abs_restricted_probability_difference": 0.0,
+            "max_total_variation_distance": 0.0,
+            "non_finite_values": [],
+            "status": "PASS"
+          },
+          "1v3": {
+            "max_abs_centered_restricted_logit_difference": 0.0,
+            "max_abs_designated_score_difference": 0.0,
+            "max_abs_restricted_probability_difference": 0.0,
+            "max_total_variation_distance": 0.0,
+            "non_finite_values": [],
+            "status": "PASS"
+          },
+          "2v3": {
+            "max_abs_centered_restricted_logit_difference": 0.0,
+            "max_abs_designated_score_difference": 0.0,
+            "max_abs_restricted_probability_difference": 0.0,
+            "max_total_variation_distance": 0.0,
+            "non_finite_values": [],
+            "status": "PASS"
+          }
+        },
+        "status": "PASS",
+        "worst": {
+          "max_abs_centered_restricted_logit_difference": 0.0,
+          "max_abs_designated_score_difference": 0.0,
+          "max_abs_restricted_probability_difference": 0.0,
+          "max_total_variation_distance": 0.0
+        }
+      }
+    }
+  },
+  "scientific_semantics_changed": false,
+  "selected_map": {
+    "falcon-h1-7b-instruct": "R0",
+    "granite-4-0-h-tiny": "R0",
+    "minicpm5-2b": "R0",
+    "olmo-3-7b-instruct": "R0",
+    "qwen3-5-2b": "R0",
+    "qwen3-5-9b": "R0"
+  },
+  "selection_rule": {
+    "step_1": "eligible set = candidates passing numerical equivalence AND repeatability AND performance threshold AND memory",
+    "step_2_if_eligible_set_empty": "select R0; record status NO_QUALIFIED_ACCELERATION (not a scientific model failure)",
+    "step_3_if_exactly_one_eligible": "select it",
+    "step_4_if_multiple_eligible": "select the highest median synthetic rows/sec",
+    "step_5_tie_break": "if the fastest two are within 5% of each other, select the smaller dependency set (C1 preferred over C2, C2 over C3)",
+    "step_6_reference_preference": "R0 is never displaced by a candidate that fails any gate; a numerically ineligible candidate is never selected even if it is faster"
+  },
+  "study_rows_used": 0,
+  "thresholds_changed": false
+}

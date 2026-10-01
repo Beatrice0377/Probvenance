@@ -1,0 +1,125 @@
+{
+  "selection_config_id": "r4-epoch1-model-execution-environment-selection",
+  "selection_config_version": 1,
+  "epoch": 1,
+  "nature": "PREDECLARED OPERATIONAL SELECTION RULE",
+  "declaration_timestamp": "2026-10-01T09:05:00+00:00",
+  "declared_before_any_benchmark_result_was_observed": true,
+  "scientific_semantics_changed": false,
+  "study_rows_used": 0,
+
+  "immutable_numerical_thresholds": {
+    "max_abs_restricted_probability_difference": 0.005,
+    "max_abs_designated_score_difference": 0.005,
+    "max_abs_centered_restricted_logit_difference": 0.1,
+    "max_total_variation_distance": 0.01,
+    "all_values_finite": true,
+    "may_be_relaxed": false,
+    "may_be_reinterpreted": false,
+    "may_be_widened_per_model": false
+  },
+
+  "candidates": {
+    "R0": {
+      "label": "reference",
+      "environment_path": "/root/rivermind-data/envs/probvenance-r4",
+      "added_packages": [],
+      "dependency_set_size": 0
+    },
+    "C1": {
+      "label": "causal-conv1d only",
+      "environment_path": "/root/rivermind-data/envs/probvenance-r4-kernel-c1",
+      "added_packages": ["causal-conv1d==1.7.0"],
+      "dependency_set_size": 1
+    },
+    "C2": {
+      "label": "causal-conv1d + mamba-ssm",
+      "environment_path": "/root/rivermind-data/envs/probvenance-r4-kernel-c2",
+      "added_packages": ["causal-conv1d==1.7.0", "mamba-ssm==2.3.1"],
+      "dependency_set_size": 2,
+      "construction_status": "BLOCKED_UNDECLARED_DEPENDENCY",
+      "eligibility_status": "INELIGIBLE_DIAGNOSTIC_ONLY_NOT_SELECTABLE",
+      "benchmark_for_adoption": false,
+      "enters_selection": false,
+      "note": "declared set cannot import mamba_ssm (einops missing); adding einops would violate the declared candidate set, so C2 is functionally identical to C1 and cannot be an independent candidate; adjudicated by the human reviewer"
+    },
+    "C3": {
+      "label": "causal-conv1d + flash-linear-attention + fla-core + einops",
+      "environment_path": "/root/rivermind-data/envs/probvenance-r4-kernel-c3",
+      "added_packages": ["causal-conv1d==1.7.0", "flash-linear-attention==0.5.2", "fla-core==0.5.2", "einops==0.8.2"],
+      "dependency_set_size": 4
+    },
+    "F0": {
+      "label": "original full fast stack (historical control)",
+      "environment_path": "/root/rivermind-data/envs/probvenance-r4-fast",
+      "status": "REJECTED_AND_REMAINS_REJECTED",
+      "eligible": false,
+      "note": "must never be selected, re-built, or re-qualified"
+    }
+  },
+
+  "eligibility": {
+    "requires_all_of": [
+      "candidate_repeatability_pass",
+      "reference_vs_candidate_equivalence_pass",
+      "performance_threshold_pass",
+      "memory_pass"
+    ],
+    "repeatability_requirement": {
+      "independent_fresh_processes_per_model_candidate": 3,
+      "pairwise_comparisons": 3,
+      "thresholds": "identical to immutable_numerical_thresholds",
+      "additional_relaxation": "NONE"
+    },
+    "performance_thresholds_speedup_vs_R0": {
+      "falcon-h1-7b-instruct": 2.0,
+      "granite-4-0-h-tiny": 1.5,
+      "qwen3-5-9b": 1.5,
+      "qwen3-5-2b": 1.5,
+      "olmo-3-7b-instruct": null,
+      "minicpm5-2b": null,
+      "note": "null = no candidate is applicable (zero hub-kernel sites); these models always use R0"
+    },
+    "memory_requirements": [
+      "no_cuda_oom",
+      "no_process_instability",
+      "effective_cgroup_headroom_before_and_after >= 12 GiB",
+      "peak_rss_does_not_threaten_the_58_GiB_cgroup_limit"
+    ],
+    "statistic": "median_rows_per_second_over_3_independent_benchmark_processes"
+  },
+
+  "selection_rule": {
+    "step_1": "eligible set = candidates passing numerical equivalence AND repeatability AND performance threshold AND memory",
+    "step_2_if_eligible_set_empty": "select R0; record status NO_QUALIFIED_ACCELERATION (not a scientific model failure)",
+    "step_3_if_exactly_one_eligible": "select it",
+    "step_4_if_multiple_eligible": "select the highest median synthetic rows/sec",
+    "step_5_tie_break": "if the fastest two are within 5% of each other, select the smaller dependency set (C1 preferred over C2, C2 over C3)",
+    "step_6_reference_preference": "R0 is never displaced by a candidate that fails any gate; a numerically ineligible candidate is never selected even if it is faster"
+  },
+
+  "invariants": [
+    "one and only one execution environment fingerprint per model, across ALL populations and ALL cells",
+    "no mixed environment within a single model",
+    "the original full-fast environment F0 remains rejected",
+    "the immutable thresholds are never relaxed",
+    "no study row is read, scored, or timed during selection",
+    "selection is operational only and makes no scientific claim"
+  ],
+
+  "human_adjudications": [
+    {
+      "timestamp": "2026-10-01T09:20:00+00:00",
+      "subject": "C2",
+      "ruling": "C2_UNDECLARED_DEPENDENCY CONFIRMED",
+      "effect": [
+        "C2 is marked INELIGIBLE / DIAGNOSTIC_ONLY / NOT_SELECTABLE",
+        "C2 must not be benchmarked for adoption",
+        "C2 must not enter the selection set",
+        "already-started pure synthetic C2 captures may complete but are diagnostic only, used solely to evidence the degeneration/dependency fact",
+        "einops must not be installed into C2 and the C2 package definition must not be changed"
+      ],
+      "rationale": "the declared C2 package set (causal-conv1d + mamba-ssm) cannot import mamba_ssm without einops, so C2 is functionally identical to C1 and is not an independent candidate"
+    }
+  ]
+}

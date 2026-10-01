@@ -1,0 +1,751 @@
+{
+  "availability_guard_source": "transformers/utils/import_utils.py",
+  "availability_guards": {
+    "C1": {
+      "is_causal_conv1d_available": true,
+      "is_flash_linear_attention_available": false,
+      "is_mamba_2_ssm_available": false,
+      "is_mamba_ssm_available": false,
+      "is_triton_available": true
+    },
+    "C2": {
+      "is_causal_conv1d_available": true,
+      "is_flash_linear_attention_available": false,
+      "is_mamba_2_ssm_available": true,
+      "is_mamba_ssm_available": true,
+      "is_triton_available": true
+    },
+    "C3": {
+      "is_causal_conv1d_available": true,
+      "is_flash_linear_attention_available": true,
+      "is_mamba_2_ssm_available": false,
+      "is_mamba_ssm_available": false,
+      "is_triton_available": true
+    },
+    "R0": {
+      "is_causal_conv1d_available": false,
+      "is_flash_linear_attention_available": false,
+      "is_mamba_2_ssm_available": false,
+      "is_mamba_ssm_available": false,
+      "is_triton_available": true
+    }
+  },
+  "candidate_environments": {
+    "C1": {
+      "added_packages": [
+        "causal-conv1d==1.7.0"
+      ],
+      "environment_path": "/root/rivermind-data/envs/probvenance-r4-kernel-c1",
+      "label": "causal-conv1d only",
+      "role": "ablation candidate"
+    },
+    "C2": {
+      "added_packages": [
+        "causal-conv1d==1.7.0",
+        "mamba-ssm==2.3.1"
+      ],
+      "environment_path": "/root/rivermind-data/envs/probvenance-r4-kernel-c2",
+      "label": "causal-conv1d + mamba-ssm",
+      "role": "ablation candidate"
+    },
+    "C3": {
+      "added_packages": [
+        "causal-conv1d==1.7.0",
+        "flash-linear-attention==0.5.2",
+        "fla-core==0.5.2",
+        "einops==0.8.2"
+      ],
+      "environment_path": "/root/rivermind-data/envs/probvenance-r4-kernel-c3",
+      "label": "causal-conv1d + flash-linear-attention + fla-core + einops",
+      "role": "ablation candidate"
+    },
+    "F0": {
+      "added_packages": [
+        "causal-conv1d==1.7.0",
+        "mamba-ssm==2.3.1",
+        "flash-linear-attention==0.5.2",
+        "fla-core==0.5.2",
+        "einops==0.8.2"
+      ],
+      "environment_path": "/root/rivermind-data/envs/probvenance-r4-fast",
+      "label": "original full fast stack (historical control)",
+      "role": "ablation candidate",
+      "status": "REJECTED_AND_REMAINS_REJECTED"
+    },
+    "R0": {
+      "added_packages": [],
+      "environment_path": "/root/rivermind-data/envs/probvenance-r4",
+      "label": "reference",
+      "role": "selected"
+    }
+  },
+  "decorator_source": "transformers/integrations/hub_kernels.py:829 use_kernel_func_from_hub_with_fallback",
+  "detection_method": "read the closure free variable 'is_new_implementation' of the decorated module attribute; functools.wraps copies __module__/__name__ from the torch fallback so metadata-based probes cannot distinguish fast from fallback",
+  "epoch": 1,
+  "findings": [
+    "R0: every hub-kernel site falls back to the reference PyTorch implementation.",
+    "C1: causal_conv1d_fn and causal_conv1d_update activate for falcon-h1, granite and qwen3_5; all mamba and FLA sites still fall back.",
+    "C2: identical to C1 - mamba_ssm cannot be imported (einops absent) so every mamba site falls back despite is_mamba_ssm_available() reporting True.",
+    "C3: causal_conv1d activates plus the two FLA gated-delta-rule sites for qwen3_5; all mamba sites fall back.",
+    "olmo-3 and minicpm5-2b carry zero hub-kernel sites in every environment (olmo3 and llama model modules only use the inert use_kernel_forward_from_hub stub)."
+  ],
+  "matrix_fingerprint": "ab43db8fcabd3f7e064e184889d51de583a1e5702429fa2c018afb65de8c14ca",
+  "matrix_id": "r4-kernel-ablation-activation-matrix",
+  "matrix_version": 1,
+  "model_module": {
+    "falcon-h1-7b-instruct": "transformers.models.falcon_h1.modeling_falcon_h1",
+    "granite-4-0-h-tiny": "transformers.models.granitemoehybrid.modeling_granitemoehybrid",
+    "minicpm5-2b": "transformers.models.llama.modeling_llama",
+    "olmo-3-7b-instruct": "transformers.models.olmo3.modeling_olmo3",
+    "qwen3-5-2b": "transformers.models.qwen3_5.modeling_qwen3_5",
+    "qwen3-5-9b": "transformers.models.qwen3_5.modeling_qwen3_5"
+  },
+  "nature": "OUTCOME-BLIND OPERATIONAL ACTIVATION EVIDENCE",
+  "sites": {
+    "falcon-h1-7b-instruct": {
+      "C1": {
+        "causal_conv1d_fn": {
+          "implementation": "causal_conv1d.causal_conv1d_interface.causal_conv1d_fn",
+          "is_new_implementation": true,
+          "present": true
+        },
+        "causal_conv1d_update": {
+          "implementation": "causal_conv1d.causal_conv1d_interface.causal_conv1d_update",
+          "is_new_implementation": true,
+          "present": true
+        },
+        "mamba2_chunk_scan": {
+          "implementation": "transformers.models.falcon_h1.modeling_falcon_h1.mamba2_chunk_scan",
+          "is_new_implementation": false,
+          "present": true
+        },
+        "mamba2_selective_state_update": {
+          "implementation": "transformers.models.falcon_h1.modeling_falcon_h1.mamba2_selective_state_update",
+          "is_new_implementation": false,
+          "present": true
+        },
+        "mamba2_split_conv1d_scan_combined": {
+          "implementation": "transformers.models.falcon_h1.modeling_falcon_h1.mamba2_split_conv1d_scan_combined",
+          "is_new_implementation": false,
+          "present": true
+        }
+      },
+      "C2": {
+        "causal_conv1d_fn": {
+          "implementation": "causal_conv1d.causal_conv1d_interface.causal_conv1d_fn",
+          "is_new_implementation": true,
+          "present": true
+        },
+        "causal_conv1d_update": {
+          "implementation": "causal_conv1d.causal_conv1d_interface.causal_conv1d_update",
+          "is_new_implementation": true,
+          "present": true
+        },
+        "mamba2_chunk_scan": {
+          "implementation": "transformers.models.falcon_h1.modeling_falcon_h1.mamba2_chunk_scan",
+          "is_new_implementation": false,
+          "present": true
+        },
+        "mamba2_selective_state_update": {
+          "implementation": "transformers.models.falcon_h1.modeling_falcon_h1.mamba2_selective_state_update",
+          "is_new_implementation": false,
+          "present": true
+        },
+        "mamba2_split_conv1d_scan_combined": {
+          "implementation": "transformers.models.falcon_h1.modeling_falcon_h1.mamba2_split_conv1d_scan_combined",
+          "is_new_implementation": false,
+          "present": true
+        }
+      },
+      "C3": {
+        "causal_conv1d_fn": {
+          "implementation": "causal_conv1d.causal_conv1d_interface.causal_conv1d_fn",
+          "is_new_implementation": true,
+          "present": true
+        },
+        "causal_conv1d_update": {
+          "implementation": "causal_conv1d.causal_conv1d_interface.causal_conv1d_update",
+          "is_new_implementation": true,
+          "present": true
+        },
+        "mamba2_chunk_scan": {
+          "implementation": "transformers.models.falcon_h1.modeling_falcon_h1.mamba2_chunk_scan",
+          "is_new_implementation": false,
+          "present": true
+        },
+        "mamba2_selective_state_update": {
+          "implementation": "transformers.models.falcon_h1.modeling_falcon_h1.mamba2_selective_state_update",
+          "is_new_implementation": false,
+          "present": true
+        },
+        "mamba2_split_conv1d_scan_combined": {
+          "implementation": "transformers.models.falcon_h1.modeling_falcon_h1.mamba2_split_conv1d_scan_combined",
+          "is_new_implementation": false,
+          "present": true
+        }
+      },
+      "R0": {
+        "causal_conv1d_fn": {
+          "implementation": "transformers.models.falcon_h1.modeling_falcon_h1.causal_conv1d_fn",
+          "is_new_implementation": false,
+          "present": true
+        },
+        "causal_conv1d_update": {
+          "implementation": "transformers.models.falcon_h1.modeling_falcon_h1.causal_conv1d_update",
+          "is_new_implementation": false,
+          "present": true
+        },
+        "mamba2_chunk_scan": {
+          "implementation": "transformers.models.falcon_h1.modeling_falcon_h1.mamba2_chunk_scan",
+          "is_new_implementation": false,
+          "present": true
+        },
+        "mamba2_selective_state_update": {
+          "implementation": "transformers.models.falcon_h1.modeling_falcon_h1.mamba2_selective_state_update",
+          "is_new_implementation": false,
+          "present": true
+        },
+        "mamba2_split_conv1d_scan_combined": {
+          "implementation": "transformers.models.falcon_h1.modeling_falcon_h1.mamba2_split_conv1d_scan_combined",
+          "is_new_implementation": false,
+          "present": true
+        }
+      }
+    },
+    "granite-4-0-h-tiny": {
+      "C1": {
+        "causal_conv1d_fn": {
+          "implementation": "causal_conv1d.causal_conv1d_interface.causal_conv1d_fn",
+          "is_new_implementation": true,
+          "present": true
+        },
+        "causal_conv1d_update": {
+          "implementation": "causal_conv1d.causal_conv1d_interface.causal_conv1d_update",
+          "is_new_implementation": true,
+          "present": true
+        },
+        "mamba2_chunk_scan": {
+          "implementation": "transformers.models.granitemoehybrid.modeling_granitemoehybrid.mamba2_chunk_scan",
+          "is_new_implementation": false,
+          "present": true
+        },
+        "mamba2_selective_state_update": {
+          "implementation": "transformers.models.granitemoehybrid.modeling_granitemoehybrid.mamba2_selective_state_update",
+          "is_new_implementation": false,
+          "present": true
+        },
+        "mamba2_split_conv1d_scan_combined": {
+          "implementation": "transformers.models.granitemoehybrid.modeling_granitemoehybrid.mamba2_split_conv1d_scan_combined",
+          "is_new_implementation": false,
+          "present": true
+        }
+      },
+      "C2": {
+        "causal_conv1d_fn": {
+          "implementation": "causal_conv1d.causal_conv1d_interface.causal_conv1d_fn",
+          "is_new_implementation": true,
+          "present": true
+        },
+        "causal_conv1d_update": {
+          "implementation": "causal_conv1d.causal_conv1d_interface.causal_conv1d_update",
+          "is_new_implementation": true,
+          "present": true
+        },
+        "mamba2_chunk_scan": {
+          "implementation": "transformers.models.granitemoehybrid.modeling_granitemoehybrid.mamba2_chunk_scan",
+          "is_new_implementation": false,
+          "present": true
+        },
+        "mamba2_selective_state_update": {
+          "implementation": "transformers.models.granitemoehybrid.modeling_granitemoehybrid.mamba2_selective_state_update",
+          "is_new_implementation": false,
+          "present": true
+        },
+        "mamba2_split_conv1d_scan_combined": {
+          "implementation": "transformers.models.granitemoehybrid.modeling_granitemoehybrid.mamba2_split_conv1d_scan_combined",
+          "is_new_implementation": false,
+          "present": true
+        }
+      },
+      "C3": {
+        "causal_conv1d_fn": {
+          "implementation": "causal_conv1d.causal_conv1d_interface.causal_conv1d_fn",
+          "is_new_implementation": true,
+          "present": true
+        },
+        "causal_conv1d_update": {
+          "implementation": "causal_conv1d.causal_conv1d_interface.causal_conv1d_update",
+          "is_new_implementation": true,
+          "present": true
+        },
+        "mamba2_chunk_scan": {
+          "implementation": "transformers.models.granitemoehybrid.modeling_granitemoehybrid.mamba2_chunk_scan",
+          "is_new_implementation": false,
+          "present": true
+        },
+        "mamba2_selective_state_update": {
+          "implementation": "transformers.models.granitemoehybrid.modeling_granitemoehybrid.mamba2_selective_state_update",
+          "is_new_implementation": false,
+          "present": true
+        },
+        "mamba2_split_conv1d_scan_combined": {
+          "implementation": "transformers.models.granitemoehybrid.modeling_granitemoehybrid.mamba2_split_conv1d_scan_combined",
+          "is_new_implementation": false,
+          "present": true
+        }
+      },
+      "R0": {
+        "causal_conv1d_fn": {
+          "implementation": "transformers.models.granitemoehybrid.modeling_granitemoehybrid.causal_conv1d_fn",
+          "is_new_implementation": false,
+          "present": true
+        },
+        "causal_conv1d_update": {
+          "implementation": "transformers.models.granitemoehybrid.modeling_granitemoehybrid.causal_conv1d_update",
+          "is_new_implementation": false,
+          "present": true
+        },
+        "mamba2_chunk_scan": {
+          "implementation": "transformers.models.granitemoehybrid.modeling_granitemoehybrid.mamba2_chunk_scan",
+          "is_new_implementation": false,
+          "present": true
+        },
+        "mamba2_selective_state_update": {
+          "implementation": "transformers.models.granitemoehybrid.modeling_granitemoehybrid.mamba2_selective_state_update",
+          "is_new_implementation": false,
+          "present": true
+        },
+        "mamba2_split_conv1d_scan_combined": {
+          "implementation": "transformers.models.granitemoehybrid.modeling_granitemoehybrid.mamba2_split_conv1d_scan_combined",
+          "is_new_implementation": false,
+          "present": true
+        }
+      }
+    },
+    "minicpm5-2b": {
+      "C1": {},
+      "C2": {},
+      "C3": {},
+      "R0": {}
+    },
+    "olmo-3-7b-instruct": {
+      "C1": {},
+      "C2": {},
+      "C3": {},
+      "R0": {}
+    },
+    "qwen3-5-2b": {
+      "C1": {
+        "causal_conv1d_fn": {
+          "implementation": "causal_conv1d.causal_conv1d_interface.causal_conv1d_fn",
+          "is_new_implementation": true,
+          "present": true
+        },
+        "causal_conv1d_update": {
+          "implementation": "causal_conv1d.causal_conv1d_interface.causal_conv1d_update",
+          "is_new_implementation": true,
+          "present": true
+        },
+        "torch_chunk_gated_delta_rule": {
+          "implementation": "transformers.models.qwen3_5.modeling_qwen3_5.torch_chunk_gated_delta_rule",
+          "is_new_implementation": false,
+          "present": true
+        },
+        "torch_recurrent_gated_delta_rule": {
+          "implementation": "transformers.models.qwen3_5.modeling_qwen3_5.torch_recurrent_gated_delta_rule",
+          "is_new_implementation": false,
+          "present": true
+        }
+      },
+      "C2": {
+        "causal_conv1d_fn": {
+          "implementation": "causal_conv1d.causal_conv1d_interface.causal_conv1d_fn",
+          "is_new_implementation": true,
+          "present": true
+        },
+        "causal_conv1d_update": {
+          "implementation": "causal_conv1d.causal_conv1d_interface.causal_conv1d_update",
+          "is_new_implementation": true,
+          "present": true
+        },
+        "torch_chunk_gated_delta_rule": {
+          "implementation": "transformers.models.qwen3_5.modeling_qwen3_5.torch_chunk_gated_delta_rule",
+          "is_new_implementation": false,
+          "present": true
+        },
+        "torch_recurrent_gated_delta_rule": {
+          "implementation": "transformers.models.qwen3_5.modeling_qwen3_5.torch_recurrent_gated_delta_rule",
+          "is_new_implementation": false,
+          "present": true
+        }
+      },
+      "C3": {
+        "causal_conv1d_fn": {
+          "implementation": "causal_conv1d.causal_conv1d_interface.causal_conv1d_fn",
+          "is_new_implementation": true,
+          "present": true
+        },
+        "causal_conv1d_update": {
+          "implementation": "causal_conv1d.causal_conv1d_interface.causal_conv1d_update",
+          "is_new_implementation": true,
+          "present": true
+        },
+        "torch_chunk_gated_delta_rule": {
+          "implementation": "fla.ops.gated_delta_rule.chunk.chunk_gated_delta_rule",
+          "is_new_implementation": true,
+          "present": true
+        },
+        "torch_recurrent_gated_delta_rule": {
+          "implementation": "fla.ops.gated_delta_rule.fused_recurrent.fused_recurrent_gated_delta_rule",
+          "is_new_implementation": true,
+          "present": true
+        }
+      },
+      "R0": {
+        "causal_conv1d_fn": {
+          "implementation": "transformers.models.qwen3_5.modeling_qwen3_5.causal_conv1d_fn",
+          "is_new_implementation": false,
+          "present": true
+        },
+        "causal_conv1d_update": {
+          "implementation": "transformers.models.qwen3_5.modeling_qwen3_5.causal_conv1d_update",
+          "is_new_implementation": false,
+          "present": true
+        },
+        "torch_chunk_gated_delta_rule": {
+          "implementation": "transformers.models.qwen3_5.modeling_qwen3_5.torch_chunk_gated_delta_rule",
+          "is_new_implementation": false,
+          "present": true
+        },
+        "torch_recurrent_gated_delta_rule": {
+          "implementation": "transformers.models.qwen3_5.modeling_qwen3_5.torch_recurrent_gated_delta_rule",
+          "is_new_implementation": false,
+          "present": true
+        }
+      }
+    },
+    "qwen3-5-9b": {
+      "C1": {
+        "causal_conv1d_fn": {
+          "implementation": "causal_conv1d.causal_conv1d_interface.causal_conv1d_fn",
+          "is_new_implementation": true,
+          "present": true
+        },
+        "causal_conv1d_update": {
+          "implementation": "causal_conv1d.causal_conv1d_interface.causal_conv1d_update",
+          "is_new_implementation": true,
+          "present": true
+        },
+        "torch_chunk_gated_delta_rule": {
+          "implementation": "transformers.models.qwen3_5.modeling_qwen3_5.torch_chunk_gated_delta_rule",
+          "is_new_implementation": false,
+          "present": true
+        },
+        "torch_recurrent_gated_delta_rule": {
+          "implementation": "transformers.models.qwen3_5.modeling_qwen3_5.torch_recurrent_gated_delta_rule",
+          "is_new_implementation": false,
+          "present": true
+        }
+      },
+      "C2": {
+        "causal_conv1d_fn": {
+          "implementation": "causal_conv1d.causal_conv1d_interface.causal_conv1d_fn",
+          "is_new_implementation": true,
+          "present": true
+        },
+        "causal_conv1d_update": {
+          "implementation": "causal_conv1d.causal_conv1d_interface.causal_conv1d_update",
+          "is_new_implementation": true,
+          "present": true
+        },
+        "torch_chunk_gated_delta_rule": {
+          "implementation": "transformers.models.qwen3_5.modeling_qwen3_5.torch_chunk_gated_delta_rule",
+          "is_new_implementation": false,
+          "present": true
+        },
+        "torch_recurrent_gated_delta_rule": {
+          "implementation": "transformers.models.qwen3_5.modeling_qwen3_5.torch_recurrent_gated_delta_rule",
+          "is_new_implementation": false,
+          "present": true
+        }
+      },
+      "C3": {
+        "causal_conv1d_fn": {
+          "implementation": "causal_conv1d.causal_conv1d_interface.causal_conv1d_fn",
+          "is_new_implementation": true,
+          "present": true
+        },
+        "causal_conv1d_update": {
+          "implementation": "causal_conv1d.causal_conv1d_interface.causal_conv1d_update",
+          "is_new_implementation": true,
+          "present": true
+        },
+        "torch_chunk_gated_delta_rule": {
+          "implementation": "fla.ops.gated_delta_rule.chunk.chunk_gated_delta_rule",
+          "is_new_implementation": true,
+          "present": true
+        },
+        "torch_recurrent_gated_delta_rule": {
+          "implementation": "fla.ops.gated_delta_rule.fused_recurrent.fused_recurrent_gated_delta_rule",
+          "is_new_implementation": true,
+          "present": true
+        }
+      },
+      "R0": {
+        "causal_conv1d_fn": {
+          "implementation": "transformers.models.qwen3_5.modeling_qwen3_5.causal_conv1d_fn",
+          "is_new_implementation": false,
+          "present": true
+        },
+        "causal_conv1d_update": {
+          "implementation": "transformers.models.qwen3_5.modeling_qwen3_5.causal_conv1d_update",
+          "is_new_implementation": false,
+          "present": true
+        },
+        "torch_chunk_gated_delta_rule": {
+          "implementation": "transformers.models.qwen3_5.modeling_qwen3_5.torch_chunk_gated_delta_rule",
+          "is_new_implementation": false,
+          "present": true
+        },
+        "torch_recurrent_gated_delta_rule": {
+          "implementation": "transformers.models.qwen3_5.modeling_qwen3_5.torch_recurrent_gated_delta_rule",
+          "is_new_implementation": false,
+          "present": true
+        }
+      }
+    }
+  },
+  "study_rows_used": 0,
+  "summary": {
+    "falcon-h1-7b-instruct": {
+      "C1": {
+        "absent": [],
+        "fallback": [
+          "mamba2_chunk_scan",
+          "mamba2_selective_state_update",
+          "mamba2_split_conv1d_scan_combined"
+        ],
+        "fast": [
+          "causal_conv1d_fn",
+          "causal_conv1d_update"
+        ]
+      },
+      "C2": {
+        "absent": [],
+        "fallback": [
+          "mamba2_chunk_scan",
+          "mamba2_selective_state_update",
+          "mamba2_split_conv1d_scan_combined"
+        ],
+        "fast": [
+          "causal_conv1d_fn",
+          "causal_conv1d_update"
+        ]
+      },
+      "C3": {
+        "absent": [],
+        "fallback": [
+          "mamba2_chunk_scan",
+          "mamba2_selective_state_update",
+          "mamba2_split_conv1d_scan_combined"
+        ],
+        "fast": [
+          "causal_conv1d_fn",
+          "causal_conv1d_update"
+        ]
+      },
+      "R0": {
+        "absent": [],
+        "fallback": [
+          "causal_conv1d_fn",
+          "causal_conv1d_update",
+          "mamba2_chunk_scan",
+          "mamba2_selective_state_update",
+          "mamba2_split_conv1d_scan_combined"
+        ],
+        "fast": []
+      }
+    },
+    "granite-4-0-h-tiny": {
+      "C1": {
+        "absent": [],
+        "fallback": [
+          "mamba2_chunk_scan",
+          "mamba2_selective_state_update",
+          "mamba2_split_conv1d_scan_combined"
+        ],
+        "fast": [
+          "causal_conv1d_fn",
+          "causal_conv1d_update"
+        ]
+      },
+      "C2": {
+        "absent": [],
+        "fallback": [
+          "mamba2_chunk_scan",
+          "mamba2_selective_state_update",
+          "mamba2_split_conv1d_scan_combined"
+        ],
+        "fast": [
+          "causal_conv1d_fn",
+          "causal_conv1d_update"
+        ]
+      },
+      "C3": {
+        "absent": [],
+        "fallback": [
+          "mamba2_chunk_scan",
+          "mamba2_selective_state_update",
+          "mamba2_split_conv1d_scan_combined"
+        ],
+        "fast": [
+          "causal_conv1d_fn",
+          "causal_conv1d_update"
+        ]
+      },
+      "R0": {
+        "absent": [],
+        "fallback": [
+          "causal_conv1d_fn",
+          "causal_conv1d_update",
+          "mamba2_chunk_scan",
+          "mamba2_selective_state_update",
+          "mamba2_split_conv1d_scan_combined"
+        ],
+        "fast": []
+      }
+    },
+    "minicpm5-2b": {
+      "C1": {
+        "absent": [],
+        "fallback": [],
+        "fast": []
+      },
+      "C2": {
+        "absent": [],
+        "fallback": [],
+        "fast": []
+      },
+      "C3": {
+        "absent": [],
+        "fallback": [],
+        "fast": []
+      },
+      "R0": {
+        "absent": [],
+        "fallback": [],
+        "fast": []
+      }
+    },
+    "olmo-3-7b-instruct": {
+      "C1": {
+        "absent": [],
+        "fallback": [],
+        "fast": []
+      },
+      "C2": {
+        "absent": [],
+        "fallback": [],
+        "fast": []
+      },
+      "C3": {
+        "absent": [],
+        "fallback": [],
+        "fast": []
+      },
+      "R0": {
+        "absent": [],
+        "fallback": [],
+        "fast": []
+      }
+    },
+    "qwen3-5-2b": {
+      "C1": {
+        "absent": [],
+        "fallback": [
+          "torch_chunk_gated_delta_rule",
+          "torch_recurrent_gated_delta_rule"
+        ],
+        "fast": [
+          "causal_conv1d_fn",
+          "causal_conv1d_update"
+        ]
+      },
+      "C2": {
+        "absent": [],
+        "fallback": [
+          "torch_chunk_gated_delta_rule",
+          "torch_recurrent_gated_delta_rule"
+        ],
+        "fast": [
+          "causal_conv1d_fn",
+          "causal_conv1d_update"
+        ]
+      },
+      "C3": {
+        "absent": [],
+        "fallback": [],
+        "fast": [
+          "causal_conv1d_fn",
+          "causal_conv1d_update",
+          "torch_chunk_gated_delta_rule",
+          "torch_recurrent_gated_delta_rule"
+        ]
+      },
+      "R0": {
+        "absent": [],
+        "fallback": [
+          "causal_conv1d_fn",
+          "causal_conv1d_update",
+          "torch_chunk_gated_delta_rule",
+          "torch_recurrent_gated_delta_rule"
+        ],
+        "fast": []
+      }
+    },
+    "qwen3-5-9b": {
+      "C1": {
+        "absent": [],
+        "fallback": [
+          "torch_chunk_gated_delta_rule",
+          "torch_recurrent_gated_delta_rule"
+        ],
+        "fast": [
+          "causal_conv1d_fn",
+          "causal_conv1d_update"
+        ]
+      },
+      "C2": {
+        "absent": [],
+        "fallback": [
+          "torch_chunk_gated_delta_rule",
+          "torch_recurrent_gated_delta_rule"
+        ],
+        "fast": [
+          "causal_conv1d_fn",
+          "causal_conv1d_update"
+        ]
+      },
+      "C3": {
+        "absent": [],
+        "fallback": [],
+        "fast": [
+          "causal_conv1d_fn",
+          "causal_conv1d_update",
+          "torch_chunk_gated_delta_rule",
+          "torch_recurrent_gated_delta_rule"
+        ]
+      },
+      "R0": {
+        "absent": [],
+        "fallback": [
+          "causal_conv1d_fn",
+          "causal_conv1d_update",
+          "torch_chunk_gated_delta_rule",
+          "torch_recurrent_gated_delta_rule"
+        ],
+        "fast": []
+      }
+    }
+  }
+}

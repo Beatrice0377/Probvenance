@@ -1,0 +1,315 @@
+{
+  "artifact_id": "r4-execution-environment-epoch1-fast-freeze",
+  "artifact_version": 1,
+  "blocked_detail": "The proposed fast-kernel execution environment (probvenance-r4-fast) failed the predeclared reference-vs-fast numerical equivalence gate on all four affected models, and its mamba_ssm / causal_conv1d path was non-deterministic run-to-run for Falcon-H1-7B-Instruct and granite-4.0-h-tiny. No execution environment is frozen for Epoch 1. PHASE G (performance) and PHASE H (fast-environment preflight) were not executed because the amendment conditions them on PHASE F PASS.",
+  "blocked_reason": "FAST_KERNEL_NUMERICAL_EQUIVALENCE_FAIL",
+  "candidate_fast_environment": {
+    "clone_method": "cp -a --reflink=auto from the reference environment",
+    "package_lock_artifact": "R4_FAST_KERNEL_PACKAGE_LOCK.json",
+    "package_lock_fingerprint": "c22ff1d3b8df9dc7ee64b6a0da9c41434be0127bdf7ad7266ae5a45ee5fc46dd",
+    "package_lock_sha256": "d68da19d505c19f0bb08953aa4e1ff276928e42051425509b868db846f72c7de",
+    "packages_added": [
+      {
+        "name": "causal-conv1d",
+        "version": "1.7.0",
+        "wheel_sha256": "b28c3657a9d6855e1f95bc912ab94f893434276b437dec8008c92c9f38b6a1f4"
+      },
+      {
+        "name": "mamba-ssm",
+        "version": "2.3.1",
+        "wheel_sha256": "7cc0dea8c78b63d7a450aa42725055a25771a26ce3661b321681845fdc39f5c8"
+      },
+      {
+        "name": "flash-linear-attention",
+        "version": "0.5.2",
+        "wheel_sha256": "dcf405d81f5426393b59037097aa700d0f4a841465d5028d5aa543f4502f2400"
+      },
+      {
+        "name": "fla-core",
+        "version": "0.5.2",
+        "wheel_sha256": "5e830c85bad3d0d34677f98ac7074d08687a3756f0f0499d95ceb96eb6920761"
+      },
+      {
+        "name": "einops",
+        "version": "0.8.2",
+        "wheel_sha256": "54058201ac7087911181bfec4af6091bb59380360f069276601256a76af08193"
+      }
+    ],
+    "path": "/root/rivermind-data/envs/probvenance-r4-fast",
+    "pip_freeze_package_count": 188,
+    "pip_freeze_sha256": "0ee0b8774c0ea5258d844526b042c0c6895842cc3a50373f5055c9c593f27f54",
+    "role": "CANDIDATE ACCELERATED ENVIRONMENT (not adopted)"
+  },
+  "epoch": 1,
+  "epoch1_execution_environment": "NOT_ADOPTED",
+  "epoch1_readiness": {
+    "epoch1_real_study_rows_executed": 0,
+    "epoch1_staging_root": "/root/rivermind-data/r4-formal-measurements",
+    "epoch1_staging_root_state": "empty (no cell directories, no committed rows)",
+    "formal_epoch1_execution": "NOT_AUTHORIZED",
+    "status": "BLOCKED",
+    "workload_unchanged": {
+      "cat_forwards": 100728,
+      "ovr_forwards": 100728,
+      "planned_logical_forwards": 201456,
+      "unique_model_item_rows": 100728
+    }
+  },
+  "execution_environment_fingerprint": null,
+  "execution_environment_fingerprint_reason": "not generated - no execution environment is frozen for Epoch 1",
+  "fast_environment_preflight": {
+    "expected_models": 6,
+    "reason": "PHASE H is conditioned on PHASE F PASS",
+    "status": "NOT_EXECUTED"
+  },
+  "fast_path_activation_matrix": [
+    {
+      "architecture": "Olmo3ForCausalLM",
+      "evidence": "only inert @use_kernel_forward_from_hub stubs; kernels package absent",
+      "fast_dependency_installed": "n/a",
+      "fast_path_active": false,
+      "hub_kernel_sites": 0,
+      "model_key": "olmo-3-7b-instruct"
+    },
+    {
+      "architecture": "FalconH1ForCausalLM",
+      "evidence": "closure is_new_implementation=True at 5/5 sites; no fallback warning in fast env",
+      "fast_dependency_installed": true,
+      "fast_path_active": true,
+      "hub_kernel_sites": 5,
+      "model_key": "falcon-h1-7b-instruct"
+    },
+    {
+      "architecture": "GraniteMoeHybridForCausalLM",
+      "evidence": "closure is_new_implementation=True at 5/5 sites; no fallback warning in fast env",
+      "fast_dependency_installed": true,
+      "fast_path_active": true,
+      "hub_kernel_sites": 5,
+      "model_key": "granite-4-0-h-tiny"
+    },
+    {
+      "architecture": "Qwen3_5ForCausalLM",
+      "evidence": "closure is_new_implementation=True at 4/4 sites; no fallback warning in fast env",
+      "fast_dependency_installed": true,
+      "fast_path_active": true,
+      "hub_kernel_sites": 4,
+      "model_key": "qwen3-5-9b"
+    },
+    {
+      "architecture": "LlamaForCausalLM",
+      "evidence": "only inert @use_kernel_forward_from_hub stubs; kernels package absent",
+      "fast_dependency_installed": "n/a",
+      "fast_path_active": false,
+      "hub_kernel_sites": 0,
+      "model_key": "minicpm5-2b"
+    },
+    {
+      "architecture": "Qwen3_5ForCausalLM",
+      "evidence": "closure is_new_implementation=True at 4/4 sites; no fallback warning in fast env",
+      "fast_dependency_installed": true,
+      "fast_path_active": true,
+      "hub_kernel_sites": 4,
+      "model_key": "qwen3-5-2b"
+    }
+  ],
+  "fingerprint_version": 1,
+  "freeze_performed": false,
+  "frozen_scientific_artifacts_unchanged": true,
+  "gpu": {
+    "compute_capability": "8.9",
+    "cuda_visible_device": "cuda:0",
+    "driver_version": "580.119.02",
+    "memory_total_mib": 49140,
+    "name": "NVIDIA GeForce RTX 4090"
+  },
+  "human_decision_required": {
+    "chosen": null,
+    "chosen_by": "human reviewer",
+    "options": [
+      "A - run formal R4 Epoch 1 on the frozen reference environment (torch fallback), accepting the Epoch 0 throughput",
+      "B - amend the predeclared numerical-equivalence contract and re-run PHASE F before any Epoch 1 row"
+    ]
+  },
+  "memory_gates": {
+    "cgroup_available_definition": "memory.max - memory.current + inactive_file",
+    "cgroup_available_min_observed_gib": 34.0,
+    "cgroup_v2_memory_max_bytes": 62277025792,
+    "floor_violated": false,
+    "host_meminfo_is_container_meaningless": true,
+    "note": "recorded during the PHASE F captures; no performance benchmark was run",
+    "required_floor_gib": 12.0,
+    "status": "PASS_INCIDENTAL"
+  },
+  "nature": "OPERATIONAL EXECUTION ENVIRONMENT AMENDMENT",
+  "numerical_equivalence": {
+    "artifact": "R4_FAST_KERNEL_NUMERICAL_EQUIVALENCE.md",
+    "battery_fingerprint": "c1e9d6488ec68cb44afb4d32d7468dc6b4acb70822f8f019389183cc1e4699bd",
+    "battery_id": "r4-fast-kernel-synthetic-equivalence-battery",
+    "battery_version": 1,
+    "controls": {
+      "c1_reference_vs_reference_repeat": {
+        "all_models_zero": true,
+        "meaning": "the torch-fallback reference path is bit-exact reproducible",
+        "status": "PASS"
+      },
+      "c2_fast_vs_fast_repeat": {
+        "deterministic_models": [
+          "qwen3-5-9b",
+          "qwen3-5-2b"
+        ],
+        "meaning": "the mamba_ssm / causal_conv1d triton path is non-deterministic run-to-run",
+        "non_deterministic_models": [
+          "falcon-h1-7b-instruct",
+          "granite-4-0-h-tiny"
+        ],
+        "status": "FAIL"
+      },
+      "c3_reference_repeat_vs_fast_repeat": {
+        "meaning": "the cross-environment failure reproduces",
+        "status": "FAIL"
+      }
+    },
+    "evidence_directory": "/root/rivermind-data/r4-fast-kernel-equivalence/",
+    "evidence_sha256": {
+      "cmp-fast-vs-fastrepeat.json": "1412e1c0a9693399740d3715e399d4ccf476889eec860cf8cd2623c4421bd33d",
+      "cmp-ref-vs-refrepeat.json": "f02065ad48d32cf9e2359f03edf841450c311c15b1acdb2d63e7aa4c91107c2d",
+      "cmp-refrepeat-vs-fastrepeat.json": "48d13994f4c0a66d89dab2a77f9f6f9b7337418e08dfb48a95b4bc01af812936",
+      "equivalence-comparison.json": "3e4691973ece3e6381790bcf335788c9d5e84f857e2ca7cc47ce25847408476d",
+      "fast-capture-repeat.json": "822b34e1d656fcd6697e20c5c79a77cb5900f914e9428123424f477953d06233",
+      "fast-capture.json": "c21701932c80fa0113777a496e9986c0876a7e2e409e181a9fa707d35a059d07",
+      "reference-capture-repeat.json": "abaf4fa270b1c7744aa50fa74d03312754a6a7b3493158deb79770f1edf43d32",
+      "reference-capture.json": "b1ae921cc6c6cf2c80bb84853e171d34d296a2f1a983945e8c76e80c1c15354b"
+    },
+    "harness": "fast_kernel_equivalence_probe.py",
+    "harness_sha256": "b7faaf248d1410f0301a5e3cb4f36497526835bb1904d724d24df6e36b2f214c",
+    "per_model": [
+      {
+        "affected": false,
+        "max_centered_logit_diff": 0.0,
+        "max_designated_diff": 0.0,
+        "max_prob_diff": 0.0,
+        "max_tv": 0.0,
+        "model_key": "olmo-3-7b-instruct",
+        "status": "PASS"
+      },
+      {
+        "affected": true,
+        "max_centered_logit_diff": 0.4121,
+        "max_designated_diff": 0.06437,
+        "max_prob_diff": 0.06437,
+        "max_tv": 0.06437,
+        "model_key": "falcon-h1-7b-instruct",
+        "status": "FAIL"
+      },
+      {
+        "affected": true,
+        "max_centered_logit_diff": 1.062,
+        "max_designated_diff": 0.1306,
+        "max_prob_diff": 0.1493,
+        "max_tv": 0.1493,
+        "model_key": "granite-4-0-h-tiny",
+        "status": "FAIL"
+      },
+      {
+        "affected": true,
+        "max_centered_logit_diff": 0.1875,
+        "max_designated_diff": 0.03328,
+        "max_prob_diff": 0.03328,
+        "max_tv": 0.03328,
+        "model_key": "qwen3-5-9b",
+        "status": "FAIL"
+      },
+      {
+        "affected": false,
+        "max_centered_logit_diff": 0.0,
+        "max_designated_diff": 0.0,
+        "max_prob_diff": 0.0,
+        "max_tv": 0.0,
+        "model_key": "minicpm5-2b",
+        "status": "PASS"
+      },
+      {
+        "affected": true,
+        "max_centered_logit_diff": 0.125,
+        "max_designated_diff": 0.02979,
+        "max_prob_diff": 0.02976,
+        "max_tv": 0.0303,
+        "model_key": "qwen3-5-2b",
+        "status": "FAIL"
+      }
+    ],
+    "predeclared_thresholds": {
+      "all_values_finite": true,
+      "max_abs_centered_restricted_logit_difference": 0.1,
+      "max_abs_designated_score_difference": 0.005,
+      "max_abs_restricted_probability_difference": 0.005,
+      "max_total_variation_distance": 0.01,
+      "thresholds_relaxed_after_results": false
+    },
+    "semantic_identity_confirmed": {
+      "cat_resolved_token_ids_identical": true,
+      "divergence_is_purely_numerical": true,
+      "ovr_positive_negative_token_ids_identical": true,
+      "rendered_inputs_identical": true,
+      "snapshot_path_and_revision_identical": true,
+      "verify_verbalizers_identical": true
+    },
+    "status": "FAIL",
+    "study_rows_used": 0,
+    "synthetic_only": true
+  },
+  "parent_fingerprints": {
+    "execution_manifest_fingerprint": "f32381c51db24f5dbeb240b5e0fdf73c59a56a615c8607ad8979e2a7e2586775",
+    "final_protocol_fingerprint": "d1b56d702e1f260cef47eee05b7d878ace07a15168e89408e15e7eb741c0ad34",
+    "inference_multiplicity_freeze_fingerprint": "dcbb7ac9e931145fdee86ab984de1249c1b86ca36ee735b70dafc8cabc06c141",
+    "measurement_contract_fingerprint": "7b126d300e774cb44d2c47fcb12513865d03c2b08ffd03a5ce409b2ea976e1e5",
+    "predictor_freeze_fingerprint": "c856fcc161910497a3431593639606682905adcb50fc443455468dfc295d73a9"
+  },
+  "performance_qualification": {
+    "adoption_gate": {
+      "falcon_min_speedup": 2.0,
+      "max_affected_model_slowdown_fraction": 0.1
+    },
+    "harness": "fast_kernel_performance_probe.py",
+    "harness_sha256": "651405ed93ce8b7b73cffd7878747b816145c3c07f8c96dc716168b4c3c8940d",
+    "reason": "PHASE G is conditioned on PHASE F PASS",
+    "status": "NOT_EXECUTED"
+  },
+  "protected_core_versions": {
+    "changed_by_this_amendment": false,
+    "huggingface_hub": "1.32.0",
+    "identical_in_reference_and_fast": true,
+    "numpy": "2.3.2",
+    "python": "3.11.13",
+    "safetensors": "0.8.0",
+    "scipy": "1.16.3",
+    "tokenizers": "0.23.2",
+    "torch": "2.8.0+cu128",
+    "torch_cuda_runtime": "12.8",
+    "transformers": "5.17.0",
+    "triton": "3.4.0"
+  },
+  "qualification_record_fingerprint": "9b7d60598f7a34d562d5b0cfa9055facec84b8e5478aa90f47fe7e9e31e7ff12",
+  "reference_environment": {
+    "package_receipt": "R4_REFERENCE_ENVIRONMENT_PACKAGE_RECEIPT.txt",
+    "package_receipt_sha256": "a7d780122bf6abc0dcfecf6ab9ba02450a7b052c5cc0642b920337012a366248",
+    "path": "/root/rivermind-data/envs/probvenance-r4",
+    "pip_freeze_package_count": 183,
+    "pip_freeze_sha256": "649b919aa26184a94c5ed56711187d4042bea112be1a531774b8405b2bdf82ba",
+    "preserved_unchanged": true,
+    "role": "FROZEN FORMAL EXECUTION ENVIRONMENT (torch fallback path)"
+  },
+  "regression_tests_fast_env": {
+    "full_suite": "pytest -q -p no:randomly rc=0",
+    "py_compile": "ok",
+    "ruff": "All checks passed!",
+    "status": "PASS",
+    "test_r4_calibration_families": "53 passed",
+    "test_r4_inference": "115 passed",
+    "test_r4_measurements": "87 passed (twice)",
+    "test_r4_predictor": "69 passed"
+  },
+  "scientific_semantics_changed": false,
+  "status": "BLOCKED",
+  "trust_remote_code": false
+}

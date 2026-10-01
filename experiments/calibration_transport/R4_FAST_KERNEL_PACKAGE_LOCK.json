@@ -1,0 +1,276 @@
+{
+  "artifact": "R4_FAST_KERNEL_PACKAGE_LOCK.json",
+  "created_utc": "2026-10-01T08:08:59Z",
+  "environment": {
+    "clone_method": "cp -a --reflink=auto <reference_env> <fast_env>",
+    "cuda_runtime": "12.8",
+    "driver": "580.119.02",
+    "env_type": "conda_environment_clone",
+    "fast_env_path": "/root/rivermind-data/envs/probvenance-r4-fast",
+    "glibcxx_use_cxx11_abi": true,
+    "gpu": "NVIDIA GeForce RTX 4090",
+    "gpu_compute_capability": [
+      8,
+      9
+    ],
+    "machine": "x86_64",
+    "nvcc_available": false,
+    "nvcc_note": "No nvcc on PATH, no /usr/local/cuda*, CUDA_HOME unset -> prebuilt upstream wheels used instead of a local source build.",
+    "python": "3.11.13",
+    "reference_env_path": "/root/rivermind-data/envs/probvenance-r4",
+    "torch": "2.8.0+cu128",
+    "wheel_flavour": "cu12torch2.8cxx11abiTRUE-cp311-cp311-linux_x86_64"
+  },
+  "epoch": 1,
+  "explicitly_not_installed": [
+    "flash-attn",
+    "xformers",
+    "bitsandbytes",
+    "kernels"
+  ],
+  "hub_kernel_policy": {
+    "allow_all_kernels": false,
+    "is_kernels_available": false,
+    "note": "HF Hub kernels are never used; use_kernel_forward_from_hub is an inert no-op stub without the `kernels` package.",
+    "trust_remote_code": false,
+    "use_kernels": false
+  },
+  "install": {
+    "command": "python -m pip install --no-index --no-deps einops-0.8.2-py3-none-any.whl fla_core-0.5.2-py3-none-any.whl flash_linear_attention-0.5.2-py3-none-any.whl 'causal_conv1d-1.7.0+cu12torch2.8cxx11abiTRUE-cp311-cp311-linux_x86_64.whl' 'mamba_ssm-2.3.1+cu12torch2.8cxx11abiTRUE-cp311-cp311-linux_x86_64.whl'",
+    "exit_code": 0,
+    "flags": [
+      "--no-index",
+      "--no-deps"
+    ],
+    "installed_into": "fast env only",
+    "launcher": "python -m pip (NOT the copied bin/pip, whose shebang still points at the reference env)",
+    "wheel_staging_dir": "/tmp/opencode/r4-ops/wheels"
+  },
+  "lock_id": "r4-epoch1-fast-kernel-package-lock",
+  "lock_version": 1,
+  "nature": "OPERATIONAL EXECUTION ENVIRONMENT AMENDMENT (not a scientific protocol change)",
+  "outcome_firewall": "No R4 study item, model score, or dataset was read or computed to produce this lock.",
+  "package_lock_fingerprint": "c22ff1d3b8df9dc7ee64b6a0da9c41434be0127bdf7ad7266ae5a45ee5fc46dd",
+  "packages": [
+    {
+      "build_flags": null,
+      "compiled": true,
+      "declared_dependencies": [
+        "torch",
+        "packaging",
+        "ninja"
+      ],
+      "digest_authority": "GitHub API release asset `digest` field (sha256)",
+      "digest_authority_match": true,
+      "download_route": "https://gh-proxy.com/<source_url>",
+      "import_name": "causal_conv1d",
+      "package": "causal-conv1d",
+      "required_by": [
+        "transformers.models.falcon_h1",
+        "transformers.models.granitemoehybrid",
+        "transformers.models.qwen3_5"
+      ],
+      "resolved_symbols": [
+        "causal_conv1d_fn",
+        "causal_conv1d_update"
+      ],
+      "source_commit": null,
+      "source_release_tag": "v1.7.0",
+      "source_repo": "Dao-AILab/causal-conv1d",
+      "source_type": "github_release_asset",
+      "source_url": "https://github.com/Dao-AILab/causal-conv1d/releases/download/v1.7.0/causal_conv1d-1.7.0+cu12torch2.8cxx11abiTRUE-cp311-cp311-linux_x86_64.whl",
+      "version": "1.7.0",
+      "wheel_filename": "causal_conv1d-1.7.0+cu12torch2.8cxx11abiTRUE-cp311-cp311-linux_x86_64.whl",
+      "wheel_sha256": "b28c3657a9d6855e1f95bc912ab94f893434276b437dec8008c92c9f38b6a1f4",
+      "wheel_size_bytes": 196371690
+    },
+    {
+      "build_flags": null,
+      "compiled": true,
+      "declared_dependencies": [
+        "torch",
+        "triton",
+        "ninja",
+        "einops",
+        "transformers",
+        "packaging",
+        "setuptools>=61.0.0"
+      ],
+      "digest_authority": "GitHub API release asset `digest` field (sha256)",
+      "digest_authority_match": true,
+      "download_route": "https://gh-proxy.com/<source_url>",
+      "import_name": "mamba_ssm",
+      "package": "mamba-ssm",
+      "required_by": [
+        "transformers.models.falcon_h1",
+        "transformers.models.granitemoehybrid"
+      ],
+      "resolved_symbols": [
+        "mamba_split_conv1d_scan_combined",
+        "mamba_chunk_scan_combined",
+        "selective_state_update"
+      ],
+      "source_commit": null,
+      "source_release_tag": "v2.3.1",
+      "source_repo": "state-spaces/mamba",
+      "source_type": "github_release_asset",
+      "source_url": "https://github.com/state-spaces/mamba/releases/download/v2.3.1/mamba_ssm-2.3.1+cu12torch2.8cxx11abiTRUE-cp311-cp311-linux_x86_64.whl",
+      "version": "2.3.1",
+      "wheel_filename": "mamba_ssm-2.3.1+cu12torch2.8cxx11abiTRUE-cp311-cp311-linux_x86_64.whl",
+      "wheel_sha256": "7cc0dea8c78b63d7a450aa42725055a25771a26ce3661b321681845fdc39f5c8",
+      "wheel_size_bytes": 533333215
+    },
+    {
+      "build_flags": null,
+      "compiled": false,
+      "declared_dependencies": [
+        "fla-core==0.5.2",
+        "transformers>=4.45.0"
+      ],
+      "digest_authority": "PyPI JSON API `digests.sha256`",
+      "digest_authority_match": true,
+      "download_route": "direct",
+      "import_name": "fla",
+      "package": "flash-linear-attention",
+      "required_by": [
+        "transformers.models.qwen3_5"
+      ],
+      "resolved_symbols": [],
+      "source_commit": null,
+      "source_release_tag": null,
+      "source_repo": null,
+      "source_type": "pypi_wheel",
+      "source_url": "https://files.pythonhosted.org/packages/90/d2/2070e3cf2148c5cce99ca4876633c4b7b89ec085323600bd3d47aeacd306/flash_linear_attention-0.5.2-py3-none-any.whl",
+      "version": "0.5.2",
+      "wheel_filename": "flash_linear_attention-0.5.2-py3-none-any.whl",
+      "wheel_sha256": "dcf405d81f5426393b59037097aa700d0f4a841465d5028d5aa543f4502f2400",
+      "wheel_size_bytes": 399590
+    },
+    {
+      "build_flags": null,
+      "compiled": false,
+      "declared_dependencies": [
+        "einops"
+      ],
+      "digest_authority": "PyPI JSON API `digests.sha256`",
+      "digest_authority_match": true,
+      "download_route": "direct",
+      "import_name": "fla",
+      "package": "fla-core",
+      "required_by": [
+        "transformers.models.qwen3_5"
+      ],
+      "resolved_symbols": [
+        "chunk_gated_delta_rule",
+        "fused_recurrent_gated_delta_rule"
+      ],
+      "source_commit": null,
+      "source_release_tag": null,
+      "source_repo": null,
+      "source_type": "pypi_wheel",
+      "source_url": "https://files.pythonhosted.org/packages/2d/ed/dfe19c4da779957eb6a42a26812f9b4e2280bf757a17a71933ff59ffcb98/fla_core-0.5.2-py3-none-any.whl",
+      "version": "0.5.2",
+      "wheel_filename": "fla_core-0.5.2-py3-none-any.whl",
+      "wheel_sha256": "5e830c85bad3d0d34677f98ac7074d08687a3756f0f0499d95ceb96eb6920761",
+      "wheel_size_bytes": 819225
+    },
+    {
+      "build_flags": null,
+      "compiled": false,
+      "declared_dependencies": [],
+      "digest_authority": "PyPI JSON API `digests.sha256`",
+      "digest_authority_match": true,
+      "download_route": "direct",
+      "import_name": "einops",
+      "package": "einops",
+      "required_by": [
+        "mamba-ssm",
+        "fla-core"
+      ],
+      "resolved_symbols": [],
+      "source_commit": null,
+      "source_release_tag": null,
+      "source_repo": null,
+      "source_type": "pypi_wheel",
+      "source_url": "https://files.pythonhosted.org/packages/2a/09/f8d8f8f31e4483c10a906437b4ce31bdf3d6d417b73fe33f1a8b59e34228/einops-0.8.2-py3-none-any.whl",
+      "version": "0.8.2",
+      "wheel_filename": "einops-0.8.2-py3-none-any.whl",
+      "wheel_sha256": "54058201ac7087911181bfec4af6091bb59380360f069276601256a76af08193",
+      "wheel_size_bytes": 65638
+    }
+  ],
+  "phase": "PHASE D (m04025)",
+  "protected_core": {
+    "before_after": [
+      {
+        "after": "3.11.13",
+        "before": "3.11.13",
+        "changed": false,
+        "package": "python"
+      },
+      {
+        "after": "2.8.0+cu128",
+        "before": "2.8.0+cu128",
+        "changed": false,
+        "package": "torch"
+      },
+      {
+        "after": "5.17.0",
+        "before": "5.17.0",
+        "changed": false,
+        "package": "transformers"
+      },
+      {
+        "after": "1.32.0",
+        "before": "1.32.0",
+        "changed": false,
+        "package": "huggingface_hub"
+      },
+      {
+        "after": "2.3.2",
+        "before": "2.3.2",
+        "changed": false,
+        "package": "numpy"
+      },
+      {
+        "after": "1.16.3",
+        "before": "1.16.3",
+        "changed": false,
+        "package": "scipy"
+      },
+      {
+        "after": "0.23.2",
+        "before": "0.23.2",
+        "changed": false,
+        "package": "tokenizers"
+      },
+      {
+        "after": "0.8.0",
+        "before": "0.8.0",
+        "changed": false,
+        "package": "safetensors"
+      },
+      {
+        "after": "3.4.0",
+        "before": "3.4.0",
+        "changed": false,
+        "package": "triton"
+      }
+    ],
+    "freeze_diff": "exactly the 5 new local-wheel entries; no version change to any pre-existing package",
+    "freeze_package_count_after": 188,
+    "freeze_package_count_before": 183,
+    "policy": "No protected core package version may change.",
+    "reference_env_freeze_sha256_after": "649b919aa26184a94c5ed56711187d4042bea112be1a531774b8405b2bdf82ba",
+    "reference_env_freeze_sha256_before": "649b919aa26184a94c5ed56711187d4042bea112be1a531774b8405b2bdf82ba",
+    "reference_env_mutated": false
+  },
+  "rejected_candidates": [
+    {
+      "package": "mamba-ssm",
+      "reason": "requires tilelang==0.1.8, apache-tvm-ffi<=0.1.9, quack-kernels>=0.3.4, triton>=3.5.0 -> would force a triton upgrade away from the torch-pinned 3.4.0 (protected-core mutation).",
+      "version": "2.3.2.post1"
+    }
+  ],
+  "scientific_semantics_changed": false
+}

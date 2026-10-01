@@ -1,0 +1,169 @@
+{
+  "distinct_selected_environments": [
+    "R0"
+  ],
+  "environment_map_fingerprint": "aebeb528b6db1d09d23c83ff8078e5a9cb0b779c8fbada0f19617c878cfb45eb",
+  "environment_map_id": "r4-epoch1-model-execution-environment-map",
+  "environment_map_version": 1,
+  "epoch": 1,
+  "models": [
+    {
+      "added_packages": [],
+      "environment_path": "/root/rivermind-data/envs/probvenance-r4",
+      "execution_environment_fingerprint": "46424eac4c734ee9adece0fc6e1e5394421ccdb1e50718b94144010fbf61c5c7",
+      "fast_kernel_sites_active": [],
+      "interpreter_path": "/root/rivermind-data/envs/probvenance-r4/bin/python",
+      "memory_status": "PASS",
+      "model_id": "allenai/Olmo-3-7B-Instruct",
+      "model_key": "olmo-3-7b-instruct",
+      "numerical_eligibility": {
+        "C1": "NOT_TESTED",
+        "C2": "NOT_TESTED",
+        "C3": "NOT_TESTED"
+      },
+      "performance_speedup": null,
+      "repeatability": {
+        "R0": "NOT_TESTED_REFERENCE_UNAFFECTED"
+      },
+      "revision": "6e5971d9eba42665f5bd5a0fcf047f299ce1dccc",
+      "selected_environment": "R0",
+      "selection_rule_reason": "no candidate passed the immutable numerical-equivalence gate; the predeclared rule selects the reference environment and records NO_QUALIFIED_ACCELERATION"
+    },
+    {
+      "added_packages": [],
+      "environment_path": "/root/rivermind-data/envs/probvenance-r4",
+      "execution_environment_fingerprint": "46424eac4c734ee9adece0fc6e1e5394421ccdb1e50718b94144010fbf61c5c7",
+      "fast_kernel_sites_active": [],
+      "interpreter_path": "/root/rivermind-data/envs/probvenance-r4/bin/python",
+      "memory_status": "PASS",
+      "model_id": "tiiuae/Falcon-H1-7B-Instruct",
+      "model_key": "falcon-h1-7b-instruct",
+      "numerical_eligibility": {
+        "C1": "FAIL",
+        "C2": "FAIL",
+        "C3": "NOT_TESTED"
+      },
+      "performance_speedup": null,
+      "repeatability": {
+        "C1": "PASS",
+        "C2": "PASS",
+        "R0": "PASS"
+      },
+      "revision": "41e72f27effbab80cd45b6e884688452253a3686",
+      "selected_environment": "R0",
+      "selection_rule_reason": "no candidate passed the immutable numerical-equivalence gate; the predeclared rule selects the reference environment and records NO_QUALIFIED_ACCELERATION"
+    },
+    {
+      "added_packages": [],
+      "environment_path": "/root/rivermind-data/envs/probvenance-r4",
+      "execution_environment_fingerprint": "46424eac4c734ee9adece0fc6e1e5394421ccdb1e50718b94144010fbf61c5c7",
+      "fast_kernel_sites_active": [],
+      "interpreter_path": "/root/rivermind-data/envs/probvenance-r4/bin/python",
+      "memory_status": "PASS",
+      "model_id": "ibm-granite/granite-4.0-h-tiny",
+      "model_key": "granite-4-0-h-tiny",
+      "numerical_eligibility": {
+        "C1": "FAIL",
+        "C2": "FAIL",
+        "C3": "NOT_TESTED"
+      },
+      "performance_speedup": null,
+      "repeatability": {
+        "C1": "PASS",
+        "C2": "PASS",
+        "R0": "PASS"
+      },
+      "revision": "791e0d3d28c86e106c9b6e0b4cecdee0375b6124",
+      "selected_environment": "R0",
+      "selection_rule_reason": "no candidate passed the immutable numerical-equivalence gate; the predeclared rule selects the reference environment and records NO_QUALIFIED_ACCELERATION"
+    },
+    {
+      "added_packages": [],
+      "environment_path": "/root/rivermind-data/envs/probvenance-r4",
+      "execution_environment_fingerprint": "46424eac4c734ee9adece0fc6e1e5394421ccdb1e50718b94144010fbf61c5c7",
+      "fast_kernel_sites_active": [],
+      "interpreter_path": "/root/rivermind-data/envs/probvenance-r4/bin/python",
+      "memory_status": "PASS",
+      "model_id": "Qwen/Qwen3.5-9B",
+      "model_key": "qwen3-5-9b",
+      "numerical_eligibility": {
+        "C1": "FAIL",
+        "C2": "NOT_TESTED",
+        "C3": "FAIL"
+      },
+      "performance_speedup": null,
+      "repeatability": {
+        "C1": "PASS",
+        "C3": "PASS",
+        "R0": "PASS"
+      },
+      "revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+      "selected_environment": "R0",
+      "selection_rule_reason": "no candidate passed the immutable numerical-equivalence gate; the predeclared rule selects the reference environment and records NO_QUALIFIED_ACCELERATION"
+    },
+    {
+      "added_packages": [],
+      "environment_path": "/root/rivermind-data/envs/probvenance-r4",
+      "execution_environment_fingerprint": "46424eac4c734ee9adece0fc6e1e5394421ccdb1e50718b94144010fbf61c5c7",
+      "fast_kernel_sites_active": [],
+      "interpreter_path": "/root/rivermind-data/envs/probvenance-r4/bin/python",
+      "memory_status": "PASS",
+      "model_id": "openbmb/MiniCPM5-2B",
+      "model_key": "minicpm5-2b",
+      "numerical_eligibility": {
+        "C1": "NOT_TESTED",
+        "C2": "NOT_TESTED",
+        "C3": "NOT_TESTED"
+      },
+      "performance_speedup": null,
+      "repeatability": {
+        "R0": "NOT_TESTED_REFERENCE_UNAFFECTED"
+      },
+      "revision": "12a3808a956f869c767195e9266b59c4d21d92e2",
+      "selected_environment": "R0",
+      "selection_rule_reason": "no candidate passed the immutable numerical-equivalence gate; the predeclared rule selects the reference environment and records NO_QUALIFIED_ACCELERATION"
+    },
+    {
+      "added_packages": [],
+      "environment_path": "/root/rivermind-data/envs/probvenance-r4",
+      "execution_environment_fingerprint": "46424eac4c734ee9adece0fc6e1e5394421ccdb1e50718b94144010fbf61c5c7",
+      "fast_kernel_sites_active": [],
+      "interpreter_path": "/root/rivermind-data/envs/probvenance-r4/bin/python",
+      "memory_status": "PASS",
+      "model_id": "Qwen/Qwen3.5-2B",
+      "model_key": "qwen3-5-2b",
+      "numerical_eligibility": {
+        "C1": "FAIL",
+        "C2": "NOT_TESTED",
+        "C3": "FAIL"
+      },
+      "performance_speedup": null,
+      "repeatability": {
+        "C1": "PASS",
+        "C3": "PASS",
+        "R0": "PASS"
+      },
+      "revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "selected_environment": "R0",
+      "selection_rule_reason": "no candidate passed the immutable numerical-equivalence gate; the predeclared rule selects the reference environment and records NO_QUALIFIED_ACCELERATION"
+    }
+  ],
+  "nature": "FROZEN OPERATIONAL EXECUTION ENVIRONMENT MAP",
+  "qualification_fingerprint": "1f5ebeceaee5b18d5a23be700ee049e76deb6d121749a75a2e17af649c98a556",
+  "scientific_semantics_changed": false,
+  "selection_rule": {
+    "step_1": "eligible set = candidates passing numerical equivalence AND repeatability AND performance threshold AND memory",
+    "step_2_if_eligible_set_empty": "select R0; record status NO_QUALIFIED_ACCELERATION (not a scientific model failure)",
+    "step_3_if_exactly_one_eligible": "select it",
+    "step_4_if_multiple_eligible": "select the highest median synthetic rows/sec",
+    "step_5_tie_break": "if the fastest two are within 5% of each other, select the smaller dependency set (C1 preferred over C2, C2 over C3)",
+    "step_6_reference_preference": "R0 is never displaced by a candidate that fails any gate; a numerically ineligible candidate is never selected even if it is faster"
+  },
+  "study_rows_used": 0,
+  "unselected_candidates": {
+    "C1": "NOT_FORMALLY_ADOPTED",
+    "C2": "INELIGIBLE_DIAGNOSTIC_ONLY_NOT_SELECTABLE",
+    "C3": "NOT_FORMALLY_ADOPTED",
+    "F0": "REJECTED_AND_REMAINS_REJECTED"
+  }
+}

@@ -1,0 +1,383 @@
+{
+  "artifact_type": "r4-formal-analysis-runner-dag-coverage",
+  "artifact_version": 1,
+  "coverage": [
+    {
+      "depends_on": [],
+      "engine_output_key": "artifact.measurement_provenance_references",
+      "formal_engine_path": "run_r4_analysis.py::load_cells:362 / load_cell_payload:452 (invoked by build_panel_inputs:700)",
+      "formal_path_present": true,
+      "kind": "source",
+      "member_count": 16,
+      "node_id": "raw_evidence",
+      "required": true,
+      "result_schema_path": "measurement_provenance_references",
+      "status_propagation_rule": "a cell whose sha256/evidence_fingerprint does not match the frozen registry raises R4AnalysisInputError (fail closed)",
+      "synthetic_test": "test_validate_only_does_not_touch_the_formal_output_root; test_synthetic_qualification_never_reads_the_formal_evidence",
+      "synthetic_test_present": true
+    },
+    {
+      "depends_on": [
+        "raw_evidence"
+      ],
+      "engine_output_key": "estimates / coverage_registry",
+      "formal_engine_path": "run_r4_analysis.py::build_panel_inputs:700 / select_train_rows:540",
+      "formal_path_present": true,
+      "kind": "binding",
+      "member_count": 32,
+      "node_id": "directional_train_source",
+      "required": true,
+      "result_schema_path": "full_fit_coverage",
+      "status_propagation_rule": "SOURCE TRAIN rows feed the cross/source fit; an unusable binding is reported as INELIGIBLE/FAILED at the fit layer",
+      "synthetic_test": "test_validate_only_never_fits_bootstraps_or_predicts; test_synthetic_qualification_is_byte_identical_across_runs",
+      "synthetic_test_present": true
+    },
+    {
+      "depends_on": [
+        "raw_evidence"
+      ],
+      "engine_output_key": "estimates / coverage_registry",
+      "formal_engine_path": "run_r4_analysis.py::build_panel_inputs:700 / select_train_rows:540",
+      "formal_path_present": true,
+      "kind": "binding",
+      "member_count": 32,
+      "node_id": "directional_train_target",
+      "required": true,
+      "result_schema_path": "full_fit_coverage",
+      "status_propagation_rule": "TARGET TRAIN rows feed the native/target fit; never mixed with the source fit",
+      "synthetic_test": "test_validate_only_never_fits_bootstraps_or_predicts; test_refit_scope_covers_all_six_procedures_and_both_estimands",
+      "synthetic_test_present": true
+    },
+    {
+      "depends_on": [
+        "raw_evidence"
+      ],
+      "engine_output_key": "estimates / bootstrap / logloss",
+      "formal_engine_path": "run_r4_analysis.py::build_panel_inputs:700 (test_rows)",
+      "formal_path_present": true,
+      "kind": "binding",
+      "member_count": 32,
+      "node_id": "directional_test_target",
+      "required": true,
+      "result_schema_path": "unit_estimates / panel_estimates",
+      "status_propagation_rule": "TARGET TEST rows are scored by raw/native/cross maps; no fit dependency for R_raw",
+      "synthetic_test": "test_point_estimates_match_the_direct_frozen_oracle; test_shared_test_draw_is_identical_across_models",
+      "synthetic_test_present": true
+    },
+    {
+      "depends_on": [
+        "directional_train_source",
+        "directional_train_target"
+      ],
+      "engine_output_key": "coverage_registry / estimates",
+      "formal_engine_path": "run_r4_analysis.py::fit_procedure:619 (CORE4 branch) via _cross_native_fits:779",
+      "formal_path_present": true,
+      "kind": "fit_dependency",
+      "member_count": 128,
+      "node_id": "core4_fit",
+      "required": true,
+      "result_schema_path": "full_fit_coverage / unit_estimates",
+      "status_propagation_rule": "AVAILABLE / INELIGIBLE / FAILED; a FAILED fit yields FAILED at the fit layer and INCOMPLETE/DEPENDENCY_UNAVAILABLE downstream",
+      "synthetic_test": "test_fit_procedure_marks_every_synthetic_fit_available; test_fit_procedure_covers_the_six_frozen_procedures",
+      "synthetic_test_present": true
+    },
+    {
+      "depends_on": [
+        "directional_train_source",
+        "directional_train_target"
+      ],
+      "engine_output_key": "coverage_registry / estimates",
+      "formal_engine_path": "run_r4_analysis.py::fit_procedure:619 (I-isotonic / B-beta branches)",
+      "formal_path_present": true,
+      "kind": "fit_dependency",
+      "member_count": 64,
+      "node_id": "ib_extension_fit",
+      "required": true,
+      "result_schema_path": "full_fit_coverage / unit_estimates",
+      "status_propagation_rule": "BetaFitIneligible -> INELIGIBLE; BetaContractViolation -> FAILED; BetaImplementationError -> FAILED with the exact exception type and message retained",
+      "synthetic_test": "test_fit_failure_propagates_as_incomplete_not_an_exception; test_dependency_qualification_injects_the_beta_gate9_failure",
+      "synthetic_test_present": true
+    },
+    {
+      "depends_on": [
+        "directional_test_target"
+      ],
+      "engine_output_key": "estimates",
+      "formal_engine_path": "run_r4_analysis.py::point_estimates:878 -> r4_inference.risk_raw (via unit_estimator_factory:832)",
+      "formal_path_present": true,
+      "kind": "risk_dependency",
+      "member_count": 32,
+      "node_id": "raw_risk",
+      "required": true,
+      "result_schema_path": "unit_estimates",
+      "status_propagation_rule": "no fit dependency; AVAILABLE whenever the TARGET TEST binding exists",
+      "synthetic_test": "test_point_estimates_match_the_direct_frozen_oracle",
+      "synthetic_test_present": true
+    },
+    {
+      "depends_on": [
+        "core4_fit",
+        "ib_extension_fit",
+        "directional_train_target",
+        "directional_test_target"
+      ],
+      "engine_output_key": "estimates",
+      "formal_engine_path": "run_r4_analysis.py::point_estimates:878 -> r4_inference.risk_native",
+      "formal_path_present": true,
+      "kind": "risk_dependency",
+      "member_count": 192,
+      "node_id": "native_risk",
+      "required": true,
+      "result_schema_path": "unit_estimates",
+      "status_propagation_rule": "requires the TARGET/native fit; FAILED iff that fit is FAILED, INELIGIBLE iff INELIGIBLE",
+      "synthetic_test": "test_point_estimates_match_the_direct_frozen_oracle; test_dependency_truth_table_is_frozen",
+      "synthetic_test_present": true
+    },
+    {
+      "depends_on": [
+        "core4_fit",
+        "ib_extension_fit",
+        "directional_test_target"
+      ],
+      "engine_output_key": "estimates",
+      "formal_engine_path": "run_r4_analysis.py::point_estimates:878 -> r4_inference.risk_cross",
+      "formal_path_present": true,
+      "kind": "risk_dependency",
+      "member_count": 192,
+      "node_id": "cross_risk",
+      "required": true,
+      "result_schema_path": "unit_estimates",
+      "status_propagation_rule": "requires the SOURCE/cross fit; FAILED iff that fit is FAILED, INELIGIBLE iff INELIGIBLE",
+      "synthetic_test": "test_point_estimates_match_the_direct_frozen_oracle; test_dependency_truth_table_is_frozen",
+      "synthetic_test_present": true
+    },
+    {
+      "depends_on": [
+        "native_risk",
+        "raw_risk"
+      ],
+      "engine_output_key": "estimates",
+      "formal_engine_path": "run_r4_analysis.py::unit_estimator_factory:832 -> r4_inference.delta_native",
+      "formal_path_present": true,
+      "kind": "estimand_dependency",
+      "member_count": 192,
+      "node_id": "delta_native",
+      "required": true,
+      "result_schema_path": "unit_estimates",
+      "status_propagation_rule": "ESTIMAND_DEPENDENCIES['Delta_native'] = ('native',): independent of the cross fit",
+      "synthetic_test": "test_cross_only_failure_removes_only_the_cross_dependent_estimands",
+      "synthetic_test_present": true
+    },
+    {
+      "depends_on": [
+        "cross_risk",
+        "raw_risk"
+      ],
+      "engine_output_key": "estimates",
+      "formal_engine_path": "run_r4_analysis.py::unit_estimator_factory:832 -> r4_inference.delta_deploy",
+      "formal_path_present": true,
+      "kind": "estimand_dependency",
+      "member_count": 192,
+      "node_id": "delta_deploy",
+      "required": true,
+      "result_schema_path": "unit_estimates",
+      "status_propagation_rule": "ESTIMAND_DEPENDENCIES['Delta_deploy'] = ('cross',): independent of the native fit",
+      "synthetic_test": "test_cross_only_failure_removes_only_the_cross_dependent_estimands",
+      "synthetic_test_present": true
+    },
+    {
+      "depends_on": [
+        "cross_risk",
+        "native_risk"
+      ],
+      "engine_output_key": "estimates",
+      "formal_engine_path": "run_r4_analysis.py::unit_estimator_factory:832 -> r4_inference.delta_transport",
+      "formal_path_present": true,
+      "kind": "estimand_dependency",
+      "member_count": 192,
+      "node_id": "delta_transport",
+      "required": true,
+      "result_schema_path": "unit_estimates",
+      "status_propagation_rule": "ESTIMAND_DEPENDENCIES['Delta_transport'] = ('cross', 'native'): requires BOTH fits",
+      "synthetic_test": "test_cross_only_failure_removes_only_the_cross_dependent_estimands",
+      "synthetic_test_present": true
+    },
+    {
+      "depends_on": [
+        "delta_deploy",
+        "delta_transport",
+        "core4_fit"
+      ],
+      "engine_output_key": "bootstrap.primary_contrasts / artifact.panel_estimates",
+      "formal_engine_path": "run_r4_analysis.py::run_test_bootstrap:992 -> r4_inference.run_panel_test_bootstrap",
+      "formal_path_present": true,
+      "kind": "multiplicity_family",
+      "member_count": 12,
+      "node_id": "primary12",
+      "required": true,
+      "result_schema_path": "panel_estimates.primary",
+      "status_propagation_rule": "fixed family size 12; a member whose logistic-core dependency is missing is INCOMPLETE; never shrunk, never replaced",
+      "synthetic_test": "test_primary_contrasts_are_twelve; test_families_are_never_shrunk_by_missing_members",
+      "synthetic_test_present": true
+    },
+    {
+      "depends_on": [
+        "ib_extension_fit",
+        "delta_deploy",
+        "delta_transport"
+      ],
+      "engine_output_key": "bootstrap.extension_panel / artifact.panel_estimates",
+      "formal_engine_path": "run_r4_analysis.py::run_test_bootstrap:992 -> r4_inference.run_panel_test_bootstrap (extension_panel)",
+      "formal_path_present": true,
+      "kind": "multiplicity_family",
+      "member_count": 8,
+      "node_id": "extension8",
+      "required": true,
+      "result_schema_path": "panel_estimates.secondary_extension",
+      "status_propagation_rule": "fixed family size 8; I-isotonic / B-beta members degrade independently per (direction, estimand) dependency",
+      "synthetic_test": "test_core4_only_keeps_primary_and_degrades_the_extensions; test_fit_failure_propagates_as_incomplete_not_an_exception",
+      "synthetic_test_present": true
+    },
+    {
+      "depends_on": [
+        "delta_deploy",
+        "delta_transport",
+        "core4_fit"
+      ],
+      "engine_output_key": "bootstrap.direction_differences / artifact.panel_estimates",
+      "formal_engine_path": "run_r4_analysis.py::run_test_bootstrap:992 -> r4_inference.run_panel_test_bootstrap (direction_differences)",
+      "formal_path_present": true,
+      "kind": "multiplicity_family",
+      "member_count": 6,
+      "node_id": "direction6",
+      "required": true,
+      "result_schema_path": "panel_estimates.secondary_direction_difference",
+      "status_propagation_rule": "fixed family size 6; CORE4-only, isolated from I/B failure",
+      "synthetic_test": "test_core4_only_keeps_primary_and_degrades_the_extensions; test_dependency_injection_keeps_core4_complete",
+      "synthetic_test_present": true
+    },
+    {
+      "depends_on": [
+        "delta_native",
+        "core4_fit",
+        "ib_extension_fit"
+      ],
+      "engine_output_key": "bootstrap.native_reference / artifact.panel_estimates",
+      "formal_engine_path": "run_r4_analysis.py::run_test_bootstrap:992 -> r4_inference.run_panel_test_bootstrap (native_reference)",
+      "formal_path_present": true,
+      "kind": "multiplicity_family",
+      "member_count": 12,
+      "node_id": "native12",
+      "required": true,
+      "result_schema_path": "panel_estimates.secondary_native_reference",
+      "status_propagation_rule": "fixed family size 12; each member follows the TARGET/native fit dependency only, never an unrelated cross failure",
+      "synthetic_test": "test_core4_only_keeps_primary_and_degrades_the_extensions; test_dependency_qualification_injects_the_beta_gate9_failure",
+      "synthetic_test_present": true
+    },
+    {
+      "depends_on": [
+        "raw_evidence",
+        "core4_fit",
+        "ib_extension_fit"
+      ],
+      "engine_output_key": "n912_robustness / n912_refit / artifact.n912_robustness",
+      "formal_engine_path": "run_r4_analysis.py::run_n912_robustness:1623 / validate_n912_panels:1674 / n912 refit in run_dag_engine:1883",
+      "formal_path_present": true,
+      "kind": "robustness_dependency",
+      "member_count": 0,
+      "node_id": "n912_robustness",
+      "required": true,
+      "result_schema_path": "n912_robustness",
+      "status_propagation_rule": "SECONDARY_ROBUSTNESS; paired within the same shared TEST replicate; cannot rescue or redefine the N456 primary",
+      "synthetic_test": "test_n912_formal_path_is_paired_and_cannot_rescue; test_engine_covers_every_frozen_dag_block",
+      "synthetic_test_present": true
+    },
+    {
+      "depends_on": [
+        "raw_risk",
+        "delta_transport",
+        "delta_deploy"
+      ],
+      "engine_output_key": "predictor / artifact.secondary_diagnostics.predictor",
+      "formal_engine_path": "run_r4_analysis.py::build_predictor_measurements:1209 / run_predictor_bootstrap:1307 over merge_panels:2286",
+      "formal_path_present": true,
+      "kind": "predictor_units",
+      "member_count": 8,
+      "node_id": "predictor_development8",
+      "required": true,
+      "result_schema_path": "secondary_diagnostics.predictor.development_units",
+      "status_propagation_rule": "DEVELOPMENT_CONTINUITY: reported, never part of the primary Spearman statistic",
+      "synthetic_test": "test_predictor_formal_path_uses_the_merged_panel; test_final_assembly_records_the_predictor_and_logloss",
+      "synthetic_test_present": true
+    },
+    {
+      "depends_on": [
+        "raw_risk",
+        "delta_transport",
+        "delta_deploy",
+        "directional_train_target"
+      ],
+      "engine_output_key": "predictor / artifact.secondary_diagnostics.predictor",
+      "formal_engine_path": "run_r4_analysis.py::run_predictor_bootstrap:1307 -> r4_predictor (primary statistic over the 16 held-out units)",
+      "formal_path_present": true,
+      "kind": "predictor_units",
+      "member_count": 16,
+      "node_id": "predictor_validation16",
+      "required": true,
+      "result_schema_path": "secondary_diagnostics.predictor.{status,point_estimate,interval,validation_rows}",
+      "status_propagation_rule": "primary statistic = exactly the 16 PRIMARY_VALIDATION units; an undefined replicate makes the interval INCOMPLETE (no subset interval)",
+      "synthetic_test": "test_predictor_formal_path_uses_the_merged_panel; test_final_assembly_records_the_predictor_and_logloss",
+      "synthetic_test_present": true
+    },
+    {
+      "depends_on": [
+        "raw_risk",
+        "delta_transport",
+        "delta_deploy"
+      ],
+      "engine_output_key": "predictor / artifact.secondary_diagnostics.predictor",
+      "formal_engine_path": "run_r4_analysis.py::run_predictor_bootstrap:1307 over the merged panel",
+      "formal_path_present": true,
+      "kind": "predictor_units",
+      "member_count": 8,
+      "node_id": "predictor_legacy8",
+      "required": true,
+      "result_schema_path": "secondary_diagnostics.predictor.legacy_units",
+      "status_propagation_rule": "LEGACY_LINEAGE_EXTENSION: reported, can never rescue the 16-unit primary",
+      "synthetic_test": "test_predictor_formal_path_uses_the_merged_panel; test_legacy_role_report_never_enters_the_primary_family",
+      "synthetic_test_present": true
+    }
+  ],
+  "coverage_fingerprint": "39ac890e7b7e564cfb14d42353b5db44997c9392513f433c7473cb0a53007d1d",
+  "fingerprint_version": 1,
+  "frozen_dependency_graph_fingerprint": "449c9b19d61e4edbe95ea856b1d13e3b373765f8a9d05931f20e4d12bf28ed9f",
+  "frozen_dependency_graph_sha256": "fd1248052402de5c6b575957f7465b8f6094455851a16528ea92bc0242d16872",
+  "nature": "OPERATIONAL FORMAL-DAG COVERAGE MATRIX",
+  "runner_id": "r4-integrated-formal-analysis-runner",
+  "runner_source_path": "experiments/calibration_transport/run_r4_analysis.py",
+  "runner_source_sha256": "e86ef34a3435c81fd78285fbc709a7966bf704fbe35987db6d3003d2cf31bac3",
+  "runner_test_path": "tests/test_r4_analysis_runner.py",
+  "runner_version": 1,
+  "scientific_outputs_computed": false,
+  "shared_engine": {
+    "differences": [
+      "input source (frozen raw evidence vs synthetic fixture)",
+      "replicate counts",
+      "output root",
+      "formal/synthetic authority marker"
+    ],
+    "formal_and_synthetic_share_the_same_engine": true,
+    "function": "run_r4_analysis.run_dag_engine"
+  },
+  "summary": {
+    "frozen_node_count": 20,
+    "frozen_nodes_not_in_matrix": [],
+    "nodes_with_formal_path": 20,
+    "nodes_with_synthetic_test": 20,
+    "nodes_without_formal_path": 0,
+    "nodes_without_synthetic_test": 0,
+    "required_node_count": 20,
+    "required_nodes_uncovered": 0,
+    "required_nodes_without_synthetic_test": 0
+  }
+}

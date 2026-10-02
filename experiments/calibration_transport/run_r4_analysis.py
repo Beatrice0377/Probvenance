@@ -578,11 +578,24 @@ class ProcedureFit:
     calibrator: Callable[[float], float] | None
     reason: str | None
     state_fingerprint: str | None
+    failure_type: str | None = None
 
 
 AVAILABLE = "AVAILABLE"
 INELIGIBLE = "INELIGIBLE"
 FAILED = "FAILED"
+
+# Frozen dependency truth table: which fitted map each frozen estimand needs.
+# Delta_deploy = R_cross - R_raw  -> cross (source-fitted) map only
+# Delta_native = R_native - R_raw -> native (target-fitted) map only
+# Delta_transport = R_cross - R_native -> both maps
+ESTIMAND_DEPENDENCIES: Mapping[str, tuple[str, ...]] = {
+    "Delta_deploy": ("cross",),
+    "Delta_native": ("native",),
+    "Delta_transport": ("cross", "native"),
+}
+
+REFIT_ESTIMANDS: tuple[str, ...] = ("Delta_deploy", "Delta_transport")
 
 
 def _applicator(apply: Callable[[Any, float], float], fit: Any) -> Callable[[float], float]:
@@ -621,13 +634,17 @@ def fit_procedure(
         except r3_analysis.ProbabilityEndpointError as exc:
             return ProcedureFit(procedure, INELIGIBLE, None, f"endpoint: {exc}", None)
         except r3_analysis.AnalysisError as exc:  # pragma: no cover - defensive
-            return ProcedureFit(procedure, FAILED, None, str(exc), None)
+            return ProcedureFit(
+                procedure, FAILED, None, str(exc), None, failure_type=type(exc).__name__
+            )
         return ProcedureFit(procedure, AVAILABLE, fit.apply, None, fit.fingerprint)
     if procedure == "I-isotonic":
         try:
             fit = r4_calibration_families.fit_isotonic_fixed_decision_probability(scores, labels)
         except r4_calibration_families.IsotonicContractViolation as exc:
-            return ProcedureFit(procedure, FAILED, None, str(exc), None)
+            return ProcedureFit(
+                procedure, FAILED, None, str(exc), None, failure_type=type(exc).__name__
+            )
         return ProcedureFit(
             procedure,
             AVAILABLE,
@@ -641,7 +658,21 @@ def fit_procedure(
         except r4_calibration_families.BetaFitIneligible as exc:
             return ProcedureFit(procedure, INELIGIBLE, None, f"ineligible: {exc}", None)
         except r4_calibration_families.BetaContractViolation as exc:
-            return ProcedureFit(procedure, FAILED, None, str(exc), None)
+            return ProcedureFit(
+                procedure, FAILED, None, str(exc), None, failure_type=type(exc).__name__
+            )
+        except r4_calibration_families.BetaImplementationError as exc:
+            # Frozen fitting gate 9 ("unique finite accepted optimum") not met.
+            # A frozen FULL-FIT FAILED state, never a process exception and never
+            # a DEPENDENCY_UNAVAILABLE: the exact class and message are retained.
+            return ProcedureFit(
+                procedure,
+                FAILED,
+                None,
+                f"{type(exc).__name__}: {exc}",
+                None,
+                failure_type=type(exc).__name__,
+            )
         return ProcedureFit(
             procedure,
             AVAILABLE,
@@ -745,27 +776,101 @@ def _reindexed_rows(draw: TestDraw, rows: Sequence[R4InferenceRow]) -> tuple[R4I
         raise R4AnalysisInputError(f"draw references unknown item {exc}") from exc
 
 
+def _cross_native_fits(
+    inputs: PanelInputs, *, model: str, population: str, procedure: str, direction: str
+) -> tuple[ProcedureFit, ProcedureFit]:
+    """The SOURCE-fitted (cross) and TARGET-fitted (native) fits of one cell."""
+    return (
+        inputs.fits[(model, population, f"{procedure}|{direction}|cross")],
+        inputs.fits[(model, population, f"{procedure}|{direction}|native")],
+    )
+
+
+def unit_estimand_keys(
+    inputs: PanelInputs,
+    *,
+    models: Sequence[str],
+    populations: Sequence[str],
+    direction: str,
+    procedure: str,
+) -> tuple[str, ...]:
+    """Estimands computable for EVERY model and population of a panel (fail-closed).
+
+    The frozen shared-draw engine requires one consistent estimand key set per
+    ``(direction, procedure)`` across every model and population, so an estimand is
+    offered only when every model of every population of the panel can compute it
+    from its own AVAILABLE fitted maps. A member that cannot be computed is absent,
+    and the frozen family block reports the fixed-size family as INCOMPLETE instead
+    of shrinking it.
+    """
+    keys: list[str] = []
+    for estimand, dependencies in ESTIMAND_DEPENDENCIES.items():
+        ok = True
+        for model in models:
+            for population in populations:
+                cross, native = _cross_native_fits(
+                    inputs,
+                    model=model,
+                    population=population,
+                    procedure=procedure,
+                    direction=direction,
+                )
+                for dependency in dependencies:
+                    fit = cross if dependency == "cross" else native
+                    if fit.status != AVAILABLE:
+                        ok = False
+                        break
+                if not ok:
+                    break
+            if not ok:
+                break
+        if ok:
+            keys.append(estimand)
+    return tuple(keys)
+
+
 def unit_estimator_factory(
-    inputs: PanelInputs, *, budget: str
+    inputs: PanelInputs, *, models: Sequence[str], populations: Sequence[str]
 ) -> Callable[[str, str, str, str, TestDraw], Mapping[str, float]]:
     """Return the frozen ``unit_estimator`` callback for the panel bootstrap."""
+    cache: dict[tuple[str, str], tuple[str, ...]] = {}
+
+    def keys_for(direction: str, procedure: str) -> tuple[str, ...]:
+        key = (direction, procedure)
+        if key not in cache:
+            cache[key] = unit_estimand_keys(
+                inputs,
+                models=models,
+                populations=populations,
+                direction=direction,
+                procedure=procedure,
+            )
+        return cache[key]
 
     def unit_estimator(
         population: str, model: str, direction: str, procedure: str, draw: TestDraw
     ) -> Mapping[str, float]:
         rows = _reindexed_rows(draw, inputs.test_rows[(model, population)])
-        cross = inputs.fits[(model, population, f"{procedure}|{direction}|cross")]
-        native = inputs.fits[(model, population, f"{procedure}|{direction}|native")]
-        if cross.calibrator is None or native.calibrator is None:
-            raise R4AnalysisContractViolation(
-                f"procedure {procedure!r} is unavailable for {model}/{population}/{direction}"
-            )
-        matrix = r4_inference.risk_matrix(rows, direction, cross.calibrator, native.calibrator)
-        return {
-            "Delta_deploy": float(matrix.delta_deploy),
-            "Delta_transport": float(matrix.delta_transport),
-            "Delta_native": float(matrix.delta_native),
-        }
+        cross, native = _cross_native_fits(
+            inputs, model=model, population=population, procedure=procedure, direction=direction
+        )
+        out: dict[str, float] = {}
+        for estimand in keys_for(direction, procedure):
+            if estimand == "Delta_deploy":
+                out[estimand] = float(
+                    r4_inference.delta_deploy(rows, direction, cross.calibrator)
+                )
+            elif estimand == "Delta_native":
+                out[estimand] = float(
+                    r4_inference.delta_native(rows, direction, native.calibrator)
+                )
+            else:
+                out[estimand] = float(
+                    r4_inference.delta_transport(
+                        rows, direction, cross.calibrator, native.calibrator
+                    )
+                )
+        return out
 
     return unit_estimator
 
@@ -773,28 +878,115 @@ def unit_estimator_factory(
 def point_estimates(
     inputs: PanelInputs, *, models: Sequence[str], populations: Sequence[str]
 ) -> dict[str, Any]:
-    """Full-TRAIN fitted point estimates (no bootstrap, no multiplicity)."""
+    """Full-TRAIN fitted point estimates (no bootstrap, no multiplicity).
+
+    Every frozen estimand follows its own dependency rule: ``Delta_deploy`` needs
+    only the SOURCE-fitted map, ``Delta_native`` only the TARGET-fitted map and
+    ``Delta_transport`` both. A failed or ineligible fit never removes the other
+    estimands of the same cell.
+    """
     out: dict[str, Any] = {}
     for model in models:
         for population in populations:
             for direction in inputs.authority.direction_order:
                 rows = inputs.test_rows[(model, population)]
                 for procedure in inputs.authority.procedure_order:
-                    cross = inputs.fits[(model, population, f"{procedure}|{direction}|cross")]
-                    native = inputs.fits[(model, population, f"{procedure}|{direction}|native")]
-                    key = f"{model}|{population}|{direction}|{procedure}"
-                    if cross.calibrator is None or native.calibrator is None:
-                        out[key] = {
-                            "status": INELIGIBLE,
-                            "cross_reason": cross.reason,
-                            "native_reason": native.reason,
-                        }
-                        continue
-                    matrix = r4_inference.risk_matrix(
-                        rows, direction, cross.calibrator, native.calibrator
+                    cross, native = _cross_native_fits(
+                        inputs,
+                        model=model,
+                        population=population,
+                        procedure=procedure,
+                        direction=direction,
                     )
-                    out[key] = {"status": AVAILABLE, "risk_matrix": matrix}
+                    key = f"{model}|{population}|{direction}|{procedure}"
+                    entry: dict[str, Any] = {
+                        "cross_status": cross.status,
+                        "native_status": native.status,
+                        "cross_reason": cross.reason,
+                        "native_reason": native.reason,
+                        "cross_failure_type": cross.failure_type,
+                        "native_failure_type": native.failure_type,
+                        "estimands": {},
+                    }
+                    if cross.status == AVAILABLE:
+                        entry["estimands"]["Delta_deploy"] = float(
+                            r4_inference.delta_deploy(rows, direction, cross.calibrator)
+                        )
+                    if native.status == AVAILABLE:
+                        entry["estimands"]["Delta_native"] = float(
+                            r4_inference.delta_native(rows, direction, native.calibrator)
+                        )
+                    if cross.status == AVAILABLE and native.status == AVAILABLE:
+                        entry["estimands"]["Delta_transport"] = float(
+                            r4_inference.delta_transport(
+                                rows, direction, cross.calibrator, native.calibrator
+                            )
+                        )
+                        entry["risk_matrix"] = r4_inference.risk_matrix(
+                            rows, direction, cross.calibrator, native.calibrator
+                        )
+                        entry["status"] = AVAILABLE
+                    elif cross.status == FAILED or native.status == FAILED:
+                        entry["status"] = FAILED
+                    else:
+                        entry["status"] = INELIGIBLE
+                    out[key] = entry
     return out
+
+
+def _empty_panel_bootstrap(
+    *, replicates: int, models: Sequence[str], populations: Sequence[str],
+    directions: Sequence[str], procedures: Sequence[str],
+) -> Any:
+    return r4_inference.PanelBootstrapResult(
+        replicates=replicates,
+        models=tuple(models),
+        populations=tuple(populations),
+        directions=tuple(directions),
+        procedures=tuple(procedures),
+        unit_values={},
+        population_values={},
+        panel_values={},
+        primary_contrasts={},
+        direction_differences={},
+        extension_panel={},
+        native_reference={},
+    )
+
+
+def _merge_panel_bootstraps(
+    results: Sequence[Any],
+    *,
+    replicates: int,
+    models: Sequence[str],
+    populations: Sequence[str],
+    directions: Sequence[str],
+    procedures: Sequence[str],
+) -> Any:
+    """Merge dependency-safe sub-calls. Draws are replicate-index deterministic."""
+    merged: dict[str, dict[Any, Any]] = {
+        field: {}
+        for field in (
+            "unit_values",
+            "population_values",
+            "panel_values",
+            "primary_contrasts",
+            "direction_differences",
+            "extension_panel",
+            "native_reference",
+        )
+    }
+    for result in results:
+        for field, target in merged.items():
+            target.update(getattr(result, field))
+    return r4_inference.PanelBootstrapResult(
+        replicates=replicates,
+        models=tuple(models),
+        populations=tuple(populations),
+        directions=tuple(directions),
+        procedures=tuple(procedures),
+        **merged,
+    )
 
 
 def run_test_bootstrap(
@@ -805,17 +997,77 @@ def run_test_bootstrap(
     procedures: Sequence[str],
     replicates: int,
 ) -> Any:
-    """Frozen shared-draw TEST bootstrap over the declared panel."""
-    return r4_inference.run_panel_test_bootstrap(
-        rows_by_population={p: inputs.test_rows[(models[0], p)] for p in populations},
-        metadata_by_population={
-            p: inputs.authority.population_metadata[p] for p in populations
-        },
-        unit_estimator=unit_estimator_factory(inputs, budget="N456"),
+    """Frozen shared-draw TEST bootstrap over the declared panel.
+
+    Dependency sets are determined first, so the frozen engine is never handed a
+    ``(direction, procedure)`` group whose estimands cannot be computed for every
+    model and population.  A group that is computable for only one direction is
+    run separately; every sub-call uses the same replicate-index-deterministic
+    draws, so the shared-draw contract is preserved.  An entirely unavailable
+    group contributes nothing and its fixed-size family members report INCOMPLETE.
+    """
+    directions = tuple(inputs.authority.direction_order)
+    keys = {
+        (direction, procedure): unit_estimand_keys(
+            inputs,
+            models=models,
+            populations=populations,
+            direction=direction,
+            procedure=procedure,
+        )
+        for direction in directions
+        for procedure in procedures
+    }
+    rows_by_population = {p: inputs.test_rows[(models[0], p)] for p in populations}
+    metadata_by_population = {
+        p: inputs.authority.population_metadata[p] for p in populations
+    }
+    unit_estimator = unit_estimator_factory(
+        inputs, models=models, populations=populations
+    )
+
+    def call(direction_subset: Sequence[str], procedure_subset: Sequence[str]) -> Any:
+        return r4_inference.run_panel_test_bootstrap(
+            rows_by_population=rows_by_population,
+            metadata_by_population=metadata_by_population,
+            unit_estimator=unit_estimator,
+            replicates=replicates,
+            models=models,
+            populations=populations,
+            directions=direction_subset,
+            procedures=procedure_subset,
+        )
+
+    results: list[Any] = []
+    fully_available = tuple(
+        procedure
+        for procedure in procedures
+        if all(keys[(direction, procedure)] for direction in directions)
+    )
+    if fully_available:
+        results.append(call(directions, fully_available))
+    for procedure in procedures:
+        if procedure in fully_available:
+            continue
+        partial = tuple(
+            direction for direction in directions if keys[(direction, procedure)]
+        )
+        if partial:
+            results.append(call(partial, (procedure,)))
+    if not results:
+        return _empty_panel_bootstrap(
+            replicates=replicates,
+            models=models,
+            populations=populations,
+            directions=directions,
+            procedures=procedures,
+        )
+    return _merge_panel_bootstraps(
+        results,
         replicates=replicates,
         models=models,
         populations=populations,
-        directions=inputs.authority.direction_order,
+        directions=directions,
         procedures=procedures,
     )
 
@@ -828,17 +1080,33 @@ def run_refit_blocks(
     procedures: Sequence[str],
     replicates: int,
 ) -> dict[str, Any]:
-    """Frozen TRAIN-refit blocks (one per unit x procedure x estimand)."""
+    """Frozen TRAIN-refit blocks (one per unit x procedure x estimand).
+
+    Every frozen estimand follows its own dependency rule, and every frozen
+    required procedure is covered: a block is only skipped when the frozen
+    dependency truth table says it cannot exist. Any single failed refit
+    replicate makes that block INCOMPLETE with ``interval = None``; no
+    successful-subset interval is ever produced.
+    """
     out: dict[str, Any] = {}
     for model in models:
         for population in populations:
             for direction in inputs.authority.direction_order:
                 for procedure in procedures:
-                    cross = inputs.fits[(model, population, f"{procedure}|{direction}|cross")]
-                    native = inputs.fits[(model, population, f"{procedure}|{direction}|native")]
-                    if cross.calibrator is None or native.calibrator is None:
-                        continue
-                    for estimand in ("Delta_deploy", "Delta_transport"):
+                    cross, native = _cross_native_fits(
+                        inputs,
+                        model=model,
+                        population=population,
+                        procedure=procedure,
+                        direction=direction,
+                    )
+                    for estimand in REFIT_ESTIMANDS:
+                        dependencies = ESTIMAND_DEPENDENCIES[estimand]
+                        if any(
+                            (cross if dependency == "cross" else native).status != AVAILABLE
+                            for dependency in dependencies
+                        ):
+                            continue
                         key = f"{model}|{population}|{direction}|{procedure}|{estimand}"
 
                         def fit_and_evaluate(
@@ -865,20 +1133,22 @@ def run_refit_blocks(
                             new_native = fit_procedure(
                                 procedure=procedure, train_rows=resampled, measurement=target
                             )
-                            if new_cross.calibrator is None or new_native.calibrator is None:
+                            if new_cross.status != AVAILABLE or new_native.status != AVAILABLE:
                                 raise r4_inference.BootstrapContractViolation(
-                                    "refit calibrator is unavailable"
+                                    "refit calibrator is unavailable: "
+                                    f"cross={new_cross.reason!r} native={new_native.reason!r}"
                                 )
-                            matrix = r4_inference.risk_matrix(
-                                inputs.test_rows[(model, population)],
-                                direction,
-                                new_cross.calibrator,
-                                new_native.calibrator,
-                            )
+                            rows = inputs.test_rows[(model, population)]
+                            if estimand == "Delta_deploy":
+                                return float(
+                                    r4_inference.delta_deploy(
+                                        rows, direction, new_cross.calibrator
+                                    )
+                                )
                             return float(
-                                matrix.delta_deploy
-                                if estimand == "Delta_deploy"
-                                else matrix.delta_transport
+                                r4_inference.delta_transport(
+                                    rows, direction, new_cross.calibrator, new_native.calibrator
+                                )
                             )
 
                         out[key] = r4_inference.run_train_refit_block(
@@ -1115,6 +1385,699 @@ def run_predictor_bootstrap(
 
 
 # --------------------------------------------------------------------------- #
+# Exact LogLoss secondary path (ExtendedReal carriers, never clipped)
+# --------------------------------------------------------------------------- #
+
+LOG_LOSS_ESTIMANDS: tuple[str, ...] = (
+    "Delta_deploy",
+    "Delta_native",
+    "Delta_transport",
+)
+
+
+@dataclass(frozen=True)
+class LogLossPanelBootstrap:
+    """Secondary exact-LogLoss bootstrap over the same frozen shared TEST draws."""
+
+    replicates: int
+    series: Mapping[tuple[str, str, str], tuple[Any, ...]]
+    intervals: Mapping[tuple[str, str, str], Any]
+    undefined_replicates: Mapping[tuple[str, str, str], tuple[int, ...]]
+    status: str
+
+
+def _logloss_paired_contrast(
+    left: Sequence[float], right: Sequence[float], labels: Sequence[int]
+) -> Any:
+    """``mean(LL(left) - LL(right))`` in exact extended-real arithmetic.
+
+    ``+inf - +inf`` is ``UNDEFINED_EXTENDED_REAL``; no clipping, no epsilon, no
+    ``nextafter``, no smoothing and no row removal ever happens here.
+    """
+    if len(left) != len(right) or len(left) != len(labels):
+        raise r4_inference.BootstrapContractViolation(
+            "paired LogLoss contrast requires equal lengths"
+        )
+    differences = [
+        r4_inference.extended_real_subtract(
+            r4_inference.logloss_loss(prediction_a, label),
+            r4_inference.logloss_loss(prediction_b, label),
+        )
+        for prediction_a, prediction_b, label in zip(left, right, labels, strict=True)
+    ]
+    return r4_inference.extended_real_mean(differences)
+
+
+def _logloss_unit_values(
+    rows: Sequence[R4InferenceRow],
+    direction: str,
+    cross: ProcedureFit,
+    native: ProcedureFit,
+    keys: Sequence[str],
+) -> dict[str, Any]:
+    target = r4_inference.target_measurement(direction)
+    scores = [r4_inference.measurement_score(row, target) for row in rows]
+    labels = [int(row.label) for row in rows]
+    out: dict[str, Any] = {}
+    if "Delta_deploy" in keys:
+        out["Delta_deploy"] = _logloss_paired_contrast(
+            [cross.calibrator(score) for score in scores], scores, labels
+        )
+    if "Delta_native" in keys:
+        out["Delta_native"] = _logloss_paired_contrast(
+            [native.calibrator(score) for score in scores], scores, labels
+        )
+    if "Delta_transport" in keys:
+        out["Delta_transport"] = _logloss_paired_contrast(
+            [cross.calibrator(score) for score in scores],
+            [native.calibrator(score) for score in scores],
+            labels,
+        )
+    return out
+
+
+def _logloss_interval(
+    series: Sequence[Any], *, lower_tail: Any, upper_tail: Any
+) -> tuple[Any, str]:
+    """Frozen rule: an UNDEFINED replicate makes the whole interval INCOMPLETE."""
+    undefined = tuple(
+        index
+        for index, value in enumerate(series)
+        if value.state == r4_inference.UNDEFINED_EXTENDED_REAL
+    )
+    if undefined:
+        return None, "INCOMPLETE_UNDEFINED_EXTENDED_REAL"
+    try:
+        interval = r4_inference.percentile_interval(
+            [value.value for value in series],
+            lower_tail=lower_tail,
+            upper_tail=upper_tail,
+        )
+    except Exception:  # pragma: no cover - fail closed, never a subset interval
+        return None, "INCOMPLETE_NON_FINITE_SERIES"
+    return interval, "COMPLETE"
+
+
+def run_logloss_panel_bootstrap(
+    inputs: PanelInputs,
+    *,
+    models: Sequence[str],
+    populations: Sequence[str],
+    procedures: Sequence[str],
+    replicates: int,
+    lower_tail: Any = None,
+    upper_tail: Any = None,
+) -> LogLossPanelBootstrap:
+    """Exact-LogLoss secondary bootstrap on the SAME frozen shared TEST draws."""
+    if lower_tail is None:
+        lower_tail = r4_inference.PRIMARY_LOWER_TAIL
+    if upper_tail is None:
+        upper_tail = r4_inference.PRIMARY_UPPER_TAIL
+    panel_values: dict[tuple[str, str], dict[str, list[Any]]] = {}
+    directions = tuple(inputs.authority.direction_order)
+    # One consistent key set per (direction, procedure) across every model and
+    # population, so a member with a missing dependency is absent everywhere and
+    # the fixed-size family reports INCOMPLETE instead of raising.
+    global_keys = {
+        (direction, procedure): unit_estimand_keys(
+            inputs,
+            models=models,
+            populations=populations,
+            direction=direction,
+            procedure=procedure,
+        )
+        for direction in directions
+        for procedure in procedures
+    }
+    for replicate_index in range(replicates):
+        draws = {
+            population: r4_inference.build_test_draw(
+                inputs.test_rows[(models[0], population)],
+                inputs.authority.population_metadata[population],
+                replicate_index,
+            )
+            for population in populations
+        }
+        for direction in directions:
+            for procedure in procedures:
+                keys = global_keys[(direction, procedure)]
+                if not keys:
+                    continue
+                per_population: dict[str, Any] = {}
+                for population in populations:
+                    draw = draws[population]
+                    per_model: dict[str, Any] = {}
+                    for model in models:
+                        cross, native = _cross_native_fits(
+                            inputs,
+                            model=model,
+                            population=population,
+                            procedure=procedure,
+                            direction=direction,
+                        )
+                        rows = _reindexed_rows(draw, inputs.test_rows[(model, population)])
+                        values = _logloss_unit_values(
+                            rows, direction, cross, native, keys
+                        )
+                        for estimand, value in values.items():
+                            per_model.setdefault(estimand, []).append(value)
+                    for estimand in keys:
+                        per_population.setdefault(estimand, []).append(
+                            r4_inference.extended_real_mean(per_model[estimand])
+                        )
+                for estimand in keys:
+                    panel_values.setdefault((direction, procedure), {}).setdefault(
+                        estimand, []
+                    ).append(r4_inference.extended_real_mean(per_population[estimand]))
+
+    series: dict[tuple[str, str, str], tuple[Any, ...]] = {}
+    intervals: dict[tuple[str, str, str], Any] = {}
+    undefined: dict[tuple[str, str, str], tuple[int, ...]] = {}
+    statuses: set[str] = set()
+    for (direction, procedure), bucket in panel_values.items():
+        for estimand, values in bucket.items():
+            key = (direction, procedure, estimand)
+            series[key] = tuple(values)
+            undefined_indices = tuple(
+                index
+                for index, value in enumerate(values)
+                if value.state == r4_inference.UNDEFINED_EXTENDED_REAL
+            )
+            undefined[key] = undefined_indices
+            interval, status = _logloss_interval(
+                values, lower_tail=lower_tail, upper_tail=upper_tail
+            )
+            intervals[key] = interval
+            statuses.add(status)
+    return LogLossPanelBootstrap(
+        replicates=replicates,
+        series=series,
+        intervals=intervals,
+        undefined_replicates=undefined,
+        status="COMPLETE" if statuses <= {"COMPLETE"} else "INCOMPLETE",
+    )
+
+
+# --------------------------------------------------------------------------- #
+# Full-fit coverage registry
+# --------------------------------------------------------------------------- #
+
+
+def build_fit_coverage(
+    inputs: PanelInputs, *, models: Sequence[str], populations: Sequence[str]
+) -> tuple[Any, dict[str, Any]]:
+    """Frozen ``CoverageMatrix`` plus the exact per-fit failure registry."""
+    matrix = r4_inference.CoverageMatrix()
+    registry: dict[str, Any] = {}
+    for model in models:
+        for population in populations:
+            for direction in inputs.authority.direction_order:
+                for procedure in inputs.authority.procedure_order:
+                    for side, measurement in (
+                        ("cross", r4_inference.source_measurement(direction)),
+                        ("native", r4_inference.target_measurement(direction)),
+                    ):
+                        fit = inputs.fits[(model, population, f"{procedure}|{direction}|{side}")]
+                        matrix.set(model, population, procedure, measurement, fit.status)
+                        registry[
+                            f"{model}|{population}|{procedure}|{direction}|{side}"
+                        ] = {
+                            "model": model,
+                            "population": population,
+                            "procedure": procedure,
+                            "measurement": measurement,
+                            "direction": direction,
+                            "side": side,
+                            "status": fit.status,
+                            "failure_type": fit.failure_type,
+                            "reason": fit.reason,
+                        }
+    return matrix, registry
+
+
+# --------------------------------------------------------------------------- #
+# N912 nested robustness (secondary; can never rescue the N456 primary)
+# --------------------------------------------------------------------------- #
+
+
+def run_n912_robustness(
+    primary_inputs: PanelInputs,
+    n912_inputs: PanelInputs,
+    *,
+    models: Sequence[str],
+    populations: Sequence[str],
+    procedures: Sequence[str],
+    replicates: int,
+) -> dict[str, Any]:
+    """N456 vs nested N912 on the SAME shared TEST draws, paired by replicate."""
+    n456 = run_test_bootstrap(
+        primary_inputs,
+        models=models,
+        populations=populations,
+        procedures=procedures,
+        replicates=replicates,
+    )
+    n912 = run_test_bootstrap(
+        n912_inputs,
+        models=models,
+        populations=populations,
+        procedures=procedures,
+        replicates=replicates,
+    )
+    comparisons: dict[str, Any] = {}
+    for (direction, procedure), bucket in sorted(n912.panel_values.items()):
+        for estimand, values_912 in sorted(bucket.items()):
+            values_456 = n456.panel_values.get((direction, procedure), {}).get(estimand)
+            if values_456 is None:
+                comparisons[f"{direction}|{procedure}|{estimand}"] = {
+                    "status": "INCOMPLETE",
+                    "reason": "N456 counterpart unavailable",
+                }
+                continue
+            difference = r4_inference.n912_minus_n456(values_912, values_456)
+            comparisons[f"{direction}|{procedure}|{estimand}"] = {
+                "status": "COMPLETE",
+                "n456_replicates": len(values_456),
+                "n912_replicates": len(values_912),
+                "n912_minus_n456_mean": (
+                    sum(difference) / len(difference) if difference else None
+                ),
+            }
+    return {
+        "role": r4_inference.N912_ROBUSTNESS_ROLE,
+        "cannot_rescue_primary": r4_inference.N912_CANNOT_RESCUE_PRIMARY,
+        "shared_test_draw_paired_by_replicate": True,
+        "comparisons": comparisons,
+    }
+
+
+def validate_n912_panels(
+    primary_inputs: PanelInputs,
+    n912_inputs: PanelInputs,
+    *,
+    models: Sequence[str],
+    populations: Sequence[str],
+) -> dict[str, Any]:
+    """Frozen TRAIN_456 subset TRAIN_912 + identical TEST identity validator."""
+    report: dict[str, Any] = {}
+    for model in models:
+        for population in populations:
+            train_456 = tuple(
+                r4_inference.FrozenItemReference(row.item_id, row.label, row.anchor_index)
+                for row in primary_inputs.train_rows[(model, population)]
+            )
+            train_912 = tuple(
+                r4_inference.FrozenItemReference(row.item_id, row.label, row.anchor_index)
+                for row in n912_inputs.train_rows[(model, population)]
+            )
+            test_456 = tuple(
+                r4_inference.FrozenItemReference(row.item_id, row.label, row.anchor_index)
+                for row in primary_inputs.test_rows[(model, population)]
+            )
+            test_912 = tuple(
+                r4_inference.FrozenItemReference(row.item_id, row.label, row.anchor_index)
+                for row in n912_inputs.test_rows[(model, population)]
+            )
+            report[f"{model}|{population}"] = r4_inference.validate_n912_pairing(
+                train_456=train_456,
+                train_912=train_912,
+                test_456=test_456,
+                test_912=test_912,
+            )
+    return report
+
+
+# --------------------------------------------------------------------------- #
+# Shared formal-DAG engine (used by BOTH formal and synthetic qualification)
+# --------------------------------------------------------------------------- #
+
+
+@dataclass(frozen=True)
+class DagRun:
+    """The complete frozen-DAG input bundle for one invocation."""
+
+    authority: FrozenAuthority
+    primary: PanelInputs
+    legacy: PanelInputs
+    n912: PanelInputs | None
+    primary_populations: tuple[str, ...]
+    legacy_populations: tuple[str, ...]
+    fixture_marker: str | None
+
+
+def _noop_block(**kwargs: Any) -> None:
+    """Default block recorder: the synthetic path records no operational state."""
+    return None
+
+
+def run_dag_engine(
+    dag: DagRun,
+    *,
+    test_replicates: int,
+    refit_replicates: int,
+    predictor_replicates: int,
+    on_block: Callable[..., None] = _noop_block,
+) -> dict[str, Any]:
+    """The single frozen formal-DAG engine.
+
+    Formal execution and synthetic formal-DAG qualification call this exact
+    function; they differ only in input source, replicate counts, output root and
+    the fixture marker. Every frozen DAG node is covered here.
+    """
+    authority = dag.authority
+    primary = dag.primary
+    legacy = dag.legacy
+    primary_populations = dag.primary_populations
+    legacy_populations = dag.legacy_populations
+    primary_models = _panel_models(primary, primary_populations)
+    legacy_models = _panel_models(legacy, legacy_populations)
+
+    # --- directional_train_source / directional_train_target / directional_test
+    on_block(
+        block="input_load",
+        status="COMPLETE",
+        identity=authority.ledger_fingerprint,
+        output_fingerprint=fingerprint(
+            {
+                "primary_models": list(primary_models),
+                "legacy_models": list(legacy_models),
+                "primary_populations": list(primary_populations),
+                "legacy_populations": list(legacy_populations),
+            }
+        ),
+    )
+
+    # --- core4_fit / ib_extension_fit coverage
+    coverage, coverage_registry = build_fit_coverage(
+        primary, models=primary_models, populations=primary_populations
+    )
+    legacy_coverage, legacy_coverage_registry = build_fit_coverage(
+        legacy, models=legacy_models, populations=legacy_populations
+    )
+
+    # --- raw_risk / native_risk / cross_risk / delta_native / delta_deploy /
+    #     delta_transport (point estimates)
+    estimates = point_estimates(
+        primary, models=primary_models, populations=primary_populations
+    )
+    legacy_estimates = point_estimates(
+        legacy, models=legacy_models, populations=legacy_populations
+    )
+    on_block(
+        block="point_estimates",
+        status="COMPLETE",
+        identity=authority.final_protocol_fingerprint,
+        output_fingerprint=fingerprint({"units": sorted(estimates)}),
+    )
+
+    # --- n912_robustness
+    n912_report: dict[str, Any]
+    # N912 is defined only on the frozen new-population 912 manifests
+    # (HellaSwag, MedMCQA); MMLU has no nested 912 budget.
+    n912_populations: tuple[str, ...] = ()
+    if dag.n912 is not None:
+        n912_populations = tuple(
+            population
+            for population in primary_populations
+            if (primary_models[0], population) in dag.n912.test_rows
+        )
+    if dag.n912 is None:
+        n912_report = {
+            "role": r4_inference.N912_ROBUSTNESS_ROLE,
+            "cannot_rescue_primary": r4_inference.N912_CANNOT_RESCUE_PRIMARY,
+            "status": "INCOMPLETE",
+            "reason": "no frozen N912 nested budget in this panel",
+        }
+    else:
+        n912_report = run_n912_robustness(
+            primary,
+            dag.n912,
+            models=primary_models,
+            populations=n912_populations,
+            procedures=authority.procedure_order,
+            replicates=test_replicates,
+        )
+        n912_report["pairing"] = validate_n912_panels(
+            primary,
+            dag.n912,
+            models=primary_models,
+            populations=n912_populations,
+        )
+    on_block(
+        block="n912_robustness",
+        status="COMPLETE",
+        identity=r4_inference.N912_ROBUSTNESS_ROLE,
+        output_fingerprint=fingerprint({"comparisons": sorted(n912_report["comparisons"])})
+        if "comparisons" in n912_report
+        else None,
+    )
+
+    # --- primary12 / extension8 / direction6 / native12 (shared TEST draws)
+    bootstrap = run_test_bootstrap(
+        primary,
+        models=primary_models,
+        populations=primary_populations,
+        procedures=authority.procedure_order,
+        replicates=test_replicates,
+    )
+    legacy_bootstrap = run_test_bootstrap(
+        legacy,
+        models=legacy_models,
+        populations=legacy_populations,
+        procedures=authority.procedure_order,
+        replicates=test_replicates,
+    )
+    logloss = run_logloss_panel_bootstrap(
+        primary,
+        models=primary_models,
+        populations=primary_populations,
+        procedures=authority.procedure_order,
+        replicates=test_replicates,
+    )
+    on_block(
+        block="test_bootstrap",
+        status="COMPLETE",
+        identity=r4_inference.TEST_BOOTSTRAP_PROTOCOL_ID,
+        output_fingerprint=fingerprint(
+            {"contrasts": len(bootstrap.primary_contrasts)}
+        ),
+    )
+
+    # --- full TRAIN-refit scope: every frozen required procedure
+    refit = run_refit_blocks(
+        primary,
+        models=primary_models,
+        populations=primary_populations,
+        procedures=authority.procedure_order,
+        replicates=refit_replicates,
+    )
+    legacy_refit = run_refit_blocks(
+        legacy,
+        models=legacy_models,
+        populations=legacy_populations,
+        procedures=authority.procedure_order,
+        replicates=refit_replicates,
+    )
+    # Secondary-robustness TRAIN-refit blocks on the frozen nested N912 budget
+    # (frozen new-population 912 manifests only). Never a new multiplicity family.
+    n912_refit: dict[str, Any] = {}
+    if dag.n912 is not None:
+        n912_refit = run_refit_blocks(
+            dag.n912,
+            models=primary_models,
+            populations=n912_populations,
+            procedures=authority.procedure_order,
+            replicates=refit_replicates,
+        )
+    on_block(
+        block="train_refit",
+        status="COMPLETE",
+        identity=r4_inference.TRAIN_REFIT_PROTOCOL_ID,
+        output_fingerprint=fingerprint(
+            {
+                "blocks": sorted(refit),
+                "legacy_blocks": sorted(legacy_refit),
+                "n912_blocks": sorted(n912_refit),
+            }
+        ),
+    )
+
+    # --- predictor_development8 / predictor_validation16 / predictor_legacy8
+    merged = merge_panels(primary, legacy)
+    measurements = build_predictor_measurements(merged)
+    point_rows = predictor_point_rows(measurements)
+    predictor = run_predictor_bootstrap(
+        measurements=measurements,
+        canonical_rows=_canonical_predictor_rows(merged),
+        metadata={
+            population: authority.population_metadata[population]
+            for population in (*primary_populations, *legacy_populations)
+        },
+        replicates=predictor_replicates,
+        point_estimate=r4_predictor.primary_statistic(point_rows) if point_rows else None,
+    )
+    on_block(
+        block="predictor",
+        status=predictor.status,
+        identity=r4_predictor.VALIDATION_PROTOCOL_ID,
+        output_fingerprint=fingerprint({"rows": len(point_rows)}),
+    )
+
+    incompleteness = tuple(
+        sorted(
+            [
+                f"fit|{key}|{entry['status']}"
+                for key, entry in coverage_registry.items()
+                if entry["status"] != AVAILABLE
+            ]
+            + [
+                f"legacy-fit|{key}|{entry['status']}"
+                for key, entry in legacy_coverage_registry.items()
+                if entry["status"] != AVAILABLE
+            ]
+        )
+    )
+
+    # --- final assembly
+    skeleton = r4_inference.build_analysis_artifact_skeleton(
+        population_fingerprints={
+            population: authority.population_metadata[population].population_fingerprint
+            for population in (*primary_populations, *legacy_populations)
+        },
+        calibration_fingerprints=dict(r4_inference.PROCEDURE_FINGERPRINTS),
+        model_identities={
+            model_key: model_key for model_key in (*primary_models, *legacy_models)
+        },
+        measurement_provenance={
+            "raw_measurement_freeze_commit": authority.raw_measurement_freeze_commit,
+            "measurement_code_commit": authority.measurement_code_commit,
+            "ledger_fingerprint": authority.ledger_fingerprint,
+        },
+        full_fit_coverage={
+            "primary": coverage.matrix(),
+            "legacy": legacy_coverage.matrix(),
+            "incomplete_cells": coverage.incomplete_cells(),
+            "legacy_incomplete_cells": legacy_coverage.incomplete_cells(),
+        },
+        unit_estimates={key: value["status"] for key, value in estimates.items()},
+        panel_estimates=bootstrap.family_status(),
+        test_bootstrap_provenance={
+            "protocol_id": r4_inference.TEST_BOOTSTRAP_PROTOCOL_ID,
+            "protocol_version": r4_inference.TEST_BOOTSTRAP_PROTOCOL_VERSION,
+            "replicates": test_replicates,
+        },
+        train_refit_provenance={
+            "protocol_id": r4_inference.TRAIN_REFIT_PROTOCOL_ID,
+            "protocol_version": r4_inference.TRAIN_REFIT_PROTOCOL_VERSION,
+            "replicates": refit_replicates,
+            "blocks": {key: block.status for key, block in refit.items()},
+            "legacy_blocks": {key: block.status for key, block in legacy_refit.items()},
+            "n912_blocks": {key: block.status for key, block in n912_refit.items()},
+        },
+        multiplicity_families={
+            "primary": len(bootstrap.primary_contrasts),
+            "extension": len(bootstrap.extension_panel),
+            "direction_difference": len(bootstrap.direction_differences),
+            "native_reference": len(bootstrap.native_reference),
+        },
+        n912_robustness=n912_report,
+        secondary_diagnostics={
+            "logloss_status": logloss.status,
+            "logloss_intervals": {
+                "|".join(key): (
+                    None if interval is None else interval.payload()
+                )
+                for key, interval in logloss.intervals.items()
+            },
+            "logloss_undefined_replicates": {
+                "|".join(key): list(value)
+                for key, value in logloss.undefined_replicates.items()
+            },
+            "predictor": {
+                "validation_protocol_id": r4_predictor.VALIDATION_PROTOCOL_ID,
+                "status": predictor.status,
+                "planned_replicates": predictor.planned_replicates,
+                "successful_replicates": predictor.successful_replicates,
+                "undefined_replicates": predictor.undefined_replicates,
+                "undefined_indices": list(predictor.undefined_indices),
+                "incomplete_replicates": predictor.incomplete_replicates,
+                "incomplete_indices": list(predictor.incomplete_indices),
+                "point_estimate": predictor.point_estimate,
+                "tail_rule": predictor.tail_rule,
+                "interval": predictor.interval().payload(),
+                "units_total": len(measurements),
+                "development_units": sum(
+                    1
+                    for measurement in measurements
+                    if measurement.unit.analysis_role == r4_predictor.ROLE_DEVELOPMENT
+                ),
+                "validation_units": sum(
+                    1
+                    for measurement in measurements
+                    if measurement.unit.analysis_role
+                    == r4_predictor.ROLE_PRIMARY_VALIDATION
+                ),
+                "legacy_units": sum(
+                    1
+                    for measurement in measurements
+                    if measurement.unit.analysis_role == r4_predictor.ROLE_LEGACY_EXTENSION
+                ),
+                "validation_rows": len(point_rows),
+            },
+            "legacy_secondary": {
+                "models": list(legacy_models),
+                "populations": list(legacy_populations),
+                "unit_estimates": len(legacy_estimates),
+                "bootstrap_family_status": legacy_bootstrap.family_status(),
+                "refit_blocks": len(legacy_refit),
+            },
+        },
+        incompleteness=incompleteness,
+    )
+    skeleton["runner"] = {
+        "runner_id": RUNNER_ID,
+        "runner_version": RUNNER_VERSION,
+        "runner_source_sha256": sha256_file(RUNNER_SOURCE_PATH),
+        "runner_contract_id": RUNNER_CONTRACT_ID,
+        "result_fingerprint_version": ANALYSIS_RESULT_FINGERPRINT_VERSION,
+        "fixture_marker": dag.fixture_marker,
+    }
+    on_block(
+        block="final_assembly",
+        status="COMPLETE",
+        identity=authority.execution_manifest_fingerprint,
+        output_fingerprint=fingerprint(skeleton),
+    )
+    return {
+        "artifact": skeleton,
+        "primary_models": primary_models,
+        "legacy_models": legacy_models,
+        "estimates": estimates,
+        "legacy_estimates": legacy_estimates,
+        "bootstrap": bootstrap,
+        "legacy_bootstrap": legacy_bootstrap,
+        "logloss": logloss,
+        "refit": refit,
+        "legacy_refit": legacy_refit,
+        "n912_refit": n912_refit,
+        "n912_robustness": n912_report,
+        "predictor": predictor,
+        "predictor_point_rows": point_rows,
+        "coverage": coverage,
+        "coverage_registry": coverage_registry,
+        "legacy_coverage_registry": legacy_coverage_registry,
+    }
+
+
+def _canonical_predictor_rows(inputs: PanelInputs) -> dict[str, tuple[R4InferenceRow, ...]]:
+    """One canonical row set per population (draw identity is model-independent)."""
+    out: dict[str, tuple[R4InferenceRow, ...]] = {}
+    for model_key, population in inputs.test_rows:
+        out.setdefault(population, inputs.test_rows[(model_key, population)])
+    return out
+
+
+# --------------------------------------------------------------------------- #
 # CLI
 # --------------------------------------------------------------------------- #
 
@@ -1252,7 +2215,9 @@ def _synthetic_rows(
     return tuple(rows)
 
 
-def _synthetic_metadata(authority: FrozenAuthority) -> dict[str, PopulationMetadata]:
+def _synthetic_metadata(
+    authority: FrozenAuthority, *, train_per_stratum: int = SYNTHETIC_TRAIN_PER_STRATUM
+) -> dict[str, PopulationMetadata]:
     out: dict[str, PopulationMetadata] = {}
     for population_id, meta in authority.population_metadata.items():
         out[population_id] = PopulationMetadata(
@@ -1265,14 +2230,24 @@ def _synthetic_metadata(authority: FrozenAuthority) -> dict[str, PopulationMetad
             test_bootstrap_mode=meta.test_bootstrap_mode,
             estimand_weighting=meta.estimand_weighting,
             test_count=SYNTHETIC_STRATA_PER_POPULATION * SYNTHETIC_TEST_PER_STRATUM,
-            train_count=SYNTHETIC_STRATA_PER_POPULATION * SYNTHETIC_TRAIN_PER_STRATUM,
+            train_count=SYNTHETIC_STRATA_PER_POPULATION * train_per_stratum,
         )
     return out
 
 
-def build_synthetic_panel(authority: FrozenAuthority, cells: Sequence[AnalysisCell]) -> PanelInputs:
-    """Build an invented panel with the frozen structure; no study value enters."""
-    metadata = _synthetic_metadata(authority)
+def build_synthetic_panel(
+    authority: FrozenAuthority,
+    cells: Sequence[AnalysisCell],
+    *,
+    train_per_stratum: int = SYNTHETIC_TRAIN_PER_STRATUM,
+) -> PanelInputs:
+    """Build an invented panel with the frozen structure; no study value enters.
+
+    ``train_per_stratum`` is only ever doubled for the synthetic N912 nested
+    robustness fixture (positions 0..k are a strict prefix, so the N456 TRAIN set
+    is a subset of the N912 TRAIN set and the TEST rows are byte-identical).
+    """
+    metadata = _synthetic_metadata(authority, train_per_stratum=train_per_stratum)
     model_keys = {cell.model_id: cell.model_key for cell in cells}
     train: dict[tuple[str, str], tuple[R4InferenceRow, ...]] = {}
     test: dict[tuple[str, str], tuple[R4InferenceRow, ...]] = {}
@@ -1284,7 +2259,7 @@ def build_synthetic_panel(authority: FrozenAuthority, cells: Sequence[AnalysisCe
             population_id=cell.population_id,
             split="TRAIN",
             grouped=grouped,
-            per_stratum=SYNTHETIC_TRAIN_PER_STRATUM,
+            per_stratum=train_per_stratum,
         )
         test[(cell.model_key, cell.population_id)] = _synthetic_rows(
             model_key=cell.model_key,
@@ -1538,16 +2513,15 @@ class CheckpointStore:
 
 
 def predictor_report(inputs: PanelInputs, *, replicates: int) -> dict[str, Any]:
-    """Qualify the predictor wiring on the synthetic panel."""
+    """Qualify the predictor wiring on the synthetic panel (merged-panel safe)."""
     measurements = build_predictor_measurements(inputs)
     point_rows = predictor_point_rows(measurements)
     point_estimate = r4_predictor.primary_statistic(point_rows) if point_rows else None
     units = (m.unit for m in measurements)
     populations = tuple(dict.fromkeys(unit.population_id for unit in units))
-    model_key = next(iter(_panel_models(inputs, populations)))
     predictor = run_predictor_bootstrap(
         measurements=measurements,
-        canonical_rows={p: inputs.test_rows[(model_key, p)] for p in populations},
+        canonical_rows=_canonical_predictor_rows(inputs),
         metadata={p: inputs.authority.population_metadata[p] for p in populations},
         replicates=replicates,
         point_estimate=point_estimate,
@@ -1573,19 +2547,39 @@ def predictor_report(inputs: PanelInputs, *, replicates: int) -> dict[str, Any]:
 
 
 def qualification_report(
-    inputs: PanelInputs,
-    *,
-    populations: Sequence[str],
-    replicates: int,
-    predictor_inputs: PanelInputs | None = None,
+    engine: Mapping[str, Any], dag: DagRun, *, replicates: int, role: str = "primary"
 ) -> dict[str, Any]:
-    """Run the integrated wiring on the synthetic panel and qualify it."""
-    models = _panel_models(inputs, populations)
+    """Qualify the frozen-DAG engine output on the synthetic panel.
+
+    This reads the SAME engine output that formal execution produces; it never
+    re-implements the DAG. ``role`` selects the primary (current-generation) or
+    the legacy secondary panel.
+    """
+    if role == "primary":
+        inputs = dag.primary
+        populations = dag.primary_populations
+        models = engine["primary_models"]
+        estimates = engine["estimates"]
+        bootstrap = engine["bootstrap"]
+        refit = engine["refit"]
+    elif role == "legacy":
+        inputs = dag.legacy
+        populations = dag.legacy_populations
+        models = engine["legacy_models"]
+        estimates = engine["legacy_estimates"]
+        bootstrap = engine["legacy_bootstrap"]
+        refit = engine["legacy_refit"]
+    else:  # pragma: no cover - defensive
+        raise R4AnalysisContractViolation(f"unknown qualification role {role!r}")
     procedures = inputs.authority.procedure_order
-    report: dict[str, Any] = {"fixture_marker": SYNTHETIC_FIXTURE_MARKER}
+    report: dict[str, Any] = {
+        "fixture_marker": SYNTHETIC_FIXTURE_MARKER,
+        "role": role,
+        "models": list(models),
+        "populations": list(populations),
+    }
 
     # 1. point estimates + direct-call oracle equivalence
-    estimates = point_estimates(inputs, models=models, populations=populations)
     mismatches: list[str] = []
     for model in models:
         for population in populations:
@@ -1593,7 +2587,7 @@ def qualification_report(
                 for procedure in procedures:
                     key = f"{model}|{population}|{direction}|{procedure}"
                     entry = estimates[key]
-                    if entry["status"] != AVAILABLE:
+                    if "risk_matrix" not in entry:
                         continue
                     oracle = oracle_risk_matrix(
                         inputs,
@@ -1619,17 +2613,14 @@ def qualification_report(
     # 2. metric / extended-real contract
     report["metric_oracle"] = oracle_metric_checks()
 
-    # 3. shared-draw TEST bootstrap
-    bootstrap = run_test_bootstrap(
-        inputs, models=models, populations=populations, procedures=procedures, replicates=replicates
-    )
+    # 3. shared-draw TEST bootstrap (primary12 / extension8 / direction6 / native12)
     report["bootstrap_family_status"] = bootstrap.family_status()
     report["bootstrap_primary_contrasts"] = len(bootstrap.primary_contrasts)
     report["bootstrap_direction_differences"] = len(bootstrap.direction_differences)
     report["bootstrap_extension_panel"] = len(bootstrap.extension_panel)
     report["bootstrap_native_reference"] = len(bootstrap.native_reference)
 
-    # 4. dependency-unavailable propagation: CORE4 alone must keep the primary family
+    # 4. dependency-unavailable propagation: CORE4 alone keeps primary + direction
     core_only = run_test_bootstrap(
         inputs,
         models=models,
@@ -1663,57 +2654,336 @@ def qualification_report(
     report["shared_draw_identity_equal_across_models"] = sharing_ok
     report["cluster_never_split"] = cluster_ok
 
-    # 6. predictor block (frozen unit panel spans every model role)
-    report["predictor"] = predictor_report(
-        predictor_inputs if predictor_inputs is not None else inputs, replicates=replicates
-    )
-
-    # 7. TRAIN-refit block
-    refit = run_refit_blocks(
-        inputs,
-        models=models,
-        populations=populations,
-        procedures=r4_inference.LOGISTIC_CORE_PROCEDURES,
-        replicates=max(2, replicates // 8),
-    )
+    # 6. full-scope TRAIN refit (every frozen required procedure)
     report["refit_blocks"] = len(refit)
     report["refit_statuses"] = sorted({block.status for block in refit.values()})
+    report["refit_procedures"] = sorted({key.split("|")[3] for key in refit})
+    report["refit_estimands"] = sorted({key.split("|")[4] for key in refit})
+    report["refit_incomplete_blocks"] = sorted(
+        key for key, block in refit.items() if block.status != "COMPLETE"
+    )
+    report["refit_failure_records"] = sorted(
+        {
+            f"{block.procedure}|{record.exception_type}|{record.message}"
+            for block in refit.values()
+            for record in block.failures
+        }
+    )
+    report["refit_intervals_withheld"] = sum(
+        1 for block in refit.values() if block.interval is None
+    )
 
+    # 7. full-fit coverage registry
+    registry = (
+        engine["coverage_registry"] if role == "primary" else engine["legacy_coverage_registry"]
+    )
+    report["fit_coverage"] = {
+        "entries": len(registry),
+        "failed": sorted(key for key, entry in registry.items() if entry["status"] == FAILED),
+        "ineligible": sorted(
+            key for key, entry in registry.items() if entry["status"] == INELIGIBLE
+        ),
+    }
     report["available_procedures"] = available_procedures(
         inputs, models=models, populations=populations
     )
+
+    if role != "primary":
+        return report
+
+    # 8. exact-LogLoss secondary path (primary panel only)
+    logloss = engine["logloss"]
+    report["logloss_status"] = logloss.status
+    report["logloss_contrasts"] = len(logloss.series)
+    report["logloss_undefined_contrasts"] = sorted(
+        "|".join(key) for key, value in logloss.undefined_replicates.items() if value
+    )
+
+    # 9. N912 nested robustness (secondary; never rescues the N456 primary)
+    n912 = engine["n912_robustness"]
+    report["n912_robustness"] = {
+        "role": n912.get("role"),
+        "cannot_rescue_primary": n912.get("cannot_rescue_primary"),
+        "shared_test_draw_paired_by_replicate": n912.get("shared_test_draw_paired_by_replicate"),
+        "comparisons": len(n912.get("comparisons", {})),
+        "refit_blocks": len(engine.get("n912_refit", {})),
+        "refit_statuses": sorted(
+            {block.status for block in engine.get("n912_refit", {}).values()}
+        ),
+    }
+
+    # 10. legacy secondary path
+    report["legacy"] = {
+        "models": list(engine["legacy_models"]),
+        "populations": list(dag.legacy_populations),
+        "unit_estimates": len(engine["legacy_estimates"]),
+        "bootstrap_family_status": engine["legacy_bootstrap"].family_status(),
+        "refit_blocks": len(engine["legacy_refit"]),
+    }
+
+    # 11. predictor 8 / 16 / 8 on the merged panel
+    merged_measurements = build_predictor_measurements(merge_panels(dag.primary, dag.legacy))
+    report["predictor"] = {
+        "units_total": len(merged_measurements),
+        "development_units": sum(
+            1
+            for m in merged_measurements
+            if m.unit.analysis_role == r4_predictor.ROLE_DEVELOPMENT
+        ),
+        "validation_units": sum(
+            1
+            for m in merged_measurements
+            if m.unit.analysis_role == r4_predictor.ROLE_PRIMARY_VALIDATION
+        ),
+        "legacy_units": sum(
+            1
+            for m in merged_measurements
+            if m.unit.analysis_role == r4_predictor.ROLE_LEGACY_EXTENSION
+        ),
+        "status": engine["predictor"].status,
+        "successful_replicates": engine["predictor"].successful_replicates,
+        "planned_replicates": engine["predictor"].planned_replicates,
+        "validation_rows": len(engine["predictor_point_rows"]),
+        "point_estimate": (
+            r4_predictor.primary_statistic(engine["predictor_point_rows"])
+            if engine["predictor_point_rows"]
+            else None
+        ),
+        "tail_rule": engine["predictor"].tail_rule,
+    }
     return report
 
 
+def _with_fit_failure(
+    panel: PanelInputs,
+    *,
+    model: str,
+    population: str,
+    procedure: str,
+    direction: str,
+    side: str,
+    failure_type: str,
+    message: str,
+) -> PanelInputs:
+    """Return a copy of ``panel`` with one fit forced into the FAILED state.
+
+    Used only by the synthetic formal-DAG qualification: it injects exactly the
+    frozen full-fit FAILED semantics without touching any frozen module.
+    """
+    fits = dict(panel.fits)
+    fits[(model, population, f"{procedure}|{direction}|{side}")] = ProcedureFit(
+        procedure=procedure,
+        status=FAILED,
+        calibrator=None,
+        reason=f"{failure_type}: {message}",
+        state_fingerprint=None,
+        failure_type=failure_type,
+    )
+    return PanelInputs(
+        authority=panel.authority,
+        model_keys=panel.model_keys,
+        train_rows=panel.train_rows,
+        test_rows=panel.test_rows,
+        fits=fits,
+    )
+
+
+def _estimands_of(engine: Mapping[str, Any], key: str) -> tuple[str, ...]:
+    return tuple(sorted(engine["estimates"][key]["estimands"]))
+
+
+def dependency_qualification(dag: DagRun, *, replicates: int) -> dict[str, Any]:
+    """Frozen dependency truth table + failure-propagation qualification.
+
+    Injects a frozen B-beta gate-9 FULL-FIT failure (and cross-only / native-only
+    / both-side variants) and checks that the engine never crashes, that the exact
+    failure class is retained, that only the dependent estimands disappear, and
+    that every fixed-size family keeps its size.
+    """
+    models = _panel_models(dag.primary, dag.primary_populations)
+    model = models[0]
+    population = dag.primary_populations[0]
+    direction = dag.authority.direction_order[0]
+    procedure = "B-beta"
+    key = f"{model}|{population}|{direction}|{procedure}"
+    message = "no constraint face produced an accepted optimum"
+
+    def run(panel: PanelInputs) -> Mapping[str, Any]:
+        return run_dag_engine(
+            DagRun(
+                authority=dag.authority,
+                primary=panel,
+                legacy=dag.legacy,
+                n912=None,
+                primary_populations=dag.primary_populations,
+                legacy_populations=dag.legacy_populations,
+                fixture_marker=SYNTHETIC_FIXTURE_MARKER,
+            ),
+            test_replicates=replicates,
+            refit_replicates=max(2, replicates // 4),
+            predictor_replicates=replicates,
+        )
+
+    out: dict[str, Any] = {"injected_unit": key, "injected_message": message}
+
+    # (a) cross/source fit FAILED only -> Delta_deploy and Delta_transport vanish
+    cross_only = run(
+        _with_fit_failure(
+            dag.primary,
+            model=model,
+            population=population,
+            procedure=procedure,
+            direction=direction,
+            side="cross",
+            failure_type="BetaImplementationError",
+            message=message,
+        )
+    )
+    out["cross_only_estimands"] = _estimands_of(cross_only, key)
+    out["cross_only_failure_type"] = cross_only["estimates"][key]["cross_failure_type"]
+    out["cross_only_status"] = cross_only["estimates"][key]["status"]
+    out["cross_only_reason"] = cross_only["estimates"][key]["cross_reason"]
+    out["cross_only_family_sizes"] = {
+        "primary": len(cross_only["bootstrap"].primary_contrasts),
+        "extension": len(cross_only["bootstrap"].extension_panel),
+        "direction": len(cross_only["bootstrap"].direction_differences),
+        "native": len(cross_only["bootstrap"].native_reference),
+    }
+
+    # (b) native/target fit FAILED only -> Delta_native and Delta_transport vanish
+    native_only = run(
+        _with_fit_failure(
+            dag.primary,
+            model=model,
+            population=population,
+            procedure=procedure,
+            direction=direction,
+            side="native",
+            failure_type="BetaImplementationError",
+            message=message,
+        )
+    )
+    out["native_only_estimands"] = _estimands_of(native_only, key)
+
+    # (c) both sides FAILED -> every estimand of that unit vanishes
+    both = dag.primary
+    for side in ("cross", "native"):
+        both = _with_fit_failure(
+            both,
+            model=model,
+            population=population,
+            procedure=procedure,
+            direction=direction,
+            side=side,
+            failure_type="BetaImplementationError",
+            message=message,
+        )
+    both_engine = run(both)
+    out["both_estimands"] = _estimands_of(both_engine, key)
+    out["both_family_sizes"] = {
+        "primary": len(both_engine["bootstrap"].primary_contrasts),
+        "extension": len(both_engine["bootstrap"].extension_panel),
+        "direction": len(both_engine["bootstrap"].direction_differences),
+        "native": len(both_engine["bootstrap"].native_reference),
+    }
+    out["both_failed_fits"] = sorted(
+        name
+        for name, entry in both_engine["coverage_registry"].items()
+        if entry["status"] == FAILED
+    )
+    out["both_failure_types"] = sorted(
+        {
+            entry["failure_type"]
+            for entry in both_engine["coverage_registry"].values()
+            if entry["failure_type"] is not None
+        }
+    )
+
+    # (d) CORE4 must stay COMPLETE under an injected B-beta gate-9 failure
+    core4_ok = True
+    for family, members in both_engine["bootstrap"].family_status().items():
+        if family in ("primary", "direction_difference"):
+            core4_ok = core4_ok and members.get("status") == "COMPLETE"
+    out["core4_primary_and_direction_complete_under_injection"] = core4_ok
+    out["dependency_truth_table"] = {
+        estimand: list(dependencies)
+        for estimand, dependencies in ESTIMAND_DEPENDENCIES.items()
+    }
+    out["family_sizes_fixed"] = {
+        "primary": 12,
+        "extension": 8,
+        "direction_difference": 6,
+        "native_reference": 12,
+    }
+    return out
+
+
 def synthetic_qualification(args: argparse.Namespace) -> int:
-    """Qualify the integrated runner on invented fixtures only."""
+    """Qualify the frozen-DAG engine on invented fixtures only.
+
+    The synthetic path calls the exact same ``run_dag_engine`` that formal
+    execution calls; only the input source, replicate counts, output root and the
+    fixture marker differ.
+    """
     authority = load_frozen_authority()
     cells = load_cells()
     current_cells = [cell for cell in cells if cell.model_role == "current-generation"]
     legacy_cells = [cell for cell in cells if cell.model_role != "current-generation"]
     primary_populations = tuple(dict.fromkeys(cell.population_id for cell in current_cells))
     legacy_populations = tuple(dict.fromkeys(cell.population_id for cell in legacy_cells))
+    replicates = args.synthetic_replicates
 
-    def run_once() -> dict[str, Any]:
+    def build_dag() -> DagRun:
         primary = build_synthetic_panel(authority, current_cells)
         legacy = build_synthetic_panel(authority, legacy_cells)
-        merged = merge_panels(primary, legacy)
+        n912_cells = [
+            cell
+            for cell in current_cells
+            if cell.population_id
+            in (
+                r4_inference.HELLASWAG_POPULATION_ID,
+                r4_inference.MEDMCQA_POPULATION_ID,
+            )
+        ]
+        n912 = build_synthetic_panel(
+            authority, n912_cells, train_per_stratum=2 * SYNTHETIC_TRAIN_PER_STRATUM
+        )
+        return DagRun(
+            authority=primary.authority,
+            primary=primary,
+            legacy=legacy,
+            n912=n912,
+            primary_populations=primary_populations,
+            legacy_populations=legacy_populations,
+            fixture_marker=SYNTHETIC_FIXTURE_MARKER,
+        )
+
+    def run_once() -> dict[str, Any]:
+        dag = build_dag()
+        engine = run_dag_engine(
+            dag,
+            test_replicates=replicates,
+            refit_replicates=max(2, replicates // 4),
+            predictor_replicates=replicates,
+        )
         return {
             "fixture_marker": SYNTHETIC_FIXTURE_MARKER,
-            "primary": qualification_report(
-                primary,
-                populations=primary_populations,
-                replicates=args.synthetic_replicates,
-                predictor_inputs=merged,
+            "primary": qualification_report(engine, dag, replicates=replicates, role="primary"),
+            "legacy": qualification_report(engine, dag, replicates=replicates, role="legacy"),
+            "dependency": dependency_qualification(dag, replicates=max(2, replicates // 2)),
+            "engine_blocks": sorted(
+                {
+                    "input_load",
+                    "point_estimates",
+                    "n912_robustness",
+                    "test_bootstrap",
+                    "train_refit",
+                    "predictor",
+                    "final_assembly",
+                }
             ),
-            "legacy": qualification_report(
-                legacy,
-                populations=legacy_populations,
-                replicates=args.synthetic_replicates,
-                predictor_inputs=merged,
-            ),
-            "primary_units": len(primary.train_rows) * 2,
-            "legacy_units": len(legacy.train_rows) * 2,
+            "primary_units": len(engine["primary_models"]) * len(primary_populations) * 2,
+            "legacy_units": len(engine["legacy_models"]) * len(legacy_populations) * 2,
         }
 
     first = run_once()
@@ -1759,8 +3029,6 @@ def execute_formal_analysis(args: argparse.Namespace) -> int:
     root = Path(args.formal_root)
     store = CheckpointStore(root)
     _assert_formal_root_clean(root, resume=bool(store.load()["blocks"]))
-    current_cells = [cell for cell in cells if cell.model_role == "current-generation"]
-    legacy_cells = [cell for cell in cells if cell.model_role != "current-generation"]
     store.record(
         "authority_validation",
         status="COMPLETE",
@@ -1768,130 +3036,51 @@ def execute_formal_analysis(args: argparse.Namespace) -> int:
         output_fingerprint=authority.measurement_contract_fingerprint,
     )
 
+    current_cells = [cell for cell in cells if cell.model_role == "current-generation"]
+    legacy_cells = [cell for cell in cells if cell.model_role != "current-generation"]
     primary_populations = tuple(authority.population_order)
-    legacy_populations = tuple(
-        dict.fromkeys(cell.population_id for cell in legacy_cells)
+    legacy_populations = tuple(dict.fromkeys(cell.population_id for cell in legacy_cells))
+    n912_populations = tuple(
+        population
+        for population in (
+            r4_inference.HELLASWAG_POPULATION_ID,
+            r4_inference.MEDMCQA_POPULATION_ID,
+        )
+        if population in primary_populations
     )
+
     primary = build_panel_inputs(
         authority, current_cells, population_ids=primary_populations, budget="N456"
     )
     legacy = build_panel_inputs(
         authority, legacy_cells, population_ids=legacy_populations, budget="N456"
     )
-    store.record(
-        "input_load",
-        status="COMPLETE",
-        identity=authority.ledger_fingerprint,
-        output_fingerprint=fingerprint(
-            {
-                "cells": sorted(cell.cell_id for cell in cells),
-                "units": len(enumerate_units(cells, authority)),
-            }
-        ),
+    n912 = (
+        build_panel_inputs(
+            authority, current_cells, population_ids=n912_populations, budget="N912"
+        )
+        if n912_populations
+        else None
     )
 
-    primary_models = _panel_models(primary, primary_populations)
-    legacy_models = _panel_models(legacy, legacy_populations)
-
-    estimates = point_estimates(primary, models=primary_models, populations=primary_populations)
-    store.record(
-        "point_estimates",
-        status="COMPLETE",
-        identity=authority.final_protocol_fingerprint,
-        output_fingerprint=fingerprint({"units": sorted(estimates)}),
+    dag = DagRun(
+        authority=authority,
+        primary=primary,
+        legacy=legacy,
+        n912=n912,
+        primary_populations=primary_populations,
+        legacy_populations=legacy_populations,
+        fixture_marker=None,
+    )
+    engine = run_dag_engine(
+        dag,
+        test_replicates=r4_inference.TEST_BOOTSTRAP_REPLICATES,
+        refit_replicates=r4_inference.TRAIN_REFIT_REPLICATES,
+        predictor_replicates=r4_predictor.PREDICTOR_BOOTSTRAP_REPLICATES,
+        on_block=store.record,
     )
 
-    bootstrap = run_test_bootstrap(
-        primary,
-        models=primary_models,
-        populations=primary_populations,
-        procedures=authority.procedure_order,
-        replicates=r4_inference.TEST_BOOTSTRAP_REPLICATES,
-    )
-    store.record(
-        "test_bootstrap",
-        status="COMPLETE",
-        identity=r4_inference.TEST_BOOTSTRAP_PROTOCOL_ID,
-        output_fingerprint=fingerprint({"contrasts": len(bootstrap.primary_contrasts)}),
-    )
-
-    refit = run_refit_blocks(
-        primary,
-        models=primary_models,
-        populations=primary_populations,
-        procedures=r4_inference.LOGISTIC_CORE_PROCEDURES,
-        replicates=r4_inference.TRAIN_REFIT_REPLICATES,
-    )
-    store.record(
-        "train_refit",
-        status="COMPLETE",
-        identity=r4_inference.TRAIN_REFIT_PROTOCOL_ID,
-        output_fingerprint=fingerprint({"blocks": sorted(refit)}),
-    )
-
-    measurements = build_predictor_measurements(primary)
-    point_rows = predictor_point_rows(measurements)
-    predictor = run_predictor_bootstrap(
-        measurements=measurements,
-        canonical_rows={p: primary.test_rows[(primary_models[0], p)] for p in primary_populations},
-        metadata={p: authority.population_metadata[p] for p in primary_populations},
-        replicates=r4_predictor.PREDICTOR_BOOTSTRAP_REPLICATES,
-        point_estimate=r4_predictor.primary_statistic(point_rows) if point_rows else None,
-    )
-    store.record(
-        "predictor",
-        status=predictor.status,
-        identity=r4_predictor.VALIDATION_PROTOCOL_ID,
-        output_fingerprint=fingerprint({"rows": len(point_rows)}),
-    )
-
-    skeleton = r4_inference.build_analysis_artifact_skeleton(
-        population_fingerprints={
-            population: authority.population_metadata[population].population_fingerprint
-            for population in primary_populations
-        },
-        calibration_fingerprints={
-            procedure: r4_inference.PROCEDURE_FINGERPRINTS[procedure]
-            for procedure in r4_inference.LOGISTIC_CORE_PROCEDURES
-        },
-        model_identities={
-            model: model for model in primary_models
-        },
-        measurement_provenance={
-            "raw_measurement_freeze_commit": authority.raw_measurement_freeze_commit,
-            "measurement_code_commit": authority.measurement_code_commit,
-            "ledger_fingerprint": authority.ledger_fingerprint,
-        },
-        full_fit_coverage={
-            "cells": len(cells),
-            "current_models": list(primary_models),
-            "legacy_models": list(legacy_models),
-        },
-        unit_estimates={
-            key: value["status"] for key, value in estimates.items()
-        },
-        panel_estimates=bootstrap.family_status(),
-        test_bootstrap_provenance={
-            "protocol_id": r4_inference.TEST_BOOTSTRAP_PROTOCOL_ID,
-            "protocol_version": r4_inference.TEST_BOOTSTRAP_PROTOCOL_VERSION,
-            "replicates": r4_inference.TEST_BOOTSTRAP_REPLICATES,
-        },
-        train_refit_provenance={
-            "protocol_id": r4_inference.TRAIN_REFIT_PROTOCOL_ID,
-            "protocol_version": r4_inference.TRAIN_REFIT_PROTOCOL_VERSION,
-            "replicates": r4_inference.TRAIN_REFIT_REPLICATES,
-            "blocks": {key: block.status for key, block in refit.items()},
-        },
-        multiplicity_families={
-            "primary": len(bootstrap.primary_contrasts),
-            "extension": len(bootstrap.extension_panel),
-            "direction_difference": len(bootstrap.direction_differences),
-            "native_reference": len(bootstrap.native_reference),
-        },
-        n912_robustness={"status": "NOT_EXECUTED_IN_THIS_INVOCATION"},
-        secondary_diagnostics={"status": "NOT_EXECUTED_IN_THIS_INVOCATION"},
-        incompleteness=(),
-    )
+    skeleton = engine["artifact"]
     skeleton["runner"] = {
         "runner_id": RUNNER_ID,
         "runner_version": RUNNER_VERSION,
@@ -1901,13 +3090,17 @@ def execute_formal_analysis(args: argparse.Namespace) -> int:
         "checkpoints": store.completed(),
     }
     write_atomic(root / "analysis-result.json", canonical_json(skeleton))
-    store.record(
-        "final_assembly",
-        status="COMPLETE",
-        identity=authority.execution_manifest_fingerprint,
-        output_fingerprint=fingerprint(skeleton),
+    print(
+        canonical_json(
+            {
+                "status": "COMPLETE",
+                "root": str(root),
+                "units": len(engine["estimates"]),
+                "legacy_units": len(engine["legacy_estimates"]),
+            }
+        ),
+        end="",
     )
-    print(canonical_json({"status": "COMPLETE", "root": str(root)}), end="")
     return 0
 
 

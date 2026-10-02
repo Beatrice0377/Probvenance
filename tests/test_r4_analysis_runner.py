@@ -907,38 +907,349 @@ def test_predictor_bootstrap_is_undefined_for_a_constant_predictor(synthetic_all
 # --------------------------------------------------------------------------- #
 
 
-def test_qualification_report_is_deterministic(
-    synthetic_primary, synthetic_all, current_populations
-):
-    first = runner.qualification_report(
-        synthetic_primary,
-        populations=current_populations,
-        replicates=4,
-        predictor_inputs=synthetic_all,
+@pytest.fixture(scope="module")
+def synthetic_dag(authority, cells, current_populations, legacy_populations):
+    """The full synthetic DagRun (primary + legacy + nested N912)."""
+    current = [cell for cell in cells if cell.model_role == "current-generation"]
+    legacy = [cell for cell in cells if cell.model_role != "current-generation"]
+    n912_cells = [
+        cell
+        for cell in current
+        if cell.population_id
+        in (
+            runner.r4_inference.HELLASWAG_POPULATION_ID,
+            runner.r4_inference.MEDMCQA_POPULATION_ID,
+        )
+    ]
+    return runner.DagRun(
+        authority=authority,
+        primary=runner.build_synthetic_panel(authority, current),
+        legacy=runner.build_synthetic_panel(authority, legacy),
+        n912=runner.build_synthetic_panel(
+            authority,
+            n912_cells,
+            train_per_stratum=2 * runner.SYNTHETIC_TRAIN_PER_STRATUM,
+        ),
+        primary_populations=current_populations,
+        legacy_populations=legacy_populations,
+        fixture_marker=runner.SYNTHETIC_FIXTURE_MARKER,
     )
-    second = runner.qualification_report(
-        synthetic_primary,
-        populations=current_populations,
-        replicates=4,
-        predictor_inputs=synthetic_all,
+
+
+def _run_dag_engine(dag, *, replicates: int = 2):
+    return runner.run_dag_engine(
+        dag,
+        test_replicates=replicates,
+        refit_replicates=2,
+        predictor_replicates=replicates,
     )
+
+
+def test_qualification_report_is_deterministic(synthetic_dag):
+    engine = _run_dag_engine(synthetic_dag)
+    first = runner.qualification_report(engine, synthetic_dag, replicates=2, role="primary")
+    second = runner.qualification_report(engine, synthetic_dag, replicates=2, role="primary")
     assert runner.canonical_json(first) == runner.canonical_json(second)
 
 
-def test_qualification_report_matches_the_oracle(
-    synthetic_primary, synthetic_all, current_populations
-):
-    report = runner.qualification_report(
-        synthetic_primary,
-        populations=current_populations,
-        replicates=4,
-        predictor_inputs=synthetic_all,
-    )
+def test_qualification_report_matches_the_oracle(synthetic_dag):
+    engine = _run_dag_engine(synthetic_dag)
+    report = runner.qualification_report(engine, synthetic_dag, replicates=2, role="primary")
     assert report["fixture_marker"] == runner.SYNTHETIC_FIXTURE_MARKER
     assert report["point_estimate_oracle_equal"] is True
     assert report["point_estimate_mismatches"] == []
     assert report["shared_draw_identity_equal_across_models"] is True
     assert report["cluster_never_split"] is True
+
+
+def test_qualification_report_uses_the_shared_formal_engine(synthetic_dag):
+    """The qualification report must read the engine output, never re-run a DAG."""
+    engine = _run_dag_engine(synthetic_dag)
+    report = runner.qualification_report(engine, synthetic_dag, replicates=2, role="primary")
+    assert report["bootstrap_primary_contrasts"] == len(engine["bootstrap"].primary_contrasts)
+    assert report["refit_blocks"] == len(engine["refit"])
+    assert report["n912_robustness"]["refit_blocks"] == len(engine["n912_refit"])
+    assert report["predictor"]["units_total"] == 32
+    assert report["predictor"]["development_units"] == 8
+    assert report["predictor"]["validation_units"] == 16
+    assert report["predictor"]["legacy_units"] == 8
+    assert report["legacy"]["unit_estimates"] == len(engine["legacy_estimates"])
+
+
+def test_legacy_role_report_never_enters_the_primary_family(synthetic_dag):
+    engine = _run_dag_engine(synthetic_dag)
+    report = runner.qualification_report(engine, synthetic_dag, replicates=2, role="legacy")
+    assert report["role"] == "legacy"
+    assert set(report["models"]) == set(engine["legacy_models"])
+    assert "predictor" not in report
+    assert "n912_robustness" not in report
+
+
+def test_refit_scope_covers_all_six_procedures_and_both_estimands(synthetic_dag):
+    engine = _run_dag_engine(synthetic_dag)
+    assert set(engine["refit"]) and set(engine["legacy_refit"])
+    procedures = {key.split("|")[3] for key in engine["refit"]}
+    estimands = {key.split("|")[4] for key in engine["refit"]}
+    assert procedures == set(synthetic_dag.authority.procedure_order)
+    assert estimands == {"Delta_deploy", "Delta_transport"}
+    assert "Delta_native" not in estimands
+    assert engine["n912_refit"]
+    n912_populations = {key.split("|")[1] for key in engine["n912_refit"]}
+    assert runner.r4_inference.MMLU_POPULATION_ID not in n912_populations
+
+
+def test_logloss_formal_path_is_wired_on_the_engine(synthetic_dag):
+    engine = _run_dag_engine(synthetic_dag)
+    logloss = engine["logloss"]
+    assert logloss.replicates == 2
+    assert logloss.series
+    assert set(logloss.series) == set(logloss.intervals)
+    assert set(logloss.intervals) == set(logloss.undefined_replicates)
+    for key, interval in logloss.intervals.items():
+        if logloss.undefined_replicates[key]:
+            assert interval is None
+        if interval is not None:
+            assert all(value.is_finite for value in logloss.series[key])
+    report = runner.qualification_report(engine, synthetic_dag, replicates=2, role="primary")
+    assert report["logloss_contrasts"] == len(logloss.series)
+    assert report["logloss_status"] in ("COMPLETE", "INCOMPLETE")
+    for key in report["logloss_undefined_contrasts"]:
+        assert logloss.undefined_replicates[tuple(key.split("|"))]
+
+
+def test_one_undefined_logloss_replicate_withholds_the_whole_interval():
+    """Frozen rule: an UNDEFINED replicate -> INCOMPLETE, never a subset interval."""
+    finite = runner.r4_inference.ExtendedReal(value=0.25, state="FINITE")
+    undefined = runner.r4_inference.ExtendedReal(
+        value=None, state=runner.r4_inference.UNDEFINED_EXTENDED_REAL
+    )
+    interval, status = runner._logloss_interval(
+        (finite, undefined, finite),
+        lower_tail=runner.r4_inference.PRIMARY_LOWER_TAIL,
+        upper_tail=runner.r4_inference.PRIMARY_UPPER_TAIL,
+    )
+    assert interval is None
+    assert status == "INCOMPLETE_UNDEFINED_EXTENDED_REAL"
+    good, good_status = runner._logloss_interval(
+        (finite, finite, finite),
+        lower_tail=runner.r4_inference.PRIMARY_LOWER_TAIL,
+        upper_tail=runner.r4_inference.PRIMARY_UPPER_TAIL,
+    )
+    assert good is not None
+    assert good_status == "COMPLETE"
+
+
+def test_logloss_paired_contrast_uses_exact_extended_real_algebra():
+    """+inf - +inf -> UNDEFINED, and a finite difference stays finite."""
+    undefined = runner._logloss_paired_contrast([0.0], [0.0], [1])
+    assert undefined.state == runner.r4_inference.UNDEFINED_EXTENDED_REAL
+    finite = runner._logloss_paired_contrast([0.5], [0.25], [1])
+    assert finite.state == "FINITE"
+    assert finite.value < 0.0
+
+
+def test_n912_formal_path_is_paired_and_cannot_rescue(synthetic_dag):
+    engine = _run_dag_engine(synthetic_dag)
+    n912 = engine["n912_robustness"]
+    assert n912["role"] == runner.r4_inference.N912_ROBUSTNESS_ROLE
+    assert n912["cannot_rescue_primary"] is True
+    assert n912["shared_test_draw_paired_by_replicate"] is True
+    assert n912["comparisons"]
+    for comparison in n912["comparisons"].values():
+        assert comparison["status"] == "COMPLETE"
+        assert comparison["n456_replicates"] == 2
+        assert comparison["n912_replicates"] == 2
+    pairing = runner.validate_n912_panels(
+        synthetic_dag.primary,
+        synthetic_dag.n912,
+        models=engine["primary_models"],
+        populations=(
+            runner.r4_inference.HELLASWAG_POPULATION_ID,
+            runner.r4_inference.MEDMCQA_POPULATION_ID,
+        ),
+    )
+    assert pairing
+    assert all(
+        entry["train_456_subset_of_train_912"] is True
+        and entry["test_identity_identical"] is True
+        and entry["extension_count"] > 0
+        for entry in pairing.values()
+    )
+
+
+def test_predictor_formal_path_uses_the_merged_panel(synthetic_dag):
+    engine = _run_dag_engine(synthetic_dag)
+    predictor = engine["predictor"]
+    assert predictor.planned_replicates == 2
+    assert len(engine["predictor_point_rows"]) == 16
+    assert {row.unit.analysis_role for row in engine["predictor_point_rows"]} == {
+        runner.r4_predictor.ROLE_PRIMARY_VALIDATION
+    }
+
+
+def test_engine_covers_every_frozen_dag_block(synthetic_dag):
+    seen: list[str] = []
+    engine = runner.run_dag_engine(
+        synthetic_dag,
+        test_replicates=2,
+        refit_replicates=2,
+        predictor_replicates=2,
+        on_block=lambda **kwargs: seen.append(kwargs["block"]),
+    )
+    assert engine["artifact"]
+    assert set(seen) >= {
+        "input_load",
+        "point_estimates",
+        "n912_robustness",
+        "test_bootstrap",
+        "train_refit",
+        "predictor",
+        "final_assembly",
+    }
+    assert not any(
+        value == "NOT_EXECUTED_IN_THIS_INVOCATION"
+        for value in runner.canonical_json(engine["artifact"]).split('"')[1::2]
+    )
+
+
+def test_final_assembly_records_the_n912_refit_blocks(synthetic_dag):
+    engine = _run_dag_engine(synthetic_dag)
+    provenance = engine["artifact"]["train_refit_provenance"]
+    assert set(provenance["blocks"]) == set(engine["refit"])
+    assert set(provenance["legacy_blocks"]) == set(engine["legacy_refit"])
+    assert set(provenance["n912_blocks"]) == set(engine["n912_refit"])
+
+
+def test_final_assembly_records_the_predictor_and_logloss(synthetic_dag):
+    engine = _run_dag_engine(synthetic_dag)
+    diagnostics = engine["artifact"]["secondary_diagnostics"]
+    predictor = diagnostics["predictor"]
+    assert predictor["validation_protocol_id"] == runner.r4_predictor.VALIDATION_PROTOCOL_ID
+    assert predictor["units_total"] == 32
+    assert predictor["development_units"] == 8
+    assert predictor["validation_units"] == 16
+    assert predictor["legacy_units"] == 8
+    assert predictor["validation_rows"] == 16
+    assert predictor["status"] == engine["predictor"].status
+    assert predictor["interval"]["status"] == engine["predictor"].interval().status
+    assert diagnostics["logloss_status"] == engine["logloss"].status
+    assert diagnostics["legacy_secondary"]["unit_estimates"] == len(
+        engine["legacy_estimates"]
+    )
+
+
+# --------------------------------------------------------------------------- #
+# Dependency truth table and failure propagation
+# --------------------------------------------------------------------------- #
+
+
+def test_dependency_truth_table_is_frozen():
+    assert runner.ESTIMAND_DEPENDENCIES == {
+        "Delta_deploy": ("cross",),
+        "Delta_native": ("native",),
+        "Delta_transport": ("cross", "native"),
+    }
+    assert runner.REFIT_ESTIMANDS == ("Delta_deploy", "Delta_transport")
+
+
+def test_dependency_qualification_injects_the_beta_gate9_failure(synthetic_dag):
+    report = runner.dependency_qualification(synthetic_dag, replicates=2)
+    assert report["cross_only_failure_type"] == "BetaImplementationError"
+    assert "no constraint face produced an accepted optimum" in report["cross_only_reason"]
+    assert report["cross_only_status"] == "FAILED"
+    assert report["both_failure_types"] == ["BetaImplementationError"]
+    assert report["both_failed_fits"]
+    assert all("B-beta" in name for name in report["both_failed_fits"])
+    assert report["dependency_truth_table"] == {
+        estimand: list(dependencies)
+        for estimand, dependencies in runner.ESTIMAND_DEPENDENCIES.items()
+    }
+    assert report["family_sizes_fixed"] == {
+        "primary": 12,
+        "extension": 8,
+        "direction_difference": 6,
+        "native_reference": 12,
+    }
+
+
+def test_dependency_injection_keeps_core4_complete(synthetic_dag):
+    report = runner.dependency_qualification(synthetic_dag, replicates=2)
+    assert report["core4_primary_and_direction_complete_under_injection"] is True
+
+
+def test_cross_only_failure_removes_only_the_cross_dependent_estimands(synthetic_dag):
+    report = runner.dependency_qualification(synthetic_dag, replicates=2)
+    assert report["cross_only_estimands"] == ("Delta_native",)
+    assert report["native_only_estimands"] == ("Delta_deploy",)
+    assert report["both_estimands"] == ()
+
+
+def test_fit_failure_propagates_as_incomplete_not_an_exception(
+    synthetic_dag, current_populations
+):
+    """A frozen full-fit FAILED must never abort the DAG engine."""
+    models = runner._panel_models(synthetic_dag.primary, current_populations)
+    model = models[0]
+    population = current_populations[0]
+    direction = synthetic_dag.authority.direction_order[0]
+    panel = runner._with_fit_failure(
+        synthetic_dag.primary,
+        model=model,
+        population=population,
+        procedure="B-beta",
+        direction=direction,
+        side="cross",
+        failure_type="BetaImplementationError",
+        message="no constraint face produced an accepted optimum",
+    )
+    broken = runner.DagRun(
+        authority=synthetic_dag.authority,
+        primary=panel,
+        legacy=synthetic_dag.legacy,
+        n912=None,
+        primary_populations=synthetic_dag.primary_populations,
+        legacy_populations=synthetic_dag.legacy_populations,
+        fixture_marker=runner.SYNTHETIC_FIXTURE_MARKER,
+    )
+    engine = _run_dag_engine(broken)
+    registry = engine["coverage_registry"]
+    failed = {key: entry for key, entry in registry.items() if entry["status"] == "FAILED"}
+    assert failed
+    assert all(entry["failure_type"] == "BetaImplementationError" for entry in failed.values())
+    # CORE4 families survive; the fixed family sizes never shrink.
+    status = engine["bootstrap"].family_status()
+    assert status["primary"]["complete_count"] == 12
+    assert status["secondary_direction_difference"]["complete_count"] == 6
+    assert status["secondary_extension"]["family_size"] == 8
+    assert status["secondary_native_reference"]["family_size"] == 12
+    assert status["secondary_extension"]["complete_count"] < 8
+
+
+def test_refit_block_withholds_the_interval_when_a_replicate_fails(
+    synthetic_dag, monkeypatch
+):
+    """Any single failed refit replicate -> INCOMPLETE with no subset interval."""
+    models = runner._panel_models(synthetic_dag.primary, synthetic_dag.primary_populations)
+
+    def exploding(*args, **kwargs):
+        raise runner.r4_inference.BootstrapContractViolation("injected refit failure")
+
+    monkeypatch.setattr(runner.r4_inference, "build_train_refit_draw", exploding)
+    blocks = runner.run_refit_blocks(
+        synthetic_dag.primary,
+        models=models,
+        populations=synthetic_dag.primary_populations,
+        procedures=runner.r4_inference.LOGISTIC_CORE_PROCEDURES,
+        replicates=2,
+    )
+    assert blocks
+    for block in blocks.values():
+        assert block.status == "INCOMPLETE"
+        assert block.interval is None
+        assert block.failures
+        assert all(
+            record.exception_type == "BootstrapContractViolation" for record in block.failures
+        )
 
 
 def test_synthetic_qualification_never_reads_the_formal_evidence(monkeypatch, tmp_path, capsys):

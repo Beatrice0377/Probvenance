@@ -585,6 +585,13 @@ AVAILABLE = "AVAILABLE"
 INELIGIBLE = "INELIGIBLE"
 FAILED = "FAILED"
 
+# The only two frozen measurements. A fitted-map identity is
+# model x population x budget x procedure x measurement.
+_MEASUREMENTS: tuple[str, ...] = (
+    r4_inference.MEASUREMENT_CAT,
+    r4_inference.MEASUREMENT_OVR,
+)
+
 # Frozen dependency truth table: which fitted map each frozen estimand needs.
 # Delta_deploy = R_cross - R_raw  -> cross (source-fitted) map only
 # Delta_native = R_native - R_raw -> native (target-fitted) map only
@@ -688,13 +695,42 @@ def fit_procedure(
 # --------------------------------------------------------------------------- #
 
 
+def canonical_fit_key(
+    model_key: str, population_id: str, procedure: str, measurement: str
+) -> tuple[str, str, str, str]:
+    """The single scientific fitted-map identity of one TRAIN fit.
+
+    Frozen identity: ``model x population x budget x procedure x measurement``.
+    The budget is carried once by :class:`PanelInputs`; direction, cross/native
+    side, estimand and metric are directional REFERENCES into this registry, never
+    distinct fit identities.
+    """
+    return (model_key, population_id, procedure, measurement)
+
+
+def directional_measurement(direction: str, side: str) -> str:
+    """Resolve a directional role to its canonical measurement.
+
+    ``CAT->OVR``: cross = CAT, native = OVR.
+    ``OVR->CAT``: cross = OVR, native = CAT.
+
+    The same fitted map therefore serves two directional roles.
+    """
+    if side == "cross":
+        return r4_inference.source_measurement(direction)
+    if side == "native":
+        return r4_inference.target_measurement(direction)
+    raise R4AnalysisUnfrozenChoice(f"unknown directional side {side!r}")
+
+
 @dataclass(frozen=True)
 class PanelInputs:
     authority: FrozenAuthority
     model_keys: Mapping[str, str]
     train_rows: Mapping[tuple[str, str], tuple[R4InferenceRow, ...]]
     test_rows: Mapping[tuple[str, str], tuple[R4InferenceRow, ...]]
-    fits: Mapping[tuple[str, str, str], ProcedureFit]
+    fits: Mapping[tuple[str, str, str, str], ProcedureFit]
+    budget: str = "N456"
 
 
 def build_panel_inputs(
@@ -719,17 +755,14 @@ def build_panel_inputs(
         selected = select_train_rows(cell, splits["TRAIN"], budget)
         train[(cell.model_key, cell.population_id)] = selected
         model_keys[cell.model_id] = cell.model_key
-        for direction in authority.direction_order:
-            source = r4_inference.source_measurement(direction)
-            target = r4_inference.target_measurement(direction)
-            for procedure in authority.procedure_order:
-                cross_key = (cell.model_key, cell.population_id, f"{procedure}|{direction}|cross")
-                native_key = (cell.model_key, cell.population_id, f"{procedure}|{direction}|native")
-                fits[cross_key] = fit_procedure(
-                    procedure=procedure, train_rows=selected, measurement=source
-                )
-                fits[native_key] = fit_procedure(
-                    procedure=procedure, train_rows=selected, measurement=target
+        # Exactly one canonical fit per (model, population, procedure, measurement):
+        # a measurement is never fitted twice, however many directional roles use it.
+        for procedure in authority.procedure_order:
+            for measurement in _MEASUREMENTS:
+                fits[
+                    canonical_fit_key(cell.model_key, cell.population_id, procedure, measurement)
+                ] = fit_procedure(
+                    procedure=procedure, train_rows=selected, measurement=measurement
                 )
     return PanelInputs(
         authority=authority,
@@ -737,6 +770,7 @@ def build_panel_inputs(
         train_rows=train,
         test_rows=test,
         fits=fits,
+        budget=budget,
     )
 
 
@@ -749,11 +783,9 @@ def available_procedures(
         ok = True
         for model in models:
             for population in populations:
-                for direction in inputs.authority.direction_order:
-                    for side in ("cross", "native"):
-                        key = (model, population, f"{procedure}|{direction}|{side}")
-                        fit = inputs.fits.get(key)
-                        if fit is None or fit.status != AVAILABLE:
+                for measurement in _MEASUREMENTS:
+                    fit = inputs.fits.get((model, population, procedure, measurement))
+                    if fit is None or fit.status != AVAILABLE:
                             ok = False
                             break
                     if not ok:
@@ -779,10 +811,25 @@ def _reindexed_rows(draw: TestDraw, rows: Sequence[R4InferenceRow]) -> tuple[R4I
 def _cross_native_fits(
     inputs: PanelInputs, *, model: str, population: str, procedure: str, direction: str
 ) -> tuple[ProcedureFit, ProcedureFit]:
-    """The SOURCE-fitted (cross) and TARGET-fitted (native) fits of one cell."""
+    """The SOURCE-fitted (cross) and TARGET-fitted (native) fits of one cell.
+
+    Both are directional REFERENCES into the canonical measurement-level registry:
+    the CAT fit is the cross map of ``CAT->OVR`` and the native map of
+    ``OVR->CAT``; the OVR fit is the cross map of ``OVR->CAT`` and the native map
+    of ``CAT->OVR``. A measurement-level failure therefore propagates to both of
+    its directional roles automatically.
+    """
     return (
-        inputs.fits[(model, population, f"{procedure}|{direction}|cross")],
-        inputs.fits[(model, population, f"{procedure}|{direction}|native")],
+        inputs.fits[
+            canonical_fit_key(
+                model, population, procedure, directional_measurement(direction, "cross")
+            )
+        ],
+        inputs.fits[
+            canonical_fit_key(
+                model, population, procedure, directional_measurement(direction, "native")
+            )
+        ],
     )
 
 
@@ -1193,8 +1240,16 @@ def core4_means(
     transport: dict[str, float] = {}
     deploy: dict[str, float] = {}
     for procedure in r4_predictor.CORE4_PROCEDURES:
-        cross = inputs.fits[(model_key, population_id, f"{procedure}|{direction}|cross")]
-        native = inputs.fits[(model_key, population_id, f"{procedure}|{direction}|native")]
+        cross = inputs.fits[
+            canonical_fit_key(
+                model_key, population_id, procedure, directional_measurement(direction, "cross")
+            )
+        ]
+        native = inputs.fits[
+            canonical_fit_key(
+                model_key, population_id, procedure, directional_measurement(direction, "native")
+            )
+        ]
         if cross.calibrator is None or native.calibrator is None:
             return (None, None)
         matrix = r4_inference.risk_matrix(rows, direction, cross.calibrator, native.calibrator)
@@ -1586,33 +1641,65 @@ def run_logloss_panel_bootstrap(
 def build_fit_coverage(
     inputs: PanelInputs, *, models: Sequence[str], populations: Sequence[str]
 ) -> tuple[Any, dict[str, Any]]:
-    """Frozen ``CoverageMatrix`` plus the exact per-fit failure registry."""
+    """Frozen ``CoverageMatrix`` plus the exact canonical per-fit failure registry.
+
+    The registry is keyed by the frozen fitted-map identity
+    ``model|population|budget|procedure|measurement``. Direction and side appear
+    only as ``directional_references`` pointing at those canonical entries, so a
+    measurement-level failure is never mistaken for two distinct fit states.
+    """
     matrix = r4_inference.CoverageMatrix()
     registry: dict[str, Any] = {}
     for model in models:
         for population in populations:
-            for direction in inputs.authority.direction_order:
-                for procedure in inputs.authority.procedure_order:
-                    for side, measurement in (
-                        ("cross", r4_inference.source_measurement(direction)),
-                        ("native", r4_inference.target_measurement(direction)),
-                    ):
-                        fit = inputs.fits[(model, population, f"{procedure}|{direction}|{side}")]
-                        matrix.set(model, population, procedure, measurement, fit.status)
-                        registry[
-                            f"{model}|{population}|{procedure}|{direction}|{side}"
-                        ] = {
+            for procedure in inputs.authority.procedure_order:
+                for measurement in _MEASUREMENTS:
+                    fit = inputs.fits[canonical_fit_key(model, population, procedure, measurement)]
+                    matrix.set(model, population, procedure, measurement, fit.status)
+                    references = [
+                        {"direction": direction, "side": side}
+                        for direction in inputs.authority.direction_order
+                        for side in ("cross", "native")
+                        if directional_measurement(direction, side) == measurement
+                    ]
+                    registry[
+                        f"{model}|{population}|{inputs.budget}|{procedure}|{measurement}"
+                    ] = {
+                        "fit_identity": {
                             "model": model,
                             "population": population,
+                            "budget": inputs.budget,
                             "procedure": procedure,
                             "measurement": measurement,
-                            "direction": direction,
-                            "side": side,
-                            "status": fit.status,
-                            "failure_type": fit.failure_type,
-                            "reason": fit.reason,
-                        }
+                        },
+                        "model": model,
+                        "population": population,
+                        "budget": inputs.budget,
+                        "procedure": procedure,
+                        "measurement": measurement,
+                        "status": fit.status,
+                        "failure_type": fit.failure_type,
+                        "reason": fit.reason,
+                        "directional_references": references,
+                    }
     return matrix, registry
+
+
+def directional_reference_map(
+    inputs: PanelInputs, *, models: Sequence[str], populations: Sequence[str]
+) -> dict[str, str]:
+    """Every directional role mapped onto its canonical fitted-map identity."""
+    out: dict[str, str] = {}
+    for model in models:
+        for population in populations:
+            for direction in inputs.authority.direction_order:
+                for procedure in inputs.authority.procedure_order:
+                    for side in ("cross", "native"):
+                        measurement = directional_measurement(direction, side)
+                        out[f"{model}|{population}|{direction}|{procedure}|{side}"] = (
+                            f"{model}|{population}|{inputs.budget}|{procedure}|{measurement}"
+                        )
+    return out
 
 
 # --------------------------------------------------------------------------- #
@@ -2174,6 +2261,24 @@ def _synthetic_label(*parts: str) -> int:
     return int(_synthetic_digest(*parts)[12:14], 16) % 2
 
 
+SYNTHETIC_ITEM_PREFIX = "synthetic-"
+
+
+def assert_synthetic_inputs(panel: PanelInputs, *, role: str) -> None:
+    """Defensive guard: synthetic qualification may only consume invented rows.
+
+    If any row carries a non-synthetic item id, the synthetic path has been handed
+    formal evidence (or a formal panel) and must refuse to run.
+    """
+    for rows in (*panel.train_rows.values(), *panel.test_rows.values()):
+        for row in rows:
+            if not row.item_id.startswith(SYNTHETIC_ITEM_PREFIX):
+                raise R4AnalysisOutcomeFirewallBreach(
+                    f"{role} panel received non-synthetic row {row.item_id!r}; "
+                    "synthetic qualification must never consume formal evidence"
+                )
+
+
 def _synthetic_rows(
     *,
     model_key: str,
@@ -2251,7 +2356,7 @@ def build_synthetic_panel(
     model_keys = {cell.model_id: cell.model_key for cell in cells}
     train: dict[tuple[str, str], tuple[R4InferenceRow, ...]] = {}
     test: dict[tuple[str, str], tuple[R4InferenceRow, ...]] = {}
-    fits: dict[tuple[str, str, str], ProcedureFit] = {}
+    fits: dict[tuple[str, str, str, str], ProcedureFit] = {}
     for cell in cells:
         grouped = cell.group_id_field is not None
         train[(cell.model_key, cell.population_id)] = _synthetic_rows(
@@ -2287,16 +2392,11 @@ def build_synthetic_panel(
     )
     for key, rows in train.items():
         model_key, population_id = key
-        for direction in synthetic_authority.direction_order:
-            for procedure in synthetic_authority.procedure_order:
-                for side, measurement in (
-                    ("cross", r4_inference.source_measurement(direction)),
-                    ("native", r4_inference.target_measurement(direction)),
-                ):
-                    fit_key = (model_key, population_id, f"{procedure}|{direction}|{side}")
-                    fits[fit_key] = fit_procedure(
-                        procedure=procedure, train_rows=rows, measurement=measurement
-                    )
+        for procedure in synthetic_authority.procedure_order:
+            for measurement in _MEASUREMENTS:
+                fits[canonical_fit_key(model_key, population_id, procedure, measurement)] = (
+                    fit_procedure(procedure=procedure, train_rows=rows, measurement=measurement)
+                )
     return PanelInputs(
         authority=synthetic_authority,
         model_keys=model_keys,
@@ -2322,7 +2422,7 @@ def merge_panels(*panels: PanelInputs) -> PanelInputs:
     model_keys: dict[str, str] = {}
     train: dict[tuple[str, str], tuple[R4InferenceRow, ...]] = {}
     test: dict[tuple[str, str], tuple[R4InferenceRow, ...]] = {}
-    fits: dict[tuple[str, str, str], ProcedureFit] = {}
+    fits: dict[tuple[str, str, str, str], ProcedureFit] = {}
     for panel in panels:
         other = panel.authority
         if other is not authority and other.registry_fingerprint != authority.registry_fingerprint:
@@ -2760,18 +2860,18 @@ def _with_fit_failure(
     model: str,
     population: str,
     procedure: str,
-    direction: str,
-    side: str,
+    measurement: str,
     failure_type: str,
     message: str,
 ) -> PanelInputs:
-    """Return a copy of ``panel`` with one fit forced into the FAILED state.
+    """Return a copy of ``panel`` with one canonical fit forced into FAILED.
 
-    Used only by the synthetic formal-DAG qualification: it injects exactly the
-    frozen full-fit FAILED semantics without touching any frozen module.
+    The injection is at the frozen fitted-map identity level, so every directional
+    role that references this measurement follows automatically. Used only by the
+    synthetic formal-DAG qualification; no frozen module is touched.
     """
     fits = dict(panel.fits)
-    fits[(model, population, f"{procedure}|{direction}|{side}")] = ProcedureFit(
+    fits[canonical_fit_key(model, population, procedure, measurement)] = ProcedureFit(
         procedure=procedure,
         status=FAILED,
         calibrator=None,
@@ -2785,6 +2885,7 @@ def _with_fit_failure(
         train_rows=panel.train_rows,
         test_rows=panel.test_rows,
         fits=fits,
+        budget=panel.budget,
     )
 
 
@@ -2792,20 +2893,76 @@ def _estimands_of(engine: Mapping[str, Any], key: str) -> tuple[str, ...]:
     return tuple(sorted(engine["estimates"][key]["estimands"]))
 
 
-def dependency_qualification(dag: DagRun, *, replicates: int) -> dict[str, Any]:
-    """Frozen dependency truth table + failure-propagation qualification.
+def expected_dependency_truth_table(measurement: str) -> dict[str, dict[str, str]]:
+    """Truth table for a canonical measurement-level fit failure.
 
-    Injects a frozen B-beta gate-9 FULL-FIT failure (and cross-only / native-only
-    / both-side variants) and checks that the engine never crashes, that the exact
-    failure class is retained, that only the dependent estimands disappear, and
-    that every fixed-size family keeps its size.
+    Derived mechanically from :data:`ESTIMAND_DEPENDENCIES` and the frozen
+    directional aliasing, never hand-written. ``Delta_deploy`` depends on the
+    cross (source-fitted) map, ``Delta_native`` on the native (target-fitted) map,
+    ``Delta_transport`` on both.
+    """
+    table: dict[str, dict[str, str]] = {}
+    for direction in r4_inference.DIRECTIONS:
+        row: dict[str, str] = {}
+        for estimand, dependencies in ESTIMAND_DEPENDENCIES.items():
+            blocked = any(
+                directional_measurement(direction, side) == measurement
+                for side in dependencies
+            )
+            row[estimand] = "INCOMPLETE" if blocked else "AVAILABLE"
+        table[direction] = row
+    return table
+
+
+def _direction_status(
+    engine: Mapping[str, Any],
+    *,
+    authority: FrozenAuthority,
+    model: str,
+    population: str,
+    procedure: str,
+) -> dict[str, dict[str, str]]:
+    """Observed per-direction estimand availability for one procedure."""
+    out: dict[str, dict[str, str]] = {}
+    for direction in authority.direction_order:
+        key = f"{model}|{population}|{direction}|{procedure}"
+        entry = engine["estimates"][key]
+        out[direction] = {
+            estimand: ("AVAILABLE" if estimand in entry["estimands"] else "INCOMPLETE")
+            for estimand in ESTIMAND_DEPENDENCIES
+        }
+    return out
+
+
+def _family_counts(engine: Mapping[str, Any]) -> dict[str, dict[str, Any]]:
+    """Frozen family_size / complete_count / incomplete_count per family."""
+    return {
+        name: {
+            "family_size": block["family_size"],
+            "complete_count": block["complete_count"],
+            "incomplete_count": block["incomplete_count"],
+            "status": block["status"],
+        }
+        for name, block in engine["bootstrap"].family_status().items()
+    }
+
+
+def dependency_qualification(dag: DagRun, *, replicates: int) -> dict[str, Any]:
+    """Frozen dependency truth table + measurement-level failure propagation.
+
+    Injection happens at the canonical fitted-map identity
+    ``model x population x budget x procedure x measurement``. A CAT failure and an
+    OVR failure are therefore each injected ONCE and must propagate automatically
+    into BOTH directional roles that reference that measurement: a failed CAT map
+    is simultaneously the cross map of ``CAT->OVR`` and the native map of
+    ``OVR->CAT``. Only the affected estimands disappear; every fixed-size family
+    keeps its frozen ``family_size`` and reports the exact complete/incomplete
+    counts (a member is never dropped).
     """
     models = _panel_models(dag.primary, dag.primary_populations)
     model = models[0]
     population = dag.primary_populations[0]
-    direction = dag.authority.direction_order[0]
     procedure = "B-beta"
-    key = f"{model}|{population}|{direction}|{procedure}"
     message = "no constraint face produced an accepted optimum"
 
     def run(panel: PanelInputs) -> Mapping[str, Any]:
@@ -2824,97 +2981,122 @@ def dependency_qualification(dag: DagRun, *, replicates: int) -> dict[str, Any]:
             predictor_replicates=replicates,
         )
 
-    out: dict[str, Any] = {"injected_unit": key, "injected_message": message}
+    def variant(measurements: Sequence[str]) -> tuple[Mapping[str, Any], PanelInputs]:
+        panel = dag.primary
+        for measurement in measurements:
+            panel = _with_fit_failure(
+                panel,
+                model=model,
+                population=population,
+                procedure=procedure,
+                measurement=measurement,
+                failure_type="BetaImplementationError",
+                message=message,
+            )
+        return run(panel), panel
 
-    # (a) cross/source fit FAILED only -> Delta_deploy and Delta_transport vanish
-    cross_only = run(
-        _with_fit_failure(
-            dag.primary,
-            model=model,
-            population=population,
-            procedure=procedure,
-            direction=direction,
-            side="cross",
-            failure_type="BetaImplementationError",
-            message=message,
-        )
-    )
-    out["cross_only_estimands"] = _estimands_of(cross_only, key)
-    out["cross_only_failure_type"] = cross_only["estimates"][key]["cross_failure_type"]
-    out["cross_only_status"] = cross_only["estimates"][key]["status"]
-    out["cross_only_reason"] = cross_only["estimates"][key]["cross_reason"]
-    out["cross_only_family_sizes"] = {
-        "primary": len(cross_only["bootstrap"].primary_contrasts),
-        "extension": len(cross_only["bootstrap"].extension_panel),
-        "direction": len(cross_only["bootstrap"].direction_differences),
-        "native": len(cross_only["bootstrap"].native_reference),
+    baseline_engine = run(dag.primary)
+    cat_only_engine, _ = variant((r4_inference.MEASUREMENT_CAT,))
+    ovr_only_engine, _ = variant((r4_inference.MEASUREMENT_OVR,))
+    both_engine, _ = variant(_MEASUREMENTS)
+
+    out: dict[str, Any] = {
+        "injected_fit_identity": {
+            "model": model,
+            "population": population,
+            "budget": dag.primary.budget,
+            "procedure": procedure,
+        },
+        "injected_message": message,
+        "directional_aliasing": {
+            f"{direction}|{side}": directional_measurement(direction, side)
+            for direction in dag.authority.direction_order
+            for side in ("cross", "native")
+        },
+        "canonical_fit_count": len(dag.primary.fits),
+        "expected_canonical_fit_count": (
+            len(models)
+            * len(dag.primary_populations)
+            * len(dag.authority.procedure_order)
+            * len(_MEASUREMENTS)
+        ),
+        "dependency_truth_table": {
+            estimand: list(dependencies)
+            for estimand, dependencies in ESTIMAND_DEPENDENCIES.items()
+        },
+        "baseline_families": _family_counts(baseline_engine),
+        "baseline_refit_blocks": len(baseline_engine["refit"]),
+        "family_sizes_fixed": {
+            "primary": r4_inference.PRIMARY_FAMILY_SIZE,
+            "secondary_extension": r4_inference.EXTENSION_FAMILY_SIZE,
+            "secondary_direction_difference": r4_inference.DIRECTION_DIFFERENCE_FAMILY_SIZE,
+            "secondary_native_reference": r4_inference.NATIVE_REFERENCE_FAMILY_SIZE,
+        },
     }
 
-    # (b) native/target fit FAILED only -> Delta_native and Delta_transport vanish
-    native_only = run(
-        _with_fit_failure(
-            dag.primary,
+    for label, engine in (
+        ("cat_only", cat_only_engine),
+        ("ovr_only", ovr_only_engine),
+        ("both_measurements", both_engine),
+    ):
+        out[f"{label}_direction_status"] = _direction_status(
+            engine,
+            authority=dag.authority,
             model=model,
             population=population,
             procedure=procedure,
-            direction=direction,
-            side="native",
-            failure_type="BetaImplementationError",
-            message=message,
         )
-    )
-    out["native_only_estimands"] = _estimands_of(native_only, key)
+        out[f"{label}_families"] = _family_counts(engine)
+        out[f"{label}_failed_fits"] = sorted(
+            name
+            for name, entry in engine["coverage_registry"].items()
+            if entry["status"] == FAILED
+        )
+        out[f"{label}_failure_types"] = sorted(
+            {
+                entry["failure_type"]
+                for entry in engine["coverage_registry"].values()
+                if entry["failure_type"] is not None
+            }
+        )
+        out[f"{label}_refit_blocks"] = len(engine["refit"])
+        out[f"{label}_refit_failure_types"] = sorted(
+            {
+                failure.exception_type
+                for block in engine["refit"].values()
+                for failure in block.failures
+            }
+        )
 
-    # (c) both sides FAILED -> every estimand of that unit vanishes
-    both = dag.primary
-    for side in ("cross", "native"):
-        both = _with_fit_failure(
-            both,
-            model=model,
-            population=population,
-            procedure=procedure,
-            direction=direction,
-            side=side,
-            failure_type="BetaImplementationError",
-            message=message,
-        )
-    both_engine = run(both)
-    out["both_estimands"] = _estimands_of(both_engine, key)
-    out["both_family_sizes"] = {
-        "primary": len(both_engine["bootstrap"].primary_contrasts),
-        "extension": len(both_engine["bootstrap"].extension_panel),
-        "direction": len(both_engine["bootstrap"].direction_differences),
-        "native": len(both_engine["bootstrap"].native_reference),
+    out["cat_only_expected"] = expected_dependency_truth_table(r4_inference.MEASUREMENT_CAT)
+    out["cat_only_expected_matches"] = (
+        out["cat_only_expected"] == out["cat_only_direction_status"]
+    )
+    out["ovr_only_expected"] = expected_dependency_truth_table(r4_inference.MEASUREMENT_OVR)
+    out["ovr_only_expected_matches"] = (
+        out["ovr_only_expected"] == out["ovr_only_direction_status"]
+    )
+    out["both_expected"] = {
+        direction: {estimand: "INCOMPLETE" for estimand in ESTIMAND_DEPENDENCIES}
+        for direction in dag.authority.direction_order
     }
-    out["both_failed_fits"] = sorted(
-        name
-        for name, entry in both_engine["coverage_registry"].items()
-        if entry["status"] == FAILED
-    )
-    out["both_failure_types"] = sorted(
-        {
-            entry["failure_type"]
-            for entry in both_engine["coverage_registry"].values()
-            if entry["failure_type"] is not None
-        }
+    out["both_expected_matches"] = (
+        out["both_expected"] == out["both_measurements_direction_status"]
     )
 
-    # (d) CORE4 must stay COMPLETE under an injected B-beta gate-9 failure
+    # CORE4 (P-low/P-historical/L-low/L-historical) must stay COMPLETE because they
+    # never depend on the standalone B-beta extension.
     core4_ok = True
-    for family, members in both_engine["bootstrap"].family_status().items():
-        if family in ("primary", "direction_difference"):
-            core4_ok = core4_ok and members.get("status") == "COMPLETE"
+    for name in ("primary", "secondary_direction_difference"):
+        core4_ok = core4_ok and out["both_measurements_families"][name]["status"] == "COMPLETE"
     out["core4_primary_and_direction_complete_under_injection"] = core4_ok
-    out["dependency_truth_table"] = {
-        estimand: list(dependencies)
-        for estimand, dependencies in ESTIMAND_DEPENDENCIES.items()
-    }
-    out["family_sizes_fixed"] = {
-        "primary": 12,
-        "extension": 8,
-        "direction_difference": 6,
-        "native_reference": 12,
-    }
+    out["core4_only_extension_unaffected_by_standalone_failure"] = (
+        out["both_measurements_families"]["primary"]["complete_count"] == 12
+        and out["both_measurements_families"]["secondary_direction_difference"][
+            "complete_count"
+        ]
+        == 6
+    )
     return out
 
 
@@ -2948,6 +3130,8 @@ def synthetic_qualification(args: argparse.Namespace) -> int:
         n912 = build_synthetic_panel(
             authority, n912_cells, train_per_stratum=2 * SYNTHETIC_TRAIN_PER_STRATUM
         )
+        for role, panel in (("primary", primary), ("legacy", legacy), ("n912", n912)):
+            assert_synthetic_inputs(panel, role=role)
         return DagRun(
             authority=primary.authority,
             primary=primary,

@@ -348,14 +348,79 @@
       "synthetic_test_present": true
     }
   ],
-  "coverage_fingerprint": "39ac890e7b7e564cfb14d42353b5db44997c9392513f433c7473cb0a53007d1d",
+  "coverage_fingerprint": "5bbd1b0d11c337b410b02fa996ef44389d6c135177ccc3f76145a940819098d1",
   "fingerprint_version": 1,
+  "fit_identity_rule": {
+    "components": [
+      "model_key",
+      "population_id",
+      "budget",
+      "procedure",
+      "measurement"
+    ],
+    "dependency_truth_table": {
+      "Delta_deploy": [
+        "cross"
+      ],
+      "Delta_native": [
+        "native"
+      ],
+      "Delta_transport": [
+        "cross",
+        "native"
+      ],
+      "cross_fit_source": "SOURCE measurement A TRAIN (N456 primary / N912 robustness)",
+      "native_fit_source": "TARGET measurement B TRAIN (N456 primary / N912 robustness)",
+      "note": "Each estimand calls the frozen r4_inference.delta_* function directly; cross/native are directional references into the canonical measurement-level fit registry, so a CAT failure is simultaneously the CAT->OVR cross map and the OVR->CAT native map.",
+      "raw_risk_dependency": "none"
+    },
+    "direction_side_is_a_reference_not_a_fit_identity": true,
+    "directional_reference_rule": {
+      "CAT->OVR|cross": "CAT",
+      "CAT->OVR|native": "OVR",
+      "OVR->CAT|cross": "OVR",
+      "OVR->CAT|native": "CAT"
+    },
+    "exception_whitelist": {
+      "B-beta": {
+        "BetaContractViolation": "FAILED",
+        "BetaFitIneligible": "INELIGIBLE",
+        "BetaImplementationError": "FAILED"
+      },
+      "I-isotonic": {
+        "IsotonicContractViolation": "FAILED"
+      },
+      "logistic_core": {
+        "AnalysisError": "FAILED",
+        "ProbabilityEndpointError": "INELIGIBLE"
+      }
+    },
+    "failure_propagation_rule": "a canonical measurement failure makes BOTH of its directional roles unavailable",
+    "rule": "model x population x budget x procedure x measurement",
+    "unique_fit_counts": {
+      "current_generation_N912_robustness": {
+        "formula": "4 models x 2 populations x 6 procedures x 2 measurements",
+        "unique_fits": 96
+      },
+      "direction_side_fits_never_double_counted": true,
+      "legacy_N456": {
+        "formula": "2 models x 2 populations x 6 procedures x 2 measurements",
+        "unique_fits": 48
+      },
+      "primary_N456_current_generation": {
+        "formula": "4 models x 3 populations x 6 procedures x 2 measurements",
+        "unique_fits": 144
+      }
+    },
+    "unknown_exception_action": "PROPAGATE",
+    "unknown_exception_classification": "FORMAL_ANALYSIS_CODE_DEFECT"
+  },
   "frozen_dependency_graph_fingerprint": "449c9b19d61e4edbe95ea856b1d13e3b373765f8a9d05931f20e4d12bf28ed9f",
   "frozen_dependency_graph_sha256": "fd1248052402de5c6b575957f7465b8f6094455851a16528ea92bc0242d16872",
   "nature": "OPERATIONAL FORMAL-DAG COVERAGE MATRIX",
   "runner_id": "r4-integrated-formal-analysis-runner",
   "runner_source_path": "experiments/calibration_transport/run_r4_analysis.py",
-  "runner_source_sha256": "e86ef34a3435c81fd78285fbc709a7966bf704fbe35987db6d3003d2cf31bac3",
+  "runner_source_sha256": "a2c231012893dd7d840aaadb1efd6f2f3b7fe74536ba7e3cf90fc6765fe8f55c",
   "runner_test_path": "tests/test_r4_analysis_runner.py",
   "runner_version": 1,
   "scientific_outputs_computed": false,
@@ -379,5 +444,8 @@
     "required_node_count": 20,
     "required_nodes_uncovered": 0,
     "required_nodes_without_synthetic_test": 0
+  },
+  "superseded_coverage_fingerprints": {
+    "39ac890e7b7e564cfb14d42353b5db44997c9392513f433c7473cb0a53007d1d": "SUPERSEDED BY THE FITTED-MAP IDENTITY CORRECTION: the coverage matrix described a direction/side fit registry."
   }
 }

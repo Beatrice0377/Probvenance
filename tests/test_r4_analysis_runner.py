@@ -16,6 +16,7 @@ Formal R4 calibration / inference / predictor validation remains unauthorized.
 from __future__ import annotations
 
 import argparse
+import collections
 import importlib.util
 import json
 import sys
@@ -476,8 +477,9 @@ def test_available_procedures_drops_a_missing_procedure(synthetic_primary, curre
         fits={
             key: value
             for key, value in synthetic_primary.fits.items()
-            if not key[2].startswith("B-beta|")
+            if key[2] != "B-beta"
         },
+        budget=synthetic_primary.budget,
     )
     available = runner.available_procedures(
         stripped, models=models, populations=current_populations
@@ -1150,55 +1152,334 @@ def test_dependency_truth_table_is_frozen():
         "Delta_transport": ("cross", "native"),
     }
     assert runner.REFIT_ESTIMANDS == ("Delta_deploy", "Delta_transport")
+    assert runner._MEASUREMENTS == ("CAT", "OVR")
 
 
-def test_dependency_qualification_injects_the_beta_gate9_failure(synthetic_dag):
+def _panel_key(synthetic_dag):
+    models = runner._panel_models(synthetic_dag.primary, synthetic_dag.primary_populations)
+    return models[0], synthetic_dag.primary_populations[0]
+
+
+def _train_rows(synthetic_dag):
+    return synthetic_dag.primary.train_rows[_panel_key(synthetic_dag)]
+
+
+# --------------------------------------------------------------------------- #
+# Canonical fitted-map identity
+# --------------------------------------------------------------------------- #
+
+
+def test_canonical_fit_identity_is_measurement_level(synthetic_primary, current_populations):
+    """One scientific fit identity: model x population x budget x procedure x measurement."""
+    models = runner._panel_models(synthetic_primary, current_populations)
+    model = models[0]
+    population = current_populations[0]
+    expected = (
+        len(models)
+        * len(current_populations)
+        * len(synthetic_primary.authority.procedure_order)
+        * 2
+    )
+    assert len(synthetic_primary.fits) == expected == 144
+    assert synthetic_primary.budget == "N456"
+    for procedure in synthetic_primary.authority.procedure_order:
+        for measurement in runner._MEASUREMENTS:
+            key = runner.canonical_fit_key(model, population, procedure, measurement)
+            assert key == (model, population, procedure, measurement)
+            assert key in synthetic_primary.fits
+
+
+def test_directional_planes_alias_onto_one_canonical_fit(synthetic_primary, current_populations):
+    """CAT->OVR cross and OVR->CAT native resolve to the very same fitted map."""
+    model, population = (
+        runner._panel_models(synthetic_primary, current_populations)[0],
+        current_populations[0],
+    )
+    procedure = "B-beta"
+    cat_key = runner.canonical_fit_key(model, population, procedure, "CAT")
+    ovr_key = runner.canonical_fit_key(model, population, procedure, "OVR")
+    assert (
+        runner.canonical_fit_key(
+            model, population, procedure, runner.directional_measurement("CAT->OVR", "cross")
+        )
+        == cat_key
+    )
+    assert (
+        runner.canonical_fit_key(
+            model, population, procedure, runner.directional_measurement("OVR->CAT", "native")
+        )
+        == cat_key
+    )
+    assert (
+        runner.canonical_fit_key(
+            model, population, procedure, runner.directional_measurement("OVR->CAT", "cross")
+        )
+        == ovr_key
+    )
+    assert (
+        runner.canonical_fit_key(
+            model, population, procedure, runner.directional_measurement("CAT->OVR", "native")
+        )
+        == ovr_key
+    )
+    cross_cat, native_cat = runner._cross_native_fits(
+        synthetic_primary, model=model, population=population, procedure=procedure,
+        direction="CAT->OVR",
+    )
+    cross_ovr, native_ovr = runner._cross_native_fits(
+        synthetic_primary, model=model, population=population, procedure=procedure,
+        direction="OVR->CAT",
+    )
+    assert cross_cat is native_ovr
+    assert native_cat is cross_ovr
+
+
+def test_directional_reference_map_points_at_the_canonical_fit(
+    synthetic_primary, current_populations
+):
+    mapping = runner.directional_reference_map(
+        synthetic_primary,
+        models=runner._panel_models(synthetic_primary, current_populations),
+        populations=current_populations,
+    )
+    model = runner._panel_models(synthetic_primary, current_populations)[0]
+    population = current_populations[0]
+    reference = f"{model}|{population}"
+    assert mapping[f"{reference}|CAT->OVR|B-beta|cross"] == (
+        f"{reference}|N456|B-beta|CAT"
+    )
+    assert mapping[f"{reference}|OVR->CAT|B-beta|native"] == (
+        f"{reference}|N456|B-beta|CAT"
+    )
+    assert mapping[f"{reference}|OVR->CAT|B-beta|cross"] == (
+        f"{reference}|N456|B-beta|OVR"
+    )
+    assert mapping[f"{reference}|CAT->OVR|B-beta|native"] == (
+        f"{reference}|N456|B-beta|OVR"
+    )
+
+
+def test_fit_procedure_is_called_once_per_measurement(authority, cells, monkeypatch):
+    """A measurement is fitted exactly once, never once per directional role."""
+    calls: list[tuple[str, str]] = []
+    original = runner.fit_procedure
+
+    def counting(**kwargs):
+        calls.append((kwargs["procedure"], kwargs["measurement"]))
+        return original(**kwargs)
+
+    monkeypatch.setattr(runner, "fit_procedure", counting)
+    current = [cell for cell in cells if cell.model_role == "current-generation"]
+    panel = runner.build_synthetic_panel(authority, current)
+    pairs = {(cell.model_key, cell.population_id) for cell in current}
+    expected = len(pairs) * len(panel.authority.procedure_order) * 2
+    counts = collections.Counter(calls)
+    assert len(calls) == expected
+    assert len(panel.fits) == expected
+    assert len(counts) == len(panel.authority.procedure_order) * 2
+    assert set(counts.values()) == {len(pairs)}
+
+
+# --------------------------------------------------------------------------- #
+# Measurement-level failure propagation
+# --------------------------------------------------------------------------- #
+
+
+def test_dependency_qualification_injects_a_canonical_measurement_failure(synthetic_dag):
     report = runner.dependency_qualification(synthetic_dag, replicates=2)
-    assert report["cross_only_failure_type"] == "BetaImplementationError"
-    assert "no constraint face produced an accepted optimum" in report["cross_only_reason"]
-    assert report["cross_only_status"] == "FAILED"
-    assert report["both_failure_types"] == ["BetaImplementationError"]
-    assert report["both_failed_fits"]
-    assert all("B-beta" in name for name in report["both_failed_fits"])
-    assert report["dependency_truth_table"] == {
-        estimand: list(dependencies)
-        for estimand, dependencies in runner.ESTIMAND_DEPENDENCIES.items()
+    identity = report["injected_fit_identity"]
+    model, population = _panel_key(synthetic_dag)
+    assert identity == {
+        "model": model,
+        "population": population,
+        "budget": "N456",
+        "procedure": "B-beta",
     }
+    assert report["directional_aliasing"] == {
+        "CAT->OVR|cross": "CAT",
+        "CAT->OVR|native": "OVR",
+        "OVR->CAT|cross": "OVR",
+        "OVR->CAT|native": "CAT",
+    }
+    assert report["canonical_fit_count"] == report["expected_canonical_fit_count"] == 144
+    assert report["cat_only_expected_matches"] is True
+    assert report["ovr_only_expected_matches"] is True
+    assert report["both_expected_matches"] is True
+    assert report["cat_only_failed_fits"] == [
+        f"{model}|{population}|N456|B-beta|CAT"
+    ]
+    assert report["ovr_only_failed_fits"] == [
+        f"{model}|{population}|N456|B-beta|OVR"
+    ]
+    assert report["cat_only_failure_types"] == ["BetaImplementationError"]
+    assert report["ovr_only_failure_types"] == ["BetaImplementationError"]
+    assert report["both_measurements_failure_types"] == ["BetaImplementationError"]
+    # A canonical measurement failure is reported ONCE, never once per role.
+    assert len(report["cat_only_failed_fits"]) == 1
+    assert len(report["ovr_only_failed_fits"]) == 1
     assert report["family_sizes_fixed"] == {
         "primary": 12,
-        "extension": 8,
-        "direction_difference": 6,
-        "native_reference": 12,
+        "secondary_extension": 8,
+        "secondary_direction_difference": 6,
+        "secondary_native_reference": 12,
+    }
+
+
+def test_cat_only_failure_propagates_to_both_directional_roles(synthetic_dag):
+    report = runner.dependency_qualification(synthetic_dag, replicates=2)
+    assert report["cat_only_direction_status"] == {
+        "CAT->OVR": {
+            "Delta_deploy": "INCOMPLETE",
+            "Delta_native": "AVAILABLE",
+            "Delta_transport": "INCOMPLETE",
+        },
+        "OVR->CAT": {
+            "Delta_deploy": "AVAILABLE",
+            "Delta_native": "INCOMPLETE",
+            "Delta_transport": "INCOMPLETE",
+        },
+    }
+    assert report["cat_only_expected"] == report["cat_only_direction_status"]
+
+
+def test_ovr_only_failure_mirrors_the_cat_only_truth_table(synthetic_dag):
+    report = runner.dependency_qualification(synthetic_dag, replicates=2)
+    assert report["ovr_only_direction_status"] == {
+        "CAT->OVR": {
+            "Delta_deploy": "AVAILABLE",
+            "Delta_native": "INCOMPLETE",
+            "Delta_transport": "INCOMPLETE",
+        },
+        "OVR->CAT": {
+            "Delta_deploy": "INCOMPLETE",
+            "Delta_native": "AVAILABLE",
+            "Delta_transport": "INCOMPLETE",
+        },
+    }
+    assert report["ovr_only_expected"] == report["ovr_only_direction_status"]
+
+
+def test_both_measurements_failure_removes_every_estimand_of_the_unit(synthetic_dag):
+    report = runner.dependency_qualification(synthetic_dag, replicates=2)
+    assert report["both_measurements_direction_status"] == {
+        "CAT->OVR": {
+            "Delta_deploy": "INCOMPLETE",
+            "Delta_native": "INCOMPLETE",
+            "Delta_transport": "INCOMPLETE",
+        },
+        "OVR->CAT": {
+            "Delta_deploy": "INCOMPLETE",
+            "Delta_native": "INCOMPLETE",
+            "Delta_transport": "INCOMPLETE",
+        },
+    }
+    assert report["both_measurements_failed_fits"] == [
+        report["cat_only_failed_fits"][0],
+        report["ovr_only_failed_fits"][0],
+    ]
+    assert report["both_expected"] == report["both_measurements_direction_status"]
+
+
+def test_family_size_is_reported_apart_from_complete_count(synthetic_dag):
+    """A fixed family keeps its size; only complete_count moves."""
+    report = runner.dependency_qualification(synthetic_dag, replicates=2)
+    assert report["baseline_families"] == {
+        "primary": {
+            "family_size": 12,
+            "complete_count": 12,
+            "incomplete_count": 0,
+            "status": "COMPLETE",
+        },
+        "secondary_direction_difference": {
+            "family_size": 6,
+            "complete_count": 6,
+            "incomplete_count": 0,
+            "status": "COMPLETE",
+        },
+        "secondary_extension": {
+            "family_size": 8,
+            "complete_count": 8,
+            "incomplete_count": 0,
+            "status": "COMPLETE",
+        },
+        "secondary_native_reference": {
+            "family_size": 12,
+            "complete_count": 12,
+            "incomplete_count": 0,
+            "status": "COMPLETE",
+        },
+    }
+    # CAT-only: one of four B-beta extension members survives; one of twelve
+    # native-reference members is lost (the OVR->CAT native CAT map).
+    assert report["cat_only_families"]["primary"] == {
+        "family_size": 12,
+        "complete_count": 12,
+        "incomplete_count": 0,
+        "status": "COMPLETE",
+    }
+    assert report["cat_only_families"]["secondary_direction_difference"] == {
+        "family_size": 6,
+        "complete_count": 6,
+        "incomplete_count": 0,
+        "status": "COMPLETE",
+    }
+    assert report["cat_only_families"]["secondary_extension"] == {
+        "family_size": 8,
+        "complete_count": 5,
+        "incomplete_count": 3,
+        "status": "INCOMPLETE",
+    }
+    assert report["cat_only_families"]["secondary_native_reference"] == {
+        "family_size": 12,
+        "complete_count": 11,
+        "incomplete_count": 1,
+        "status": "INCOMPLETE",
+    }
+    # Both measurements: every B-beta extension member of that unit vanishes.
+    assert report["both_measurements_families"]["secondary_extension"] == {
+        "family_size": 8,
+        "complete_count": 4,
+        "incomplete_count": 4,
+        "status": "INCOMPLETE",
+    }
+    assert report["both_measurements_families"]["secondary_native_reference"] == {
+        "family_size": 12,
+        "complete_count": 10,
+        "incomplete_count": 2,
+        "status": "INCOMPLETE",
     }
 
 
 def test_dependency_injection_keeps_core4_complete(synthetic_dag):
     report = runner.dependency_qualification(synthetic_dag, replicates=2)
     assert report["core4_primary_and_direction_complete_under_injection"] is True
+    assert report["core4_only_extension_unaffected_by_standalone_failure"] is True
 
 
-def test_cross_only_failure_removes_only_the_cross_dependent_estimands(synthetic_dag):
+def test_canonical_failure_skips_only_its_own_refit_scope(synthetic_dag):
     report = runner.dependency_qualification(synthetic_dag, replicates=2)
-    assert report["cross_only_estimands"] == ("Delta_native",)
-    assert report["native_only_estimands"] == ("Delta_deploy",)
-    assert report["both_estimands"] == ()
+    assert report["baseline_refit_blocks"] == 288
+    # CAT failure blocks three of the injected unit's refit blocks; both blocks four.
+    assert report["cat_only_refit_blocks"] == 285
+    assert report["ovr_only_refit_blocks"] == 285
+    assert report["both_measurements_refit_blocks"] == 284
+    for label in ("cat_only", "ovr_only", "both_measurements"):
+        assert set(report[f"{label}_refit_failure_types"]) <= {
+            "BootstrapContractViolation"
+        }
 
 
 def test_fit_failure_propagates_as_incomplete_not_an_exception(
     synthetic_dag, current_populations
 ):
     """A frozen full-fit FAILED must never abort the DAG engine."""
-    models = runner._panel_models(synthetic_dag.primary, current_populations)
-    model = models[0]
-    population = current_populations[0]
-    direction = synthetic_dag.authority.direction_order[0]
+    model, population = _panel_key(synthetic_dag)
     panel = runner._with_fit_failure(
         synthetic_dag.primary,
         model=model,
         population=population,
         procedure="B-beta",
-        direction=direction,
-        side="cross",
+        measurement="CAT",
         failure_type="BetaImplementationError",
         message="no constraint face produced an accepted optimum",
     )
@@ -1214,15 +1495,188 @@ def test_fit_failure_propagates_as_incomplete_not_an_exception(
     engine = _run_dag_engine(broken)
     registry = engine["coverage_registry"]
     failed = {key: entry for key, entry in registry.items() if entry["status"] == "FAILED"}
-    assert failed
+    assert len(failed) == 1
     assert all(entry["failure_type"] == "BetaImplementationError" for entry in failed.values())
-    # CORE4 families survive; the fixed family sizes never shrink.
+    assert all(entry["budget"] == "N456" for entry in failed.values())
+    assert all(
+        entry["directional_references"]
+        == [
+            {"direction": "CAT->OVR", "side": "cross"},
+            {"direction": "OVR->CAT", "side": "native"},
+        ]
+        for entry in failed.values()
+    )
     status = engine["bootstrap"].family_status()
     assert status["primary"]["complete_count"] == 12
     assert status["secondary_direction_difference"]["complete_count"] == 6
     assert status["secondary_extension"]["family_size"] == 8
     assert status["secondary_native_reference"]["family_size"] == 12
     assert status["secondary_extension"]["complete_count"] < 8
+
+
+# --------------------------------------------------------------------------- #
+# Exception boundary: explicit whitelist only, unknown exceptions propagate
+# --------------------------------------------------------------------------- #
+
+
+def test_beta_implementation_error_maps_to_failed(synthetic_dag, monkeypatch):
+    def exploding(scores, labels):
+        raise runner.r4_calibration_families.BetaImplementationError(
+            "no constraint face produced an accepted optimum"
+        )
+
+    monkeypatch.setattr(
+        runner.r4_calibration_families, "fit_beta_fixed_decision_probability", exploding
+    )
+    fit = runner.fit_procedure(
+        procedure="B-beta", train_rows=_train_rows(synthetic_dag), measurement="CAT"
+    )
+    assert fit.status == "FAILED"
+    assert fit.failure_type == "BetaImplementationError"
+    assert "no constraint face produced an accepted optimum" in fit.reason
+    assert fit.calibrator is None
+
+
+def test_beta_fit_ineligible_maps_to_ineligible(synthetic_dag, monkeypatch):
+    def ineligible(scores, labels):
+        raise runner.r4_calibration_families.BetaFitIneligible("single class")
+
+    monkeypatch.setattr(
+        runner.r4_calibration_families, "fit_beta_fixed_decision_probability", ineligible
+    )
+    fit = runner.fit_procedure(
+        procedure="B-beta", train_rows=_train_rows(synthetic_dag), measurement="OVR"
+    )
+    assert fit.status == "INELIGIBLE"
+    assert fit.failure_type is None
+
+
+def test_beta_contract_violation_maps_to_failed(synthetic_dag, monkeypatch):
+    def violation(scores, labels):
+        raise runner.r4_calibration_families.BetaContractViolation("contract")
+
+    monkeypatch.setattr(
+        runner.r4_calibration_families, "fit_beta_fixed_decision_probability", violation
+    )
+    fit = runner.fit_procedure(
+        procedure="B-beta", train_rows=_train_rows(synthetic_dag), measurement="CAT"
+    )
+    assert fit.status == "FAILED"
+    assert fit.failure_type == "BetaContractViolation"
+
+
+def test_isotonic_contract_violation_maps_to_failed(synthetic_dag, monkeypatch):
+    def violation(scores, labels):
+        raise runner.r4_calibration_families.IsotonicContractViolation("contract")
+
+    monkeypatch.setattr(
+        runner.r4_calibration_families, "fit_isotonic_fixed_decision_probability", violation
+    )
+    fit = runner.fit_procedure(
+        procedure="I-isotonic", train_rows=_train_rows(synthetic_dag), measurement="CAT"
+    )
+    assert fit.status == "FAILED"
+    assert fit.failure_type == "IsotonicContractViolation"
+
+
+def test_beta_unexpected_runtime_error_propagates(synthetic_dag, monkeypatch):
+    def exploding(scores, labels):
+        raise RuntimeError("unexpected solver defect")
+
+    monkeypatch.setattr(
+        runner.r4_calibration_families, "fit_beta_fixed_decision_probability", exploding
+    )
+    with pytest.raises(RuntimeError):
+        runner.fit_procedure(
+            procedure="B-beta", train_rows=_train_rows(synthetic_dag), measurement="CAT"
+        )
+
+
+def test_isotonic_unexpected_runtime_error_propagates(synthetic_dag, monkeypatch):
+    def exploding(scores, labels):
+        raise RuntimeError("unexpected isotonic defect")
+
+    monkeypatch.setattr(
+        runner.r4_calibration_families, "fit_isotonic_fixed_decision_probability", exploding
+    )
+    with pytest.raises(RuntimeError):
+        runner.fit_procedure(
+            procedure="I-isotonic", train_rows=_train_rows(synthetic_dag), measurement="OVR"
+        )
+
+
+def test_unknown_keyerror_is_not_a_scientific_failure(synthetic_dag, monkeypatch):
+    def exploding(scores, labels):
+        raise KeyError("not-a-frozen-exception")
+
+    monkeypatch.setattr(
+        runner.r4_calibration_families, "fit_isotonic_fixed_decision_probability", exploding
+    )
+    with pytest.raises(KeyError):
+        runner.fit_procedure(
+            procedure="I-isotonic", train_rows=_train_rows(synthetic_dag), measurement="CAT"
+        )
+
+
+def test_unknown_fit_exception_escapes_the_panel_builder(authority, cells, monkeypatch):
+    """An unknown fit defect must reach the formal execution boundary, un-mapped."""
+
+    original = runner.fit_procedure
+
+    def exploding(**kwargs):
+        if kwargs["procedure"] == "I-isotonic":
+            raise TypeError("unexpected fit defect")
+        return original(**kwargs)
+
+    monkeypatch.setattr(runner, "fit_procedure", exploding)
+    current = [cell for cell in cells if cell.model_role == "current-generation"]
+    with pytest.raises(TypeError):
+        runner.build_synthetic_panel(authority, current)
+
+
+# --------------------------------------------------------------------------- #
+# Synthetic-input firewall guard
+# --------------------------------------------------------------------------- #
+
+
+def test_synthetic_guard_accepts_the_invented_fixture(synthetic_all):
+    for role, panel in (
+        ("primary", synthetic_all),
+        ("legacy", synthetic_all),
+    ):
+        runner.assert_synthetic_inputs(panel, role=role)
+    assert runner.SYNTHETIC_ITEM_PREFIX == "synthetic-"
+
+
+def test_synthetic_guard_rejects_a_study_row(synthetic_primary):
+    model, population = (
+        runner._panel_models(synthetic_primary, ("r4-mmlu-57-subject",))[0],
+        "r4-mmlu-57-subject",
+    )
+    key = (model, population)
+    template = synthetic_primary.train_rows[key][0]
+    poisoned_row = runner.r4_inference.R4InferenceRow(
+        item_id="mmlu-train-000001",
+        population_id=template.population_id,
+        stratum=template.stratum,
+        label=template.label,
+        cat_score=template.cat_score,
+        ovr_score=template.ovr_score,
+        cluster_id=template.cluster_id,
+        anchor_index=template.anchor_index,
+    )
+    train_rows = dict(synthetic_primary.train_rows)
+    train_rows[key] = (poisoned_row,)
+    poisoned = runner.PanelInputs(
+        authority=synthetic_primary.authority,
+        model_keys=synthetic_primary.model_keys,
+        train_rows=train_rows,
+        test_rows=synthetic_primary.test_rows,
+        fits=synthetic_primary.fits,
+        budget=synthetic_primary.budget,
+    )
+    with pytest.raises(runner.R4AnalysisOutcomeFirewallBreach):
+        runner.assert_synthetic_inputs(poisoned, role="primary")
 
 
 def test_refit_block_withholds_the_interval_when_a_replicate_fails(

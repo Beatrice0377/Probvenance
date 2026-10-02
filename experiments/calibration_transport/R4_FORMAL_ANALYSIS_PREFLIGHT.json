@@ -1,0 +1,111 @@
+{
+  "analysis_code_authority": {
+    "calibration_implementation": {
+      "last_commit": "5185f5044fdccf0d976f953a0ff2d6c93c91a08a",
+      "path": "experiments/calibration_transport/r4_calibration_families.py",
+      "status": "MATCHES_FROZEN_AUTHORITY"
+    },
+    "inference_implementation": {
+      "last_commit": "bdaa088a1f5b508c47875039d2cf2be5df1595a1",
+      "path": "experiments/calibration_transport/r4_inference.py",
+      "status": "MATCHES_FROZEN_AUTHORITY"
+    },
+    "predictor_implementation": {
+      "last_commit": "b6b1bc08763ab8c369611b2303cd272f99bdf1b1",
+      "path": "experiments/calibration_transport/r4_predictor.py",
+      "status": "MATCHES_FROZEN_AUTHORITY"
+    }
+  },
+  "analysis_dependency_graph_fingerprint": "449c9b19d61e4edbe95ea856b1d13e3b373765f8a9d05931f20e4d12bf28ed9f",
+  "analysis_dependency_graph_sha256": "fd1248052402de5c6b575957f7465b8f6094455851a16528ea92bc0242d16872",
+  "bootstrap_dependency": {
+    "interval_ranks": [
+      500,
+      10000,
+      19500
+    ],
+    "shared_across": [
+      "models",
+      "directions",
+      "procedures"
+    ],
+    "shared_test_draw_required": true,
+    "source_train_thresholds_fixed": true,
+    "test_bootstrap_replicates": 20000,
+    "train_refit_replicates": 2000
+  },
+  "calibration_procedures": {
+    "core4": [
+      "P-low",
+      "P-historical",
+      "L-low",
+      "L-historical"
+    ],
+    "extension2": [
+      "I-isotonic",
+      "B-beta"
+    ],
+    "seventh_procedure": "FORBIDDEN"
+  },
+  "family_counts": {
+    "direction_difference": 6,
+    "extension": 8,
+    "native_reference": 12,
+    "primary": 12,
+    "r3_continuity_subset": 6
+  },
+  "fingerprint_version": 1,
+  "metrics": {
+    "cap": false,
+    "clipping": false,
+    "epsilon": false,
+    "extended_real_allowed": true,
+    "primary": "Brier",
+    "secondary": "exact LogLoss"
+  },
+  "predictor_unit_counts": {
+    "development": 8,
+    "legacy_extension": 8,
+    "primary_validation": 16
+  },
+  "preflight_fingerprint": "500ae1cb5ee19d030dad6c27a164b84650adbd79d81451f416126892d2e48873",
+  "preflight_id": "r4-formal-analysis-structural-preflight",
+  "preflight_version": 1,
+  "raw_input_registry_fingerprint": "b0051d96eaeea693a37a0116ced4eecc7e7a7fcd34d93049b074a7010c8cb355",
+  "raw_input_registry_sha256": "cb3e7625ecfcb7ec6dd71431739969eaf7f05eb1ca6a262cd8e5d3276c632921",
+  "raw_measurement_freeze_commit": "3aae4528a131ba32582fb015bd2f6a4d201da457",
+  "readiness": "NEEDS_EXECUTION_RUNNER",
+  "runner_status": {
+    "detail": "no run_r4_analysis.py; the three implementation modules expose no CLI or __main__ entry point",
+    "dry_run_status": "NOT_APPLICABLE",
+    "formal_analysis_runner": "MISSING"
+  },
+  "scientific_authority_fingerprints": {
+    "execution_manifest_fingerprint": "f32381c51db24f5dbeb240b5e0fdf73c59a56a615c8607ad8979e2a7e2586775",
+    "final_protocol_fingerprint": "d1b56d702e1f260cef47eee05b7d878ace07a15168e89408e15e7eb741c0ad34",
+    "inference_freeze_fingerprint": "dcbb7ac9e931145fdee86ab984de1249c1b86ca36ee735b70dafc8cabc06c141",
+    "ledger_fingerprint": "2ed383f67be4476024d12a03c26699a1a50ed8656d75bb089986ce558d1be541",
+    "measurement_contract_fingerprint": "7b126d300e774cb44d2c47fcb12513865d03c2b08ffd03a5ce409b2ea976e1e5",
+    "predictor_freeze_fingerprint": "c856fcc161910497a3431593639606682905adcb50fc443455468dfc295d73a9"
+  },
+  "scientific_outputs_computed": false,
+  "test_status": {
+    "full_repo": "PASS",
+    "git_diff_check": "PASS",
+    "py_compile": "PASS",
+    "ruff": "PASS",
+    "targeted": {
+      "test_r4_calibration_families.py": "PASS",
+      "test_r4_epoch1_dispatch.py": "PASS",
+      "test_r4_inference.py": "PASS",
+      "test_r4_measurements.py": "PASS",
+      "test_r4_predictor.py": "PASS"
+    }
+  },
+  "unit_counts": {
+    "current_directional_units": 24,
+    "current_model_population_cells": 12,
+    "legacy_directional_units": 8,
+    "legacy_model_population_cells": 4
+  }
+}

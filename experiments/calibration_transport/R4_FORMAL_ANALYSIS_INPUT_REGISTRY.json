@@ -1,0 +1,943 @@
+{
+  "bootstrap_population_metadata": {
+    "hellaswag": {
+      "cluster_never_split": true,
+      "group_field": "group_id",
+      "group_source": "source_id",
+      "mode": "source_id cluster",
+      "present_on": [
+        "TRAIN",
+        "TEST"
+      ],
+      "stratum_field": "stratum",
+      "stratum_source": "activity_label"
+    },
+    "medmcqa": {
+      "group_field": null,
+      "mode": "subject_name-stratified row",
+      "stratum_field": "stratum",
+      "stratum_source": "subject_name"
+    },
+    "mmlu": {
+      "group_field": null,
+      "mode": "subject-stratified paired",
+      "stratum_field": "stratum",
+      "stratum_source": "subject"
+    }
+  },
+  "cell_artifacts": [
+    {
+      "cell_id": "falcon-h1-7b-instruct__r4-hellaswag-activity-primary",
+      "committed_rows": 10954,
+      "dataset_id": "Rowan/hellaswag",
+      "dataset_revision": "218ec52e09a7e7462a5400043bb9a69a41d06b76",
+      "direction_units": [
+        {
+          "direction": "CAT->OVR",
+          "unit_id": "falcon-h1-7b-instruct|r4-hellaswag-activity-primary|CAT->OVR"
+        },
+        {
+          "direction": "OVR->CAT",
+          "unit_id": "falcon-h1-7b-instruct|r4-hellaswag-activity-primary|OVR->CAT"
+        }
+      ],
+      "evidence_fingerprint": "85e1ac56ed32b7528c2ccdfc2be2438f6f0b601b596e6a1e2e8dba12326fb5a1",
+      "expected_rows": 10954,
+      "group_id_field": "group_id",
+      "measurement_code_commit": "100c918345ff829dd6fdb96bf99cd14285d6472f",
+      "measurement_contract_fingerprint": "7b126d300e774cb44d2c47fcb12513865d03c2b08ffd03a5ce409b2ea976e1e5",
+      "model_id": "tiiuae/Falcon-H1-7B-Instruct",
+      "model_key": "falcon-h1-7b-instruct",
+      "model_revision": "41e72f27effbab80cd45b6e884688452253a3686",
+      "model_role": "current-generation",
+      "paired_complete": true,
+      "path": "/root/rivermind-data/r4-formal-measurements/falcon-h1-7b-instruct__r4-hellaswag-activity-primary/raw-evidence.json",
+      "population_id": "r4-hellaswag-activity-primary",
+      "population_key": "hellaswag",
+      "population_manifest_fingerprint": "6817496f227d9cd57759bf55489cbf8a1dc4dfd27db0ae551e9223d21d02a096",
+      "sha256": "96bac04bfda5271d1a9e8002530f389fdc30e0579c51af40a4d79a43bd9cbe69",
+      "split_counts": {
+        "TEST": 10042,
+        "TRAIN": 912
+      },
+      "stratum_count": 192,
+      "stratum_field": "stratum",
+      "train_budget": "N912"
+    },
+    {
+      "cell_id": "falcon-h1-7b-instruct__r4-medmcqa-subject-primary",
+      "committed_rows": 5074,
+      "dataset_id": "openlifescienceai/medmcqa",
+      "dataset_revision": "91c6572c454088bf71b679ad90aa8dffcd0d5868",
+      "direction_units": [
+        {
+          "direction": "CAT->OVR",
+          "unit_id": "falcon-h1-7b-instruct|r4-medmcqa-subject-primary|CAT->OVR"
+        },
+        {
+          "direction": "OVR->CAT",
+          "unit_id": "falcon-h1-7b-instruct|r4-medmcqa-subject-primary|OVR->CAT"
+        }
+      ],
+      "evidence_fingerprint": "4c0b83723b2aeb41d6b008350810dfbec268a2326204501cfeac2a726bca662a",
+      "expected_rows": 5074,
+      "group_id_field": null,
+      "measurement_code_commit": "100c918345ff829dd6fdb96bf99cd14285d6472f",
+      "measurement_contract_fingerprint": "7b126d300e774cb44d2c47fcb12513865d03c2b08ffd03a5ce409b2ea976e1e5",
+      "model_id": "tiiuae/Falcon-H1-7B-Instruct",
+      "model_key": "falcon-h1-7b-instruct",
+      "model_revision": "41e72f27effbab80cd45b6e884688452253a3686",
+      "model_role": "current-generation",
+      "paired_complete": true,
+      "path": "/root/rivermind-data/r4-formal-measurements/falcon-h1-7b-instruct__r4-medmcqa-subject-primary/raw-evidence.json",
+      "population_id": "r4-medmcqa-subject-primary",
+      "population_key": "medmcqa",
+      "population_manifest_fingerprint": "e48c37293f196e16d8fba42e7fc255e4ac2e77f81c270ed6f71320981968af12",
+      "sha256": "3f27c23861be8b78dd194a0b08083f3681e6b28ef454f05337295e927e38ce25",
+      "split_counts": {
+        "TEST": 4162,
+        "TRAIN": 912
+      },
+      "stratum_count": 21,
+      "stratum_field": "stratum",
+      "train_budget": "N912"
+    },
+    {
+      "cell_id": "falcon-h1-7b-instruct__r4-mmlu-57-subject",
+      "committed_rows": 1596,
+      "dataset_id": "cais/mmlu",
+      "dataset_revision": "c30699e8356da336a370243923dbaf21066bb9fe",
+      "direction_units": [
+        {
+          "direction": "CAT->OVR",
+          "unit_id": "falcon-h1-7b-instruct|r4-mmlu-57-subject|CAT->OVR"
+        },
+        {
+          "direction": "OVR->CAT",
+          "unit_id": "falcon-h1-7b-instruct|r4-mmlu-57-subject|OVR->CAT"
+        }
+      ],
+      "evidence_fingerprint": "b38c4fe0a83b7fb7fa9e1c8246ff0a0b7ad2a2cdc73bf399068ee3faaa060ebc",
+      "expected_rows": 1596,
+      "group_id_field": null,
+      "measurement_code_commit": "100c918345ff829dd6fdb96bf99cd14285d6472f",
+      "measurement_contract_fingerprint": "7b126d300e774cb44d2c47fcb12513865d03c2b08ffd03a5ce409b2ea976e1e5",
+      "model_id": "tiiuae/Falcon-H1-7B-Instruct",
+      "model_key": "falcon-h1-7b-instruct",
+      "model_revision": "41e72f27effbab80cd45b6e884688452253a3686",
+      "model_role": "current-generation",
+      "paired_complete": true,
+      "path": "/root/rivermind-data/r4-formal-measurements/falcon-h1-7b-instruct__r4-mmlu-57-subject/raw-evidence.json",
+      "population_id": "r4-mmlu-57-subject",
+      "population_key": "mmlu",
+      "population_manifest_fingerprint": "40cc9753a711314ff3b25ed6e234d0cbda11f3f60cd87f1d3915195a3d1780b8",
+      "sha256": "00c21db5c4f4af839e6be38c4ccc1c914d8d59176415f81b54e188ce68be2681",
+      "split_counts": {
+        "TEST": 1140,
+        "TRAIN": 456
+      },
+      "stratum_count": 57,
+      "stratum_field": "stratum",
+      "train_budget": "N456"
+    },
+    {
+      "cell_id": "granite-4-0-h-tiny__r4-hellaswag-activity-primary",
+      "committed_rows": 10954,
+      "dataset_id": "Rowan/hellaswag",
+      "dataset_revision": "218ec52e09a7e7462a5400043bb9a69a41d06b76",
+      "direction_units": [
+        {
+          "direction": "CAT->OVR",
+          "unit_id": "granite-4-0-h-tiny|r4-hellaswag-activity-primary|CAT->OVR"
+        },
+        {
+          "direction": "OVR->CAT",
+          "unit_id": "granite-4-0-h-tiny|r4-hellaswag-activity-primary|OVR->CAT"
+        }
+      ],
+      "evidence_fingerprint": "4cae7b789126e6f0ecff8fbc6e773f20950b533b3f12bdb203e6effccec33a6e",
+      "expected_rows": 10954,
+      "group_id_field": "group_id",
+      "measurement_code_commit": "100c918345ff829dd6fdb96bf99cd14285d6472f",
+      "measurement_contract_fingerprint": "7b126d300e774cb44d2c47fcb12513865d03c2b08ffd03a5ce409b2ea976e1e5",
+      "model_id": "ibm-granite/granite-4.0-h-tiny",
+      "model_key": "granite-4-0-h-tiny",
+      "model_revision": "791e0d3d28c86e106c9b6e0b4cecdee0375b6124",
+      "model_role": "current-generation",
+      "paired_complete": true,
+      "path": "/root/rivermind-data/r4-formal-measurements/granite-4-0-h-tiny__r4-hellaswag-activity-primary/raw-evidence.json",
+      "population_id": "r4-hellaswag-activity-primary",
+      "population_key": "hellaswag",
+      "population_manifest_fingerprint": "6817496f227d9cd57759bf55489cbf8a1dc4dfd27db0ae551e9223d21d02a096",
+      "sha256": "ea74b083117d7f4163ab342981894e80cf684a65fe67dc97ea65c37f81d5e053",
+      "split_counts": {
+        "TEST": 10042,
+        "TRAIN": 912
+      },
+      "stratum_count": 192,
+      "stratum_field": "stratum",
+      "train_budget": "N912"
+    },
+    {
+      "cell_id": "granite-4-0-h-tiny__r4-medmcqa-subject-primary",
+      "committed_rows": 5074,
+      "dataset_id": "openlifescienceai/medmcqa",
+      "dataset_revision": "91c6572c454088bf71b679ad90aa8dffcd0d5868",
+      "direction_units": [
+        {
+          "direction": "CAT->OVR",
+          "unit_id": "granite-4-0-h-tiny|r4-medmcqa-subject-primary|CAT->OVR"
+        },
+        {
+          "direction": "OVR->CAT",
+          "unit_id": "granite-4-0-h-tiny|r4-medmcqa-subject-primary|OVR->CAT"
+        }
+      ],
+      "evidence_fingerprint": "c1bb006638bcaf9b32d1df07461b571d3e5130d63209915be360788a9fbe2b6c",
+      "expected_rows": 5074,
+      "group_id_field": null,
+      "measurement_code_commit": "100c918345ff829dd6fdb96bf99cd14285d6472f",
+      "measurement_contract_fingerprint": "7b126d300e774cb44d2c47fcb12513865d03c2b08ffd03a5ce409b2ea976e1e5",
+      "model_id": "ibm-granite/granite-4.0-h-tiny",
+      "model_key": "granite-4-0-h-tiny",
+      "model_revision": "791e0d3d28c86e106c9b6e0b4cecdee0375b6124",
+      "model_role": "current-generation",
+      "paired_complete": true,
+      "path": "/root/rivermind-data/r4-formal-measurements/granite-4-0-h-tiny__r4-medmcqa-subject-primary/raw-evidence.json",
+      "population_id": "r4-medmcqa-subject-primary",
+      "population_key": "medmcqa",
+      "population_manifest_fingerprint": "e48c37293f196e16d8fba42e7fc255e4ac2e77f81c270ed6f71320981968af12",
+      "sha256": "709597587757a1d5cdecae464bb8d1a9e215011b77a4d1fee7645d2d1c9d6b29",
+      "split_counts": {
+        "TEST": 4162,
+        "TRAIN": 912
+      },
+      "stratum_count": 21,
+      "stratum_field": "stratum",
+      "train_budget": "N912"
+    },
+    {
+      "cell_id": "granite-4-0-h-tiny__r4-mmlu-57-subject",
+      "committed_rows": 1596,
+      "dataset_id": "cais/mmlu",
+      "dataset_revision": "c30699e8356da336a370243923dbaf21066bb9fe",
+      "direction_units": [
+        {
+          "direction": "CAT->OVR",
+          "unit_id": "granite-4-0-h-tiny|r4-mmlu-57-subject|CAT->OVR"
+        },
+        {
+          "direction": "OVR->CAT",
+          "unit_id": "granite-4-0-h-tiny|r4-mmlu-57-subject|OVR->CAT"
+        }
+      ],
+      "evidence_fingerprint": "7dbebd1fedf38296a7b08eea6d71cfc6d2fa535a98c9281528b777cad0cf7fdb",
+      "expected_rows": 1596,
+      "group_id_field": null,
+      "measurement_code_commit": "100c918345ff829dd6fdb96bf99cd14285d6472f",
+      "measurement_contract_fingerprint": "7b126d300e774cb44d2c47fcb12513865d03c2b08ffd03a5ce409b2ea976e1e5",
+      "model_id": "ibm-granite/granite-4.0-h-tiny",
+      "model_key": "granite-4-0-h-tiny",
+      "model_revision": "791e0d3d28c86e106c9b6e0b4cecdee0375b6124",
+      "model_role": "current-generation",
+      "paired_complete": true,
+      "path": "/root/rivermind-data/r4-formal-measurements/granite-4-0-h-tiny__r4-mmlu-57-subject/raw-evidence.json",
+      "population_id": "r4-mmlu-57-subject",
+      "population_key": "mmlu",
+      "population_manifest_fingerprint": "40cc9753a711314ff3b25ed6e234d0cbda11f3f60cd87f1d3915195a3d1780b8",
+      "sha256": "5a25898a7255c85fbeea0405061d0cd69e6a55de08a915b1e05a4412bcaa7bff",
+      "split_counts": {
+        "TEST": 1140,
+        "TRAIN": 456
+      },
+      "stratum_count": 57,
+      "stratum_field": "stratum",
+      "train_budget": "N456"
+    },
+    {
+      "cell_id": "minicpm5-2b__r4-hellaswag-activity-primary",
+      "committed_rows": 10498,
+      "dataset_id": "Rowan/hellaswag",
+      "dataset_revision": "218ec52e09a7e7462a5400043bb9a69a41d06b76",
+      "direction_units": [
+        {
+          "direction": "CAT->OVR",
+          "unit_id": "minicpm5-2b|r4-hellaswag-activity-primary|CAT->OVR"
+        },
+        {
+          "direction": "OVR->CAT",
+          "unit_id": "minicpm5-2b|r4-hellaswag-activity-primary|OVR->CAT"
+        }
+      ],
+      "evidence_fingerprint": "4d9cd840f9d430f18041d5f0de563976ea6f521c5c9f038929eb56e2fb548826",
+      "expected_rows": 10498,
+      "group_id_field": "group_id",
+      "measurement_code_commit": "100c918345ff829dd6fdb96bf99cd14285d6472f",
+      "measurement_contract_fingerprint": "7b126d300e774cb44d2c47fcb12513865d03c2b08ffd03a5ce409b2ea976e1e5",
+      "model_id": "openbmb/MiniCPM5-2B",
+      "model_key": "minicpm5-2b",
+      "model_revision": "12a3808a956f869c767195e9266b59c4d21d92e2",
+      "model_role": "legacy-lineage",
+      "paired_complete": true,
+      "path": "/root/rivermind-data/r4-formal-measurements/minicpm5-2b__r4-hellaswag-activity-primary/raw-evidence.json",
+      "population_id": "r4-hellaswag-activity-primary",
+      "population_key": "hellaswag",
+      "population_manifest_fingerprint": "5c45043ba4f0ec436c16dcf494ff26be435c7857244bcbefa321d1678129c400",
+      "sha256": "f65d9be1c123a680295fe75d04d53aefb765175d8cd7e084b9cb8bcb754a260c",
+      "split_counts": {
+        "TEST": 10042,
+        "TRAIN": 456
+      },
+      "stratum_count": 192,
+      "stratum_field": "stratum",
+      "train_budget": "N456"
+    },
+    {
+      "cell_id": "minicpm5-2b__r4-medmcqa-subject-primary",
+      "committed_rows": 4618,
+      "dataset_id": "openlifescienceai/medmcqa",
+      "dataset_revision": "91c6572c454088bf71b679ad90aa8dffcd0d5868",
+      "direction_units": [
+        {
+          "direction": "CAT->OVR",
+          "unit_id": "minicpm5-2b|r4-medmcqa-subject-primary|CAT->OVR"
+        },
+        {
+          "direction": "OVR->CAT",
+          "unit_id": "minicpm5-2b|r4-medmcqa-subject-primary|OVR->CAT"
+        }
+      ],
+      "evidence_fingerprint": "446f1028391ca930962301f8bde51ef741c760603b7138d7b0bea554aef74e6c",
+      "expected_rows": 4618,
+      "group_id_field": null,
+      "measurement_code_commit": "100c918345ff829dd6fdb96bf99cd14285d6472f",
+      "measurement_contract_fingerprint": "7b126d300e774cb44d2c47fcb12513865d03c2b08ffd03a5ce409b2ea976e1e5",
+      "model_id": "openbmb/MiniCPM5-2B",
+      "model_key": "minicpm5-2b",
+      "model_revision": "12a3808a956f869c767195e9266b59c4d21d92e2",
+      "model_role": "legacy-lineage",
+      "paired_complete": true,
+      "path": "/root/rivermind-data/r4-formal-measurements/minicpm5-2b__r4-medmcqa-subject-primary/raw-evidence.json",
+      "population_id": "r4-medmcqa-subject-primary",
+      "population_key": "medmcqa",
+      "population_manifest_fingerprint": "4a4718438d46ab1ba27c59ca46806756ffb62efa05e6103981dffec4dc48c218",
+      "sha256": "b75b5252b8541c2c8ab1f201c4dd502e09812497863f957dcb47ff387e8f9a52",
+      "split_counts": {
+        "TEST": 4162,
+        "TRAIN": 456
+      },
+      "stratum_count": 21,
+      "stratum_field": "stratum",
+      "train_budget": "N456"
+    },
+    {
+      "cell_id": "olmo-3-7b-instruct__r4-hellaswag-activity-primary",
+      "committed_rows": 10954,
+      "dataset_id": "Rowan/hellaswag",
+      "dataset_revision": "218ec52e09a7e7462a5400043bb9a69a41d06b76",
+      "direction_units": [
+        {
+          "direction": "CAT->OVR",
+          "unit_id": "olmo-3-7b-instruct|r4-hellaswag-activity-primary|CAT->OVR"
+        },
+        {
+          "direction": "OVR->CAT",
+          "unit_id": "olmo-3-7b-instruct|r4-hellaswag-activity-primary|OVR->CAT"
+        }
+      ],
+      "evidence_fingerprint": "712749c4ae3b7559e77ba1bc8d2db37faa3219f1446d0eaf9c161df1d1510065",
+      "expected_rows": 10954,
+      "group_id_field": "group_id",
+      "measurement_code_commit": "100c918345ff829dd6fdb96bf99cd14285d6472f",
+      "measurement_contract_fingerprint": "7b126d300e774cb44d2c47fcb12513865d03c2b08ffd03a5ce409b2ea976e1e5",
+      "model_id": "allenai/Olmo-3-7B-Instruct",
+      "model_key": "olmo-3-7b-instruct",
+      "model_revision": "6e5971d9eba42665f5bd5a0fcf047f299ce1dccc",
+      "model_role": "current-generation",
+      "paired_complete": true,
+      "path": "/root/rivermind-data/r4-formal-measurements/olmo-3-7b-instruct__r4-hellaswag-activity-primary/raw-evidence.json",
+      "population_id": "r4-hellaswag-activity-primary",
+      "population_key": "hellaswag",
+      "population_manifest_fingerprint": "6817496f227d9cd57759bf55489cbf8a1dc4dfd27db0ae551e9223d21d02a096",
+      "sha256": "e753685f5e4924031a0ef94f1b7b281b2649525a5b53ad754906c0845c0860fc",
+      "split_counts": {
+        "TEST": 10042,
+        "TRAIN": 912
+      },
+      "stratum_count": 192,
+      "stratum_field": "stratum",
+      "train_budget": "N912"
+    },
+    {
+      "cell_id": "olmo-3-7b-instruct__r4-medmcqa-subject-primary",
+      "committed_rows": 5074,
+      "dataset_id": "openlifescienceai/medmcqa",
+      "dataset_revision": "91c6572c454088bf71b679ad90aa8dffcd0d5868",
+      "direction_units": [
+        {
+          "direction": "CAT->OVR",
+          "unit_id": "olmo-3-7b-instruct|r4-medmcqa-subject-primary|CAT->OVR"
+        },
+        {
+          "direction": "OVR->CAT",
+          "unit_id": "olmo-3-7b-instruct|r4-medmcqa-subject-primary|OVR->CAT"
+        }
+      ],
+      "evidence_fingerprint": "45410b18343ec2066a2d0e648ba086126ae2697d4b0b0c9507a77f2d427a75ff",
+      "expected_rows": 5074,
+      "group_id_field": null,
+      "measurement_code_commit": "100c918345ff829dd6fdb96bf99cd14285d6472f",
+      "measurement_contract_fingerprint": "7b126d300e774cb44d2c47fcb12513865d03c2b08ffd03a5ce409b2ea976e1e5",
+      "model_id": "allenai/Olmo-3-7B-Instruct",
+      "model_key": "olmo-3-7b-instruct",
+      "model_revision": "6e5971d9eba42665f5bd5a0fcf047f299ce1dccc",
+      "model_role": "current-generation",
+      "paired_complete": true,
+      "path": "/root/rivermind-data/r4-formal-measurements/olmo-3-7b-instruct__r4-medmcqa-subject-primary/raw-evidence.json",
+      "population_id": "r4-medmcqa-subject-primary",
+      "population_key": "medmcqa",
+      "population_manifest_fingerprint": "e48c37293f196e16d8fba42e7fc255e4ac2e77f81c270ed6f71320981968af12",
+      "sha256": "d6240f1979eae4ec2a5d72c422797c590b8d487a20164af02ba11720a21462d2",
+      "split_counts": {
+        "TEST": 4162,
+        "TRAIN": 912
+      },
+      "stratum_count": 21,
+      "stratum_field": "stratum",
+      "train_budget": "N912"
+    },
+    {
+      "cell_id": "olmo-3-7b-instruct__r4-mmlu-57-subject",
+      "committed_rows": 1596,
+      "dataset_id": "cais/mmlu",
+      "dataset_revision": "c30699e8356da336a370243923dbaf21066bb9fe",
+      "direction_units": [
+        {
+          "direction": "CAT->OVR",
+          "unit_id": "olmo-3-7b-instruct|r4-mmlu-57-subject|CAT->OVR"
+        },
+        {
+          "direction": "OVR->CAT",
+          "unit_id": "olmo-3-7b-instruct|r4-mmlu-57-subject|OVR->CAT"
+        }
+      ],
+      "evidence_fingerprint": "dadb04e97469552a22b600ade8037fac7c0fbd3fc8d1c6232be2c6303b7af728",
+      "expected_rows": 1596,
+      "group_id_field": null,
+      "measurement_code_commit": "100c918345ff829dd6fdb96bf99cd14285d6472f",
+      "measurement_contract_fingerprint": "7b126d300e774cb44d2c47fcb12513865d03c2b08ffd03a5ce409b2ea976e1e5",
+      "model_id": "allenai/Olmo-3-7B-Instruct",
+      "model_key": "olmo-3-7b-instruct",
+      "model_revision": "6e5971d9eba42665f5bd5a0fcf047f299ce1dccc",
+      "model_role": "current-generation",
+      "paired_complete": true,
+      "path": "/root/rivermind-data/r4-formal-measurements/olmo-3-7b-instruct__r4-mmlu-57-subject/raw-evidence.json",
+      "population_id": "r4-mmlu-57-subject",
+      "population_key": "mmlu",
+      "population_manifest_fingerprint": "40cc9753a711314ff3b25ed6e234d0cbda11f3f60cd87f1d3915195a3d1780b8",
+      "sha256": "e71f464c6e2adef011a588ae1b7056352ecd28a61233cf4520e7ce8f95c26a8a",
+      "split_counts": {
+        "TEST": 1140,
+        "TRAIN": 456
+      },
+      "stratum_count": 57,
+      "stratum_field": "stratum",
+      "train_budget": "N456"
+    },
+    {
+      "cell_id": "qwen3-5-2b__r4-hellaswag-activity-primary",
+      "committed_rows": 10498,
+      "dataset_id": "Rowan/hellaswag",
+      "dataset_revision": "218ec52e09a7e7462a5400043bb9a69a41d06b76",
+      "direction_units": [
+        {
+          "direction": "CAT->OVR",
+          "unit_id": "qwen3-5-2b|r4-hellaswag-activity-primary|CAT->OVR"
+        },
+        {
+          "direction": "OVR->CAT",
+          "unit_id": "qwen3-5-2b|r4-hellaswag-activity-primary|OVR->CAT"
+        }
+      ],
+      "evidence_fingerprint": "4764b8aae4bd368aa7730a3dcd59f52c57a23199c1b8e2853f150834a223c612",
+      "expected_rows": 10498,
+      "group_id_field": "group_id",
+      "measurement_code_commit": "100c918345ff829dd6fdb96bf99cd14285d6472f",
+      "measurement_contract_fingerprint": "7b126d300e774cb44d2c47fcb12513865d03c2b08ffd03a5ce409b2ea976e1e5",
+      "model_id": "Qwen/Qwen3.5-2B",
+      "model_key": "qwen3-5-2b",
+      "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "model_role": "legacy-lineage",
+      "paired_complete": true,
+      "path": "/root/rivermind-data/r4-formal-measurements/qwen3-5-2b__r4-hellaswag-activity-primary/raw-evidence.json",
+      "population_id": "r4-hellaswag-activity-primary",
+      "population_key": "hellaswag",
+      "population_manifest_fingerprint": "5c45043ba4f0ec436c16dcf494ff26be435c7857244bcbefa321d1678129c400",
+      "sha256": "048b294754edf5b710418202c0e42e50e7522ae0c805f1a8c395e2501a365bd3",
+      "split_counts": {
+        "TEST": 10042,
+        "TRAIN": 456
+      },
+      "stratum_count": 192,
+      "stratum_field": "stratum",
+      "train_budget": "N456"
+    },
+    {
+      "cell_id": "qwen3-5-2b__r4-medmcqa-subject-primary",
+      "committed_rows": 4618,
+      "dataset_id": "openlifescienceai/medmcqa",
+      "dataset_revision": "91c6572c454088bf71b679ad90aa8dffcd0d5868",
+      "direction_units": [
+        {
+          "direction": "CAT->OVR",
+          "unit_id": "qwen3-5-2b|r4-medmcqa-subject-primary|CAT->OVR"
+        },
+        {
+          "direction": "OVR->CAT",
+          "unit_id": "qwen3-5-2b|r4-medmcqa-subject-primary|OVR->CAT"
+        }
+      ],
+      "evidence_fingerprint": "75166cee197af719a85a813aab1e9df57ae3ddc4c7360a577031dfe295ad70aa",
+      "expected_rows": 4618,
+      "group_id_field": null,
+      "measurement_code_commit": "100c918345ff829dd6fdb96bf99cd14285d6472f",
+      "measurement_contract_fingerprint": "7b126d300e774cb44d2c47fcb12513865d03c2b08ffd03a5ce409b2ea976e1e5",
+      "model_id": "Qwen/Qwen3.5-2B",
+      "model_key": "qwen3-5-2b",
+      "model_revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+      "model_role": "legacy-lineage",
+      "paired_complete": true,
+      "path": "/root/rivermind-data/r4-formal-measurements/qwen3-5-2b__r4-medmcqa-subject-primary/raw-evidence.json",
+      "population_id": "r4-medmcqa-subject-primary",
+      "population_key": "medmcqa",
+      "population_manifest_fingerprint": "4a4718438d46ab1ba27c59ca46806756ffb62efa05e6103981dffec4dc48c218",
+      "sha256": "48dcdbead32f77d3b5b7a893839c2c76b4776b162226f1fb9a3d7090f8cf67bb",
+      "split_counts": {
+        "TEST": 4162,
+        "TRAIN": 456
+      },
+      "stratum_count": 21,
+      "stratum_field": "stratum",
+      "train_budget": "N456"
+    },
+    {
+      "cell_id": "qwen3-5-9b__r4-hellaswag-activity-primary",
+      "committed_rows": 10954,
+      "dataset_id": "Rowan/hellaswag",
+      "dataset_revision": "218ec52e09a7e7462a5400043bb9a69a41d06b76",
+      "direction_units": [
+        {
+          "direction": "CAT->OVR",
+          "unit_id": "qwen3-5-9b|r4-hellaswag-activity-primary|CAT->OVR"
+        },
+        {
+          "direction": "OVR->CAT",
+          "unit_id": "qwen3-5-9b|r4-hellaswag-activity-primary|OVR->CAT"
+        }
+      ],
+      "evidence_fingerprint": "58e7450a0d9f142f0ce08c6c928930c1ed9aeeb8757a692c4481b73647bc5d45",
+      "expected_rows": 10954,
+      "group_id_field": "group_id",
+      "measurement_code_commit": "100c918345ff829dd6fdb96bf99cd14285d6472f",
+      "measurement_contract_fingerprint": "7b126d300e774cb44d2c47fcb12513865d03c2b08ffd03a5ce409b2ea976e1e5",
+      "model_id": "Qwen/Qwen3.5-9B",
+      "model_key": "qwen3-5-9b",
+      "model_revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+      "model_role": "current-generation",
+      "paired_complete": true,
+      "path": "/root/rivermind-data/r4-formal-measurements/qwen3-5-9b__r4-hellaswag-activity-primary/raw-evidence.json",
+      "population_id": "r4-hellaswag-activity-primary",
+      "population_key": "hellaswag",
+      "population_manifest_fingerprint": "6817496f227d9cd57759bf55489cbf8a1dc4dfd27db0ae551e9223d21d02a096",
+      "sha256": "2b4463cf93f1d68ab801aa8268ce5c226ef51343a284ba601560685bf3e00b2a",
+      "split_counts": {
+        "TEST": 10042,
+        "TRAIN": 912
+      },
+      "stratum_count": 192,
+      "stratum_field": "stratum",
+      "train_budget": "N912"
+    },
+    {
+      "cell_id": "qwen3-5-9b__r4-medmcqa-subject-primary",
+      "committed_rows": 5074,
+      "dataset_id": "openlifescienceai/medmcqa",
+      "dataset_revision": "91c6572c454088bf71b679ad90aa8dffcd0d5868",
+      "direction_units": [
+        {
+          "direction": "CAT->OVR",
+          "unit_id": "qwen3-5-9b|r4-medmcqa-subject-primary|CAT->OVR"
+        },
+        {
+          "direction": "OVR->CAT",
+          "unit_id": "qwen3-5-9b|r4-medmcqa-subject-primary|OVR->CAT"
+        }
+      ],
+      "evidence_fingerprint": "d0ad1dc6570aafad0fb026e9c6f6ccb228b9914a1e34f5140c2220b7d8bab3ba",
+      "expected_rows": 5074,
+      "group_id_field": null,
+      "measurement_code_commit": "100c918345ff829dd6fdb96bf99cd14285d6472f",
+      "measurement_contract_fingerprint": "7b126d300e774cb44d2c47fcb12513865d03c2b08ffd03a5ce409b2ea976e1e5",
+      "model_id": "Qwen/Qwen3.5-9B",
+      "model_key": "qwen3-5-9b",
+      "model_revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+      "model_role": "current-generation",
+      "paired_complete": true,
+      "path": "/root/rivermind-data/r4-formal-measurements/qwen3-5-9b__r4-medmcqa-subject-primary/raw-evidence.json",
+      "population_id": "r4-medmcqa-subject-primary",
+      "population_key": "medmcqa",
+      "population_manifest_fingerprint": "e48c37293f196e16d8fba42e7fc255e4ac2e77f81c270ed6f71320981968af12",
+      "sha256": "b03dd0729a84ccbcf779bb42fffecdfba9d9c3d90832336d4ae9757f6f3bbbcd",
+      "split_counts": {
+        "TEST": 4162,
+        "TRAIN": 912
+      },
+      "stratum_count": 21,
+      "stratum_field": "stratum",
+      "train_budget": "N912"
+    },
+    {
+      "cell_id": "qwen3-5-9b__r4-mmlu-57-subject",
+      "committed_rows": 1596,
+      "dataset_id": "cais/mmlu",
+      "dataset_revision": "c30699e8356da336a370243923dbaf21066bb9fe",
+      "direction_units": [
+        {
+          "direction": "CAT->OVR",
+          "unit_id": "qwen3-5-9b|r4-mmlu-57-subject|CAT->OVR"
+        },
+        {
+          "direction": "OVR->CAT",
+          "unit_id": "qwen3-5-9b|r4-mmlu-57-subject|OVR->CAT"
+        }
+      ],
+      "evidence_fingerprint": "faf2b8a5316f41f3e025a0bf9030837a505c1d0f43aab4fa4fe624e9a4ac4cac",
+      "expected_rows": 1596,
+      "group_id_field": null,
+      "measurement_code_commit": "100c918345ff829dd6fdb96bf99cd14285d6472f",
+      "measurement_contract_fingerprint": "7b126d300e774cb44d2c47fcb12513865d03c2b08ffd03a5ce409b2ea976e1e5",
+      "model_id": "Qwen/Qwen3.5-9B",
+      "model_key": "qwen3-5-9b",
+      "model_revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+      "model_role": "current-generation",
+      "paired_complete": true,
+      "path": "/root/rivermind-data/r4-formal-measurements/qwen3-5-9b__r4-mmlu-57-subject/raw-evidence.json",
+      "population_id": "r4-mmlu-57-subject",
+      "population_key": "mmlu",
+      "population_manifest_fingerprint": "40cc9753a711314ff3b25ed6e234d0cbda11f3f60cd87f1d3915195a3d1780b8",
+      "sha256": "594d7777c0a99f42d13b85a3e5e79bc3582890145e81e4b8355e96bb6a636a1a",
+      "split_counts": {
+        "TEST": 1140,
+        "TRAIN": 456
+      },
+      "stratum_count": 57,
+      "stratum_field": "stratum",
+      "train_budget": "N456"
+    }
+  ],
+  "directional_units": {
+    "current_generation_primary": {
+      "cell_count": 0,
+      "composition": "4 models x 3 populations x 2 directions",
+      "unit_count": 0,
+      "units": []
+    },
+    "legacy_lineage_secondary": {
+      "cell_count": 16,
+      "composition": "2 models x 2 populations x 2 directions",
+      "unit_count": 32,
+      "units": [
+        {
+          "direction": "CAT->OVR",
+          "unit_id": "falcon-h1-7b-instruct|r4-hellaswag-activity-primary|CAT->OVR"
+        },
+        {
+          "direction": "OVR->CAT",
+          "unit_id": "falcon-h1-7b-instruct|r4-hellaswag-activity-primary|OVR->CAT"
+        },
+        {
+          "direction": "CAT->OVR",
+          "unit_id": "falcon-h1-7b-instruct|r4-medmcqa-subject-primary|CAT->OVR"
+        },
+        {
+          "direction": "OVR->CAT",
+          "unit_id": "falcon-h1-7b-instruct|r4-medmcqa-subject-primary|OVR->CAT"
+        },
+        {
+          "direction": "CAT->OVR",
+          "unit_id": "falcon-h1-7b-instruct|r4-mmlu-57-subject|CAT->OVR"
+        },
+        {
+          "direction": "OVR->CAT",
+          "unit_id": "falcon-h1-7b-instruct|r4-mmlu-57-subject|OVR->CAT"
+        },
+        {
+          "direction": "CAT->OVR",
+          "unit_id": "granite-4-0-h-tiny|r4-hellaswag-activity-primary|CAT->OVR"
+        },
+        {
+          "direction": "OVR->CAT",
+          "unit_id": "granite-4-0-h-tiny|r4-hellaswag-activity-primary|OVR->CAT"
+        },
+        {
+          "direction": "CAT->OVR",
+          "unit_id": "granite-4-0-h-tiny|r4-medmcqa-subject-primary|CAT->OVR"
+        },
+        {
+          "direction": "OVR->CAT",
+          "unit_id": "granite-4-0-h-tiny|r4-medmcqa-subject-primary|OVR->CAT"
+        },
+        {
+          "direction": "CAT->OVR",
+          "unit_id": "granite-4-0-h-tiny|r4-mmlu-57-subject|CAT->OVR"
+        },
+        {
+          "direction": "OVR->CAT",
+          "unit_id": "granite-4-0-h-tiny|r4-mmlu-57-subject|OVR->CAT"
+        },
+        {
+          "direction": "CAT->OVR",
+          "unit_id": "minicpm5-2b|r4-hellaswag-activity-primary|CAT->OVR"
+        },
+        {
+          "direction": "OVR->CAT",
+          "unit_id": "minicpm5-2b|r4-hellaswag-activity-primary|OVR->CAT"
+        },
+        {
+          "direction": "CAT->OVR",
+          "unit_id": "minicpm5-2b|r4-medmcqa-subject-primary|CAT->OVR"
+        },
+        {
+          "direction": "OVR->CAT",
+          "unit_id": "minicpm5-2b|r4-medmcqa-subject-primary|OVR->CAT"
+        },
+        {
+          "direction": "CAT->OVR",
+          "unit_id": "olmo-3-7b-instruct|r4-hellaswag-activity-primary|CAT->OVR"
+        },
+        {
+          "direction": "OVR->CAT",
+          "unit_id": "olmo-3-7b-instruct|r4-hellaswag-activity-primary|OVR->CAT"
+        },
+        {
+          "direction": "CAT->OVR",
+          "unit_id": "olmo-3-7b-instruct|r4-medmcqa-subject-primary|CAT->OVR"
+        },
+        {
+          "direction": "OVR->CAT",
+          "unit_id": "olmo-3-7b-instruct|r4-medmcqa-subject-primary|OVR->CAT"
+        },
+        {
+          "direction": "CAT->OVR",
+          "unit_id": "olmo-3-7b-instruct|r4-mmlu-57-subject|CAT->OVR"
+        },
+        {
+          "direction": "OVR->CAT",
+          "unit_id": "olmo-3-7b-instruct|r4-mmlu-57-subject|OVR->CAT"
+        },
+        {
+          "direction": "CAT->OVR",
+          "unit_id": "qwen3-5-2b|r4-hellaswag-activity-primary|CAT->OVR"
+        },
+        {
+          "direction": "OVR->CAT",
+          "unit_id": "qwen3-5-2b|r4-hellaswag-activity-primary|OVR->CAT"
+        },
+        {
+          "direction": "CAT->OVR",
+          "unit_id": "qwen3-5-2b|r4-medmcqa-subject-primary|CAT->OVR"
+        },
+        {
+          "direction": "OVR->CAT",
+          "unit_id": "qwen3-5-2b|r4-medmcqa-subject-primary|OVR->CAT"
+        },
+        {
+          "direction": "CAT->OVR",
+          "unit_id": "qwen3-5-9b|r4-hellaswag-activity-primary|CAT->OVR"
+        },
+        {
+          "direction": "OVR->CAT",
+          "unit_id": "qwen3-5-9b|r4-hellaswag-activity-primary|OVR->CAT"
+        },
+        {
+          "direction": "CAT->OVR",
+          "unit_id": "qwen3-5-9b|r4-medmcqa-subject-primary|CAT->OVR"
+        },
+        {
+          "direction": "OVR->CAT",
+          "unit_id": "qwen3-5-9b|r4-medmcqa-subject-primary|OVR->CAT"
+        },
+        {
+          "direction": "CAT->OVR",
+          "unit_id": "qwen3-5-9b|r4-mmlu-57-subject|CAT->OVR"
+        },
+        {
+          "direction": "OVR->CAT",
+          "unit_id": "qwen3-5-9b|r4-mmlu-57-subject|OVR->CAT"
+        }
+      ]
+    }
+  },
+  "fingerprint_version": 1,
+  "frozen_authority_fingerprints": {
+    "R4_CALIBRATION_FAMILY_FREEZE.md": {
+      "path": "experiments/calibration_transport/R4_CALIBRATION_FAMILY_FREEZE.md",
+      "sha256": "1fd06ad4804cb64cd9220cc86187e26f6d690fba977bd76918e057bab418cdff"
+    },
+    "R4_EPOCH1_MODEL_EXECUTION_ENVIRONMENT_MAP.json": {
+      "environment_map_fingerprint": "aebeb528b6db1d09d23c83ff8078e5a9cb0b779c8fbada0f19617c878cfb45eb",
+      "path": "experiments/calibration_transport/R4_EPOCH1_MODEL_EXECUTION_ENVIRONMENT_MAP.json",
+      "sha256": "ecb2a14e8682f7f6ef209f17988df31a9843a7529883e60f94cd52f9ae6d5873"
+    },
+    "R4_EXECUTION_MANIFEST_FREEZE.json": {
+      "execution_manifest_fingerprint": "f32381c51db24f5dbeb240b5e0fdf73c59a56a615c8607ad8979e2a7e2586775",
+      "path": "experiments/calibration_transport/R4_EXECUTION_MANIFEST_FREEZE.json",
+      "sha256": "8b56f62bfe053ddbc92518f92f7aac9da9f6b02af342699eb4db0ee12e61721d"
+    },
+    "R4_FINAL_PROTOCOL_FREEZE.json": {
+      "final_protocol_fingerprint": "d1b56d702e1f260cef47eee05b7d878ace07a15168e89408e15e7eb741c0ad34",
+      "path": "experiments/calibration_transport/R4_FINAL_PROTOCOL_FREEZE.json",
+      "sha256": "8d105b2010227b0b6467f3384ca471e536f2ae877ba351546bf4088f501d0fb6"
+    },
+    "R4_INFERENCE_MULTIPLICITY_FREEZE.json": {
+      "freeze_fingerprint": null,
+      "path": "experiments/calibration_transport/R4_INFERENCE_MULTIPLICITY_FREEZE.json",
+      "sha256": "fdc07904056fd72bdd702e275743839eea741364324bd169ec2bf97504a45ad1"
+    },
+    "R4_MEASUREMENT_EXECUTION_CONTRACT.json": {
+      "measurement_contract_fingerprint": "7b126d300e774cb44d2c47fcb12513865d03c2b08ffd03a5ce409b2ea976e1e5",
+      "path": "experiments/calibration_transport/R4_MEASUREMENT_EXECUTION_CONTRACT.json",
+      "sha256": "c9d61ed3011a3d42c1455c8e6ff1c724d80a5ceebc2f507992e371d661e15e52"
+    },
+    "R4_POPULATION_FREEZE.md": {
+      "path": "experiments/calibration_transport/R4_POPULATION_FREEZE.md",
+      "sha256": "850b6b24da61f416b76d0bac83a4ba2775d3002e94894f003fd2e0a5488fee2a"
+    },
+    "R4_PREDICTOR_FREEZE.json": {
+      "freeze_fingerprint": null,
+      "path": "experiments/calibration_transport/R4_PREDICTOR_FREEZE.json",
+      "sha256": "423c5cdaf68ce7cdbbb80cf704ed18f67692995e418d0dc8f707871322554f8c"
+    },
+    "r3_protocol.py": {
+      "path": "experiments/calibration_transport/r3_protocol.py",
+      "sha256": "46a7c0ec8e5da95a37868d89f5fc110687e66e65599ee4ac3d0602100435197e"
+    },
+    "r3_protocol_design.json": {
+      "path": "experiments/calibration_transport/r3_protocol_design.json",
+      "sha256": "cb54090f08c99c1a666ba297a896ec7be7940f6c295abddd5d594c1dabe90a43"
+    }
+  },
+  "population_manifest_joins": {
+    "r4-hellaswag-activity-primary": {
+      "join_key": "item_id",
+      "join_kind": "exact_1to1",
+      "manifest_file": "hellaswag_population_robustness912_candidate.json",
+      "manifest_fingerprint": "6817496f227d9cd57759bf55489cbf8a1dc4dfd27db0ae551e9223d21d02a096",
+      "manifest_sha256": "9920c74071953df24fef760a2878942a17344974bdd341a77e2007f96feb8c4b",
+      "test_items": 10042,
+      "train_items": 912
+    },
+    "r4-medmcqa-subject-primary": {
+      "join_key": "item_id",
+      "join_kind": "exact_1to1",
+      "manifest_file": "medmcqa_population_robustness912_candidate.json",
+      "manifest_fingerprint": "e48c37293f196e16d8fba42e7fc255e4ac2e77f81c270ed6f71320981968af12",
+      "manifest_sha256": "f56b09836da06d88f0be0915a9ebbd2bb01de54b2e48cafbeeb5554deab415fc",
+      "test_items": 4162,
+      "train_items": 912
+    }
+  },
+  "quarantined_roots": {
+    "epoch0_reference_path": "DO_NOT_USE",
+    "epoch1_pre_row1_code_defect_attempt0": "DO_NOT_USE"
+  },
+  "raw_evidence_root": "/root/rivermind-data/r4-formal-measurements",
+  "raw_measurement_freeze_commit": "3aae4528a131ba32582fb015bd2f6a4d201da457",
+  "raw_measurement_freeze_document": {
+    "path": "experiments/calibration_transport/R4_EPOCH1_RAW_MEASUREMENT_EVIDENCE_FREEZE.md",
+    "sha256": "b027be6183c06878432d22bf41d464c0281d5646269f0994924c2eec06c57727"
+  },
+  "raw_measurement_ledger": {
+    "completeness_status": "PASS",
+    "ledger_fingerprint": "2ed383f67be4476024d12a03c26699a1a50ed8656d75bb089986ce558d1be541",
+    "path": "experiments/calibration_transport/R4_EPOCH1_RAW_MEASUREMENT_EVIDENCE_LEDGER.json",
+    "sha256": "146ad254dda64778cb684283e24ae1dca2987bc6827652c448739b75ae2e1a6a",
+    "totals": {
+      "cat_ineligible": 0,
+      "cat_missing": 0,
+      "cat_scored": 100728,
+      "cells": 16,
+      "committed_rows": 100728,
+      "expected_rows": 100728,
+      "finalizations": 16,
+      "operational_attempts": 201456,
+      "ovr_ineligible": 0,
+      "ovr_missing": 0,
+      "ovr_scored": 100728,
+      "paired_complete_cells": 16,
+      "planned_logical_forwards": 201456,
+      "recovery_replay_count": 0
+    }
+  },
+  "raw_measurement_receipt": {
+    "path": "experiments/calibration_transport/R4_EPOCH1_RAW_MEASUREMENT_EXECUTION_RECEIPT.md",
+    "sha256": "50bab7148f1aa5689068f012fc16cedbd4df937069c7f69eb815d293c9148dfe"
+  },
+  "registry_fingerprint": "b0051d96eaeea693a37a0116ced4eecc7e7a7fcd34d93049b074a7010c8cb355",
+  "registry_id": "r4-formal-analysis-input-registry",
+  "registry_version": 1,
+  "scientific_output_fields_absent": [
+    "brier",
+    "log_loss",
+    "risk",
+    "delta",
+    "calibration_parameter",
+    "bootstrap_interval",
+    "factorial_effect",
+    "direction_contrast",
+    "predictor_value",
+    "spearman",
+    "accuracy",
+    "mean_probability"
+  ],
+  "scientific_outputs": "NOT_COMPUTED",
+  "test_population_identities": {
+    "hellaswag": {
+      "population_manifest_fingerprint": "5c45043ba4f0ec436c16dcf494ff26be435c7857244bcbefa321d1678129c400",
+      "test_rows": 10042
+    },
+    "medmcqa": {
+      "population_manifest_fingerprint": "4a4718438d46ab1ba27c59ca46806756ffb62efa05e6103981dffec4dc48c218",
+      "test_rows": 4162
+    },
+    "mmlu": {
+      "identity_authority": "r3_protocol_fingerprint",
+      "population_manifest_fingerprint": null,
+      "r3_protocol_fingerprint": "3ef63056ae16b18ad65d9c87d1fbec5b43550873a0e3e25ec0a323f954ee974d",
+      "test_rows": 1140
+    }
+  },
+  "train_budget_identities": {
+    "legacy_budget": {
+      "budget": "N456",
+      "n912_forbidden": true,
+      "rows": 456
+    },
+    "primary": {
+      "budget": "N456",
+      "rows": 456
+    },
+    "secondary_robustness": {
+      "applies_to": [
+        "hellaswag",
+        "medmcqa"
+      ],
+      "budget": "N912",
+      "cannot_rescue_primary": true,
+      "extension_rows": 456,
+      "nested": true,
+      "parent_primary_budget": "N456",
+      "rows": 912
+    }
+  }
+}

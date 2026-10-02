@@ -1,0 +1,414 @@
+{
+  "artifact_type": "r4-formal-analysis-runner-qualification",
+  "artifact_version": 1,
+  "bootstrap_sharing_test": {
+    "cluster_never_split": true,
+    "shared_across_directions": true,
+    "shared_across_estimands": true,
+    "shared_across_models": true,
+    "shared_across_procedures": true,
+    "shared_draw_identity_equal_across_models": true
+  },
+  "checkpoint_policy": {
+    "atomic_writes": true,
+    "blocks": [
+      "authority_validation",
+      "input_load",
+      "point_estimates",
+      "n912_robustness",
+      "test_bootstrap",
+      "train_refit",
+      "predictor",
+      "final_assembly"
+    ],
+    "bootstrap_chunking": "not introduced",
+    "draws_never_checkpointed": true,
+    "granularity": "block-level",
+    "partial_draw_merge_forbidden": true,
+    "replay_rule": "discard the uncommitted block output and recompute the whole block from identical frozen inputs and identical frozen randomness authority"
+  },
+  "entry_git": {
+    "ahead": 0,
+    "behind": 0,
+    "branch": "main",
+    "head": "47db3213b350ad9274af3780351c22b211dc21b6",
+    "origin_main": "47db3213b350ad9274af3780351c22b211dc21b6",
+    "worktree": "clean"
+  },
+  "formal_analysis_authorized": false,
+  "formal_safety_tests": {
+    "formal_evidence_never_consumed_by_synthetic_mode": true,
+    "formal_flag_missing_authority_rejected": true,
+    "formal_flag_wrong_input_identity_rejected": true,
+    "no_flag_no_analysis": true,
+    "synthetic_fixture_never_consumed_by_formal_mode": true,
+    "synthetic_qualification_synthetic_only": true,
+    "validate_only_no_analysis": true
+  },
+  "frozen_scientific_fingerprints": {
+    "analysis_dependency_graph_fingerprint": "449c9b19d61e4edbe95ea856b1d13e3b373765f8a9d05931f20e4d12bf28ed9f",
+    "analysis_dependency_graph_sha256": "fd1248052402de5c6b575957f7465b8f6094455851a16528ea92bc0242d16872",
+    "analysis_input_registry_sha256": "cb3e7625ecfcb7ec6dd71431739969eaf7f05eb1ca6a262cd8e5d3276c632921",
+    "analysis_preflight_fingerprint": "500ae1cb5ee19d030dad6c27a164b84650adbd79d81451f416126892d2e48873",
+    "analysis_registry_fingerprint": "b0051d96eaeea693a37a0116ced4eecc7e7a7fcd34d93049b074a7010c8cb355",
+    "calibration_family_freeze_sha256": "1fd06ad4804cb64cd9220cc86187e26f6d690fba977bd76918e057bab418cdff",
+    "execution_manifest_freeze_sha256": "8b56f62bfe053ddbc92518f92f7aac9da9f6b02af342699eb4db0ee12e61721d",
+    "final_protocol_freeze_sha256": "8d105b2010227b0b6467f3384ca471e536f2ae877ba351546bf4088f501d0fb6",
+    "inference_multiplicity_freeze_sha256": "fdc07904056fd72bdd702e275743839eea741364324bd169ec2bf97504a45ad1",
+    "ledger_fingerprint": "2ed383f67be4476024d12a03c26699a1a50ed8656d75bb089986ce558d1be541",
+    "measurement_contract_fingerprint": "7b126d300e774cb44d2c47fcb12513865d03c2b08ffd03a5ce409b2ea976e1e5",
+    "measurement_execution_contract_sha256": "c9d61ed3011a3d42c1455c8e6ff1c724d80a5ceebc2f507992e371d661e15e52",
+    "population_freeze_sha256": "850b6b24da61f416b76d0bac83a4ba2775d3002e94894f003fd2e0a5488fee2a",
+    "predictor_freeze_sha256": "423c5cdaf68ce7cdbbb80cf704ed18f67692995e418d0dc8f707871322554f8c",
+    "raw_evidence_ledger_sha256": "146ad254dda64778cb684283e24ae1dca2987bc6827652c448739b75ae2e1a6a"
+  },
+  "nature": "OPERATIONAL SYNTHETIC QUALIFICATION",
+  "predictor_sharing_test": {
+    "core4_only_outcome_mean": true,
+    "development_units": 8,
+    "legacy_units": 8,
+    "same_test_resample_for_x_and_y": true,
+    "source_train_thresholds_fixed": true,
+    "status": "COMPLETE",
+    "successful_replicates": 16,
+    "tail_rule": "1/40/39/40",
+    "units_total": 32,
+    "validation_units": 16
+  },
+  "qualification_fingerprint": "405f3ffcbf2cc67ff179c75ed157437045c6a726a63ae6b81dede28bcfede5ac",
+  "randomness_authority": {
+    "builtin_hash_used": false,
+    "kernel": "r4_inference.deterministic_index",
+    "mechanism": "sha256 fingerprint of a frozen identity payload, reduced modulo the pool size",
+    "prng": "none",
+    "qualification_replicates_are_not_formal": true,
+    "seed": "none",
+    "system_entropy_used": false,
+    "test_draw_identity_fields": [
+      "protocol_id",
+      "protocol_version",
+      "population_id",
+      "population_fingerprint",
+      "replicate_index",
+      "stratum",
+      "draw_index",
+      "pool_size",
+      "cluster_mode_marker"
+    ],
+    "test_replicates_formal": 20000,
+    "train_refit_identity_fields": [
+      "protocol_id",
+      "protocol_version",
+      "population_id",
+      "population_fingerprint",
+      "budget_identity",
+      "replicate_index",
+      "stratum",
+      "draw_index",
+      "pool_size"
+    ],
+    "train_refit_replicates_formal": 2000,
+    "wall_clock_used": false
+  },
+  "raw_evidence_analyzed": false,
+  "raw_freeze_identity": {
+    "ledger_fingerprint": "2ed383f67be4476024d12a03c26699a1a50ed8656d75bb089986ce558d1be541",
+    "ledger_sha256": "146ad254dda64778cb684283e24ae1dca2987bc6827652c448739b75ae2e1a6a",
+    "measurement_code_commit": "100c918345ff829dd6fdb96bf99cd14285d6472f",
+    "raw_measurement_freeze_commit": "3aae4528a131ba32582fb015bd2f6a4d201da457"
+  },
+  "runner_contract_fingerprint": "2fe5d962a706c822a63573bbd8e553a44b6b0fd082dd582af8cdaa25bc6c7c60",
+  "runner_id": "r4-integrated-formal-analysis-runner",
+  "runner_source_path": "experiments/calibration_transport/run_r4_analysis.py",
+  "runner_source_sha256": "5b4ab21d262afe1b1755120f83afaa37798df3a41dbef8274cd00ede1350f176",
+  "runner_version": 1,
+  "scientific_outputs_computed": false,
+  "status": "PASS",
+  "status_line": "R4 FORMAL ANALYSIS RUNNER = QUALIFIED CANDIDATE",
+  "synthetic_direct_oracle_equivalence": {
+    "legacy": {
+      "bootstrap_family_status": {
+        "primary": {
+          "complete_count": 12,
+          "family_size": 12,
+          "incomplete_count": 0,
+          "members": {
+            "primary::Delta_deploy::CAT->OVR::Feature": "COMPLETE",
+            "primary::Delta_deploy::CAT->OVR::Interaction": "COMPLETE",
+            "primary::Delta_deploy::CAT->OVR::Regularization": "COMPLETE",
+            "primary::Delta_deploy::OVR->CAT::Feature": "COMPLETE",
+            "primary::Delta_deploy::OVR->CAT::Interaction": "COMPLETE",
+            "primary::Delta_deploy::OVR->CAT::Regularization": "COMPLETE",
+            "primary::Delta_transport::CAT->OVR::Feature": "COMPLETE",
+            "primary::Delta_transport::CAT->OVR::Interaction": "COMPLETE",
+            "primary::Delta_transport::CAT->OVR::Regularization": "COMPLETE",
+            "primary::Delta_transport::OVR->CAT::Feature": "COMPLETE",
+            "primary::Delta_transport::OVR->CAT::Interaction": "COMPLETE",
+            "primary::Delta_transport::OVR->CAT::Regularization": "COMPLETE"
+          },
+          "status": "COMPLETE"
+        },
+        "secondary_direction_difference": {
+          "complete_count": 6,
+          "family_size": 6,
+          "incomplete_count": 0,
+          "members": {
+            "direction-difference::Delta_deploy::Feature": "COMPLETE",
+            "direction-difference::Delta_deploy::Interaction": "COMPLETE",
+            "direction-difference::Delta_deploy::Regularization": "COMPLETE",
+            "direction-difference::Delta_transport::Feature": "COMPLETE",
+            "direction-difference::Delta_transport::Interaction": "COMPLETE",
+            "direction-difference::Delta_transport::Regularization": "COMPLETE"
+          },
+          "status": "COMPLETE"
+        },
+        "secondary_extension": {
+          "complete_count": 8,
+          "family_size": 8,
+          "incomplete_count": 0,
+          "members": {
+            "extension::B-beta::CAT->OVR::Delta_deploy": "COMPLETE",
+            "extension::B-beta::CAT->OVR::Delta_transport": "COMPLETE",
+            "extension::B-beta::OVR->CAT::Delta_deploy": "COMPLETE",
+            "extension::B-beta::OVR->CAT::Delta_transport": "COMPLETE",
+            "extension::I-isotonic::CAT->OVR::Delta_deploy": "COMPLETE",
+            "extension::I-isotonic::CAT->OVR::Delta_transport": "COMPLETE",
+            "extension::I-isotonic::OVR->CAT::Delta_deploy": "COMPLETE",
+            "extension::I-isotonic::OVR->CAT::Delta_transport": "COMPLETE"
+          },
+          "status": "COMPLETE"
+        },
+        "secondary_native_reference": {
+          "complete_count": 12,
+          "family_size": 12,
+          "incomplete_count": 0,
+          "members": {
+            "native-reference::CAT->OVR::B-beta": "COMPLETE",
+            "native-reference::CAT->OVR::I-isotonic": "COMPLETE",
+            "native-reference::CAT->OVR::L-historical": "COMPLETE",
+            "native-reference::CAT->OVR::L-low": "COMPLETE",
+            "native-reference::CAT->OVR::P-historical": "COMPLETE",
+            "native-reference::CAT->OVR::P-low": "COMPLETE",
+            "native-reference::OVR->CAT::B-beta": "COMPLETE",
+            "native-reference::OVR->CAT::I-isotonic": "COMPLETE",
+            "native-reference::OVR->CAT::L-historical": "COMPLETE",
+            "native-reference::OVR->CAT::L-low": "COMPLETE",
+            "native-reference::OVR->CAT::P-historical": "COMPLETE",
+            "native-reference::OVR->CAT::P-low": "COMPLETE"
+          },
+          "status": "COMPLETE"
+        }
+      },
+      "point_estimate_mismatches": [],
+      "point_estimate_oracle_equal": true,
+      "refit_blocks": 64,
+      "refit_statuses": [
+        "COMPLETE"
+      ]
+    },
+    "method": "independent recomposition via r3_analysis.fit_calibrator / r4_calibration_families / r4_inference.risk_matrix",
+    "metric_oracle": {
+      "inf_minus_inf_state": "UNDEFINED_EXTENDED_REAL",
+      "inf_plus_finite_state": "POSITIVE_INFINITY",
+      "logloss_zero_mass_correct_state": "FINITE",
+      "logloss_zero_mass_incorrect_state": "POSITIVE_INFINITY",
+      "mean_brier": 0.28125,
+      "mean_logloss_state": "FINITE",
+      "undefined_constant": "UNDEFINED_EXTENDED_REAL"
+    },
+    "primary": {
+      "available_procedures": [
+        "P-low",
+        "P-historical",
+        "L-low",
+        "L-historical",
+        "I-isotonic",
+        "B-beta"
+      ],
+      "bootstrap_family_status": {
+        "primary": {
+          "complete_count": 12,
+          "family_size": 12,
+          "incomplete_count": 0,
+          "members": {
+            "primary::Delta_deploy::CAT->OVR::Feature": "COMPLETE",
+            "primary::Delta_deploy::CAT->OVR::Interaction": "COMPLETE",
+            "primary::Delta_deploy::CAT->OVR::Regularization": "COMPLETE",
+            "primary::Delta_deploy::OVR->CAT::Feature": "COMPLETE",
+            "primary::Delta_deploy::OVR->CAT::Interaction": "COMPLETE",
+            "primary::Delta_deploy::OVR->CAT::Regularization": "COMPLETE",
+            "primary::Delta_transport::CAT->OVR::Feature": "COMPLETE",
+            "primary::Delta_transport::CAT->OVR::Interaction": "COMPLETE",
+            "primary::Delta_transport::CAT->OVR::Regularization": "COMPLETE",
+            "primary::Delta_transport::OVR->CAT::Feature": "COMPLETE",
+            "primary::Delta_transport::OVR->CAT::Interaction": "COMPLETE",
+            "primary::Delta_transport::OVR->CAT::Regularization": "COMPLETE"
+          },
+          "status": "COMPLETE"
+        },
+        "secondary_direction_difference": {
+          "complete_count": 6,
+          "family_size": 6,
+          "incomplete_count": 0,
+          "members": {
+            "direction-difference::Delta_deploy::Feature": "COMPLETE",
+            "direction-difference::Delta_deploy::Interaction": "COMPLETE",
+            "direction-difference::Delta_deploy::Regularization": "COMPLETE",
+            "direction-difference::Delta_transport::Feature": "COMPLETE",
+            "direction-difference::Delta_transport::Interaction": "COMPLETE",
+            "direction-difference::Delta_transport::Regularization": "COMPLETE"
+          },
+          "status": "COMPLETE"
+        },
+        "secondary_extension": {
+          "complete_count": 8,
+          "family_size": 8,
+          "incomplete_count": 0,
+          "members": {
+            "extension::B-beta::CAT->OVR::Delta_deploy": "COMPLETE",
+            "extension::B-beta::CAT->OVR::Delta_transport": "COMPLETE",
+            "extension::B-beta::OVR->CAT::Delta_deploy": "COMPLETE",
+            "extension::B-beta::OVR->CAT::Delta_transport": "COMPLETE",
+            "extension::I-isotonic::CAT->OVR::Delta_deploy": "COMPLETE",
+            "extension::I-isotonic::CAT->OVR::Delta_transport": "COMPLETE",
+            "extension::I-isotonic::OVR->CAT::Delta_deploy": "COMPLETE",
+            "extension::I-isotonic::OVR->CAT::Delta_transport": "COMPLETE"
+          },
+          "status": "COMPLETE"
+        },
+        "secondary_native_reference": {
+          "complete_count": 12,
+          "family_size": 12,
+          "incomplete_count": 0,
+          "members": {
+            "native-reference::CAT->OVR::B-beta": "COMPLETE",
+            "native-reference::CAT->OVR::I-isotonic": "COMPLETE",
+            "native-reference::CAT->OVR::L-historical": "COMPLETE",
+            "native-reference::CAT->OVR::L-low": "COMPLETE",
+            "native-reference::CAT->OVR::P-historical": "COMPLETE",
+            "native-reference::CAT->OVR::P-low": "COMPLETE",
+            "native-reference::OVR->CAT::B-beta": "COMPLETE",
+            "native-reference::OVR->CAT::I-isotonic": "COMPLETE",
+            "native-reference::OVR->CAT::L-historical": "COMPLETE",
+            "native-reference::OVR->CAT::L-low": "COMPLETE",
+            "native-reference::OVR->CAT::P-historical": "COMPLETE",
+            "native-reference::OVR->CAT::P-low": "COMPLETE"
+          },
+          "status": "COMPLETE"
+        }
+      },
+      "core4_only_family_status": {
+        "primary": {
+          "complete_count": 12,
+          "family_size": 12,
+          "incomplete_count": 0,
+          "members": {
+            "primary::Delta_deploy::CAT->OVR::Feature": "COMPLETE",
+            "primary::Delta_deploy::CAT->OVR::Interaction": "COMPLETE",
+            "primary::Delta_deploy::CAT->OVR::Regularization": "COMPLETE",
+            "primary::Delta_deploy::OVR->CAT::Feature": "COMPLETE",
+            "primary::Delta_deploy::OVR->CAT::Interaction": "COMPLETE",
+            "primary::Delta_deploy::OVR->CAT::Regularization": "COMPLETE",
+            "primary::Delta_transport::CAT->OVR::Feature": "COMPLETE",
+            "primary::Delta_transport::CAT->OVR::Interaction": "COMPLETE",
+            "primary::Delta_transport::CAT->OVR::Regularization": "COMPLETE",
+            "primary::Delta_transport::OVR->CAT::Feature": "COMPLETE",
+            "primary::Delta_transport::OVR->CAT::Interaction": "COMPLETE",
+            "primary::Delta_transport::OVR->CAT::Regularization": "COMPLETE"
+          },
+          "status": "COMPLETE"
+        },
+        "secondary_direction_difference": {
+          "complete_count": 6,
+          "family_size": 6,
+          "incomplete_count": 0,
+          "members": {
+            "direction-difference::Delta_deploy::Feature": "COMPLETE",
+            "direction-difference::Delta_deploy::Interaction": "COMPLETE",
+            "direction-difference::Delta_deploy::Regularization": "COMPLETE",
+            "direction-difference::Delta_transport::Feature": "COMPLETE",
+            "direction-difference::Delta_transport::Interaction": "COMPLETE",
+            "direction-difference::Delta_transport::Regularization": "COMPLETE"
+          },
+          "status": "COMPLETE"
+        },
+        "secondary_extension": {
+          "complete_count": 0,
+          "family_size": 8,
+          "incomplete_count": 8,
+          "members": {
+            "extension::B-beta::CAT->OVR::Delta_deploy": "INCOMPLETE",
+            "extension::B-beta::CAT->OVR::Delta_transport": "INCOMPLETE",
+            "extension::B-beta::OVR->CAT::Delta_deploy": "INCOMPLETE",
+            "extension::B-beta::OVR->CAT::Delta_transport": "INCOMPLETE",
+            "extension::I-isotonic::CAT->OVR::Delta_deploy": "INCOMPLETE",
+            "extension::I-isotonic::CAT->OVR::Delta_transport": "INCOMPLETE",
+            "extension::I-isotonic::OVR->CAT::Delta_deploy": "INCOMPLETE",
+            "extension::I-isotonic::OVR->CAT::Delta_transport": "INCOMPLETE"
+          },
+          "status": "INCOMPLETE"
+        },
+        "secondary_native_reference": {
+          "complete_count": 8,
+          "family_size": 12,
+          "incomplete_count": 4,
+          "members": {
+            "native-reference::CAT->OVR::B-beta": "INCOMPLETE",
+            "native-reference::CAT->OVR::I-isotonic": "INCOMPLETE",
+            "native-reference::CAT->OVR::L-historical": "COMPLETE",
+            "native-reference::CAT->OVR::L-low": "COMPLETE",
+            "native-reference::CAT->OVR::P-historical": "COMPLETE",
+            "native-reference::CAT->OVR::P-low": "COMPLETE",
+            "native-reference::OVR->CAT::B-beta": "INCOMPLETE",
+            "native-reference::OVR->CAT::I-isotonic": "INCOMPLETE",
+            "native-reference::OVR->CAT::L-historical": "COMPLETE",
+            "native-reference::OVR->CAT::L-low": "COMPLETE",
+            "native-reference::OVR->CAT::P-historical": "COMPLETE",
+            "native-reference::OVR->CAT::P-low": "COMPLETE"
+          },
+          "status": "INCOMPLETE"
+        }
+      },
+      "point_estimate_mismatches": [],
+      "point_estimate_oracle_equal": true,
+      "refit_blocks": 192,
+      "refit_statuses": [
+        "COMPLETE"
+      ]
+    }
+  },
+  "synthetic_fixture_identity": {
+    "clusters_per_stratum": 3,
+    "formal_evidence_consumed": false,
+    "labels": "invented non-separable labels derived from the invented scores",
+    "marker": "SYNTHETIC_ONLY_NOT_SCIENTIFIC_EVIDENCE",
+    "score_source": "sha256 fingerprint of a frozen synthetic identity payload",
+    "strata_per_population": 6,
+    "test_per_stratum": 12,
+    "train_per_stratum": 12
+  },
+  "tests": {
+    "determinism": "byte-identical synthetic qualification rerun",
+    "new_runner_tests": {
+      "collected": 89,
+      "failed": 0,
+      "passed": 89,
+      "path": "tests/test_r4_analysis_runner.py"
+    }
+  },
+  "validate_only_result": {
+    "bootstrap_draws": 0,
+    "calibrator_fits": 0,
+    "cells": 16,
+    "current_directional_units": 24,
+    "input": "real frozen raw evidence",
+    "legacy_directional_units": 8,
+    "metrics_computed": 0,
+    "mode": "--validate-only",
+    "predictor_values": 0,
+    "problems": [],
+    "rows": 100728,
+    "scientific_outputs_computed": false,
+    "status": "PASS"
+  }
+}

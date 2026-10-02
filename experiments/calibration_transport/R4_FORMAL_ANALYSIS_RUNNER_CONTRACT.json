@@ -1,0 +1,299 @@
+{
+  "analysis_result_fingerprint_version": 1,
+  "artifact_type": "r4-formal-analysis-runner-contract",
+  "artifact_version": 1,
+  "authority_block_fields": [
+    "measurement_contract_fingerprint",
+    "final_protocol_fingerprint",
+    "execution_manifest_fingerprint",
+    "ledger_fingerprint",
+    "environment_map_fingerprint",
+    "registry_fingerprint",
+    "dependency_graph_fingerprint",
+    "preflight_fingerprint",
+    "raw_measurement_freeze_commit",
+    "measurement_code_commit",
+    "frozen_file_sha256",
+    "frozen_implementation_sha256"
+  ],
+  "bootstrap_family_ids": [
+    "primary12",
+    "extension8",
+    "direction_difference6",
+    "native_reference12"
+  ],
+  "bootstrap_family_record_fields": [
+    "family_id",
+    "family_size",
+    "members",
+    "member_status",
+    "bonferroni_lower",
+    "bonferroni_upper",
+    "interval_rank_low",
+    "interval_rank_high",
+    "replicates",
+    "status",
+    "incomplete_reason"
+  ],
+  "bootstrap_family_sizes": {
+    "direction_difference6": 6,
+    "extension8": 8,
+    "native_reference12": 12,
+    "primary12": 12
+  },
+  "calibration_procedure_record_fields": [
+    "procedure",
+    "status",
+    "reason",
+    "state_fingerprint",
+    "available",
+    "ineligible",
+    "failed"
+  ],
+  "checkpoint_policy": {
+    "atomic_writes": true,
+    "blocks": [
+      "authority_validation",
+      "input_load",
+      "point_estimates",
+      "n912_robustness",
+      "test_bootstrap",
+      "train_refit",
+      "predictor",
+      "final_assembly"
+    ],
+    "bootstrap_chunking": "not introduced",
+    "draws_never_checkpointed": true,
+    "granularity": "block-level",
+    "partial_draw_merge_forbidden": true,
+    "replay_rule": "discard the uncommitted block output and recompute the whole block from identical frozen inputs and identical frozen randomness authority"
+  },
+  "cli_modes": {
+    "default": "no mode: no analysis, exit non-zero",
+    "execute_formal_analysis": "--execute-formal-analysis: explicit formal mode, never implied",
+    "synthetic_qualification": "--synthetic-qualification: invented fixtures only, never reads the formal evidence root",
+    "validate_only": "--validate-only: structural validation of frozen authorities and raw-evidence identity only"
+  },
+  "completeness_record_fields": [
+    "status",
+    "complete_blocks",
+    "incomplete_blocks",
+    "missing_dependency",
+    "undefined_reason",
+    "incomplete_reason",
+    "analysis_result_fingerprint"
+  ],
+  "directional_unit_record_fields": [
+    "unit_id",
+    "model_key",
+    "model_id",
+    "model_revision",
+    "population_key",
+    "population_id",
+    "direction_id",
+    "cell_id",
+    "role"
+  ],
+  "estimand_ids": [
+    "Delta_native",
+    "Delta_deploy",
+    "Delta_transport"
+  ],
+  "estimand_record_fields": [
+    "estimand_id",
+    "procedure",
+    "direction_id",
+    "measurement",
+    "metric_id",
+    "state",
+    "value"
+  ],
+  "execution_identity_block_fields": [
+    "runner_id",
+    "runner_version",
+    "runner_source_sha256",
+    "runner_contract_fingerprint",
+    "measurement_code_commit",
+    "test_bootstrap_protocol_id",
+    "test_bootstrap_protocol_version",
+    "train_refit_protocol_id",
+    "train_refit_protocol_version",
+    "multiplicity_correction_id",
+    "percentile_rule_id",
+    "analysis_result_fingerprint_version"
+  ],
+  "extended_real_states": [
+    "FINITE",
+    "POSITIVE_INFINITY",
+    "UNDEFINED_EXTENDED_REAL"
+  ],
+  "formal_analysis_authorized": false,
+  "formal_evidence_root": "/root/rivermind-data/r4-formal-measurements",
+  "formal_mode_preconditions": [
+    "measurement_contract_status == FROZEN",
+    "final_protocol_status == FROZEN",
+    "execution_manifest_status == FROZEN",
+    "frozen file sha256 all match",
+    "frozen implementation sha256 all match",
+    "formal output root clean or a frozen checkpoint resume"
+  ],
+  "formal_output_root": "/root/rivermind-data/r4-formal-analysis",
+  "input_identity_block_fields": [
+    "cell_id",
+    "model_key",
+    "model_id",
+    "model_revision",
+    "model_role",
+    "population_key",
+    "population_id",
+    "population_manifest_fingerprint",
+    "dataset_id",
+    "dataset_revision",
+    "train_budget",
+    "stratum_field",
+    "group_id_field",
+    "path",
+    "sha256",
+    "evidence_fingerprint",
+    "split_counts"
+  ],
+  "metric_ids": [
+    "Brier",
+    "LogLoss"
+  ],
+  "metric_record_fields": [
+    "metric_id",
+    "state",
+    "value",
+    "undefined_reason"
+  ],
+  "n912_robustness_invariants": {
+    "cannot_replace_or_rescue_primary": true,
+    "legacy_n912_forbidden": true,
+    "separate_from_primary": true
+  },
+  "n912_robustness_record_fields": [
+    "cell_id",
+    "population_id",
+    "train_budget",
+    "role",
+    "status",
+    "reason",
+    "separate_from_primary",
+    "cannot_rescue_primary"
+  ],
+  "nature": "OPERATIONAL ANALYSIS ORCHESTRATION CONTRACT",
+  "orchestration_boundary": {
+    "delegated_modules": [
+      "r4_calibration_families.py",
+      "r4_inference.py",
+      "r4_predictor.py",
+      "r3_protocol.py",
+      "r3_analysis.py"
+    ],
+    "runner_may_add": [
+      "io",
+      "schema_validation",
+      "authority_validation",
+      "dependency_wiring",
+      "status_propagation",
+      "checkpointing",
+      "atomic_writes",
+      "cli"
+    ],
+    "runner_must_not_reimplement": [
+      "calibration_mathematics",
+      "risk_definitions",
+      "delta_formulas",
+      "bootstrap_statistics",
+      "multiplicity_formulas",
+      "spearman",
+      "wasserstein"
+    ]
+  },
+  "predictor_record_fields": [
+    "unit_id",
+    "model_key",
+    "population_id",
+    "direction_id",
+    "role",
+    "x_range",
+    "x_wasserstein1",
+    "y_transport_core4",
+    "y_deploy_core4",
+    "spearman_rho",
+    "interval_low",
+    "interval_high",
+    "status",
+    "incomplete_reason"
+  ],
+  "predictor_role_counts": {
+    "development": 8,
+    "legacy_extension": 8,
+    "primary_validation": 16
+  },
+  "qualification_output_root": "/root/rivermind-data/r4-analysis-runner-qualification",
+  "randomness_authority": {
+    "builtin_hash_used": false,
+    "kernel": "r4_inference.deterministic_index",
+    "mechanism": "sha256 fingerprint of a frozen identity payload, reduced modulo the pool size",
+    "prng": "none",
+    "qualification_replicates_are_not_formal": true,
+    "seed": "none",
+    "system_entropy_used": false,
+    "test_draw_identity_fields": [
+      "protocol_id",
+      "protocol_version",
+      "population_id",
+      "population_fingerprint",
+      "replicate_index",
+      "stratum",
+      "draw_index",
+      "pool_size",
+      "cluster_mode_marker"
+    ],
+    "test_replicates_formal": 20000,
+    "train_refit_identity_fields": [
+      "protocol_id",
+      "protocol_version",
+      "population_id",
+      "population_fingerprint",
+      "budget_identity",
+      "replicate_index",
+      "stratum",
+      "draw_index",
+      "pool_size"
+    ],
+    "train_refit_replicates_formal": 2000,
+    "wall_clock_used": false
+  },
+  "raw_evidence_analyzed": false,
+  "risk_ids": [
+    "R_raw",
+    "R_native",
+    "R_cross"
+  ],
+  "risk_record_fields": [
+    "risk_id",
+    "procedure",
+    "direction_id",
+    "measurement",
+    "metric_id",
+    "state",
+    "value"
+  ],
+  "runner_contract_fingerprint": "2fe5d962a706c822a63573bbd8e553a44b6b0fd082dd582af8cdaa25bc6c7c60",
+  "runner_id": "r4-integrated-formal-analysis-runner",
+  "runner_source_path": "experiments/calibration_transport/run_r4_analysis.py",
+  "runner_source_sha256": "5b4ab21d262afe1b1755120f83afaa37798df3a41dbef8274cd00ede1350f176",
+  "runner_version": 1,
+  "scientific_outputs_computed": false,
+  "scientific_semantics_changed": false,
+  "status": "FROZEN CANDIDATE",
+  "status_vocabulary": [
+    "COMPLETE",
+    "INCOMPLETE",
+    "UNDEFINED",
+    "DEPENDENCY_UNAVAILABLE"
+  ]
+}

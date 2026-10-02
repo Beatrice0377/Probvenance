@@ -7,13 +7,18 @@ status:                      PASS
 nature:                      OPERATIONAL SYNTHETIC FORMAL-DAG QUALIFICATION
 runner_id:                   r4-integrated-formal-analysis-runner
 runner_source_path:          experiments/calibration_transport/run_r4_analysis.py
-runner_source_sha256:        e86ef34a3435c81fd78285fbc709a7966bf704fbe35987db6d3003d2cf31bac3
-runner_contract_fingerprint: d16a8edb9f7edcb5a0dee69e37bb32f4f45dd661fcb324e166db31a2c6b06ff5
-qualification_fingerprint:   9e7d998060daf761f1f8914714eb57b16128a18f6db4bde49ddf7db9a0267270
+runner_source_sha256:        a2c231012893dd7d840aaadb1efd6f2f3b7fe74536ba7e3cf90fc6765fe8f55c
+runner_test_sha256:          e35e9fdfc0ec13d73862d000b9770c3f851eda0b82766aaf2747e13b8f6adf8e
+runner_contract_fingerprint: 630cafa6ec7943274c943b1354c6f8acbb7c722764f7770ef3de4c8c9c09fd2e
+qualification_fingerprint:   89f808bd7f4574b73c176935f39ae940cf741e2cb3a56c541e1b04d5d5536164
+canonical_fit_identity:      model x population x budget x procedure x measurement
 scientific_outputs_computed: false
 raw_evidence_analyzed:       false
 formal_analysis_authorized:  false
-superseded_qualification_fingerprint: 405f3ffcbf2cc67ff179c75ed157437045c6a726a63ae6b81dede28bcfede5ac
+superseded_qualification_fingerprints:
+  405f3ffcbf2cc67ff179c75ed157437045c6a726a63ae6b81dede28bcfede5ac  SUPERSEDED FOR FORMAL-PATH COVERAGE
+  9e7d998060daf761f1f8914714eb57b16128a18f6db4bde49ddf7db9a0267270  SUPERSEDED BY THE
+                                                                  IDENTITY/EXCEPTION CORRECTION
 ```
 
 The runner is **implementation-qualified against the frozen synthetic / direct-call contract**. It

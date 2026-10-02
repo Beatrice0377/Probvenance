@@ -8,21 +8,26 @@ nature:                   OPERATIONAL ANALYSIS ORCHESTRATION CONTRACT
 runner_id:                r4-integrated-formal-analysis-runner
 runner_version:           1
 runner_source_path:       experiments/calibration_transport/run_r4_analysis.py
-runner_source_sha256:     e86ef34a3435c81fd78285fbc709a7966bf704fbe35987db6d3003d2cf31bac3
-runner_contract_fingerprint: d16a8edb9f7edcb5a0dee69e37bb32f4f45dd661fcb324e166db31a2c6b06ff5
+runner_source_sha256:     a2c231012893dd7d840aaadb1efd6f2f3b7fe74536ba7e3cf90fc6765fe8f55c
+runner_contract_fingerprint: 630cafa6ec7943274c943b1354c6f8acbb7c722764f7770ef3de4c8c9c09fd2e
 formal_analysis_authorized:  false
 scientific_semantics_changed: false
 scientific_outputs_computed:  false
 raw_evidence_analyzed:        false
-superseded_contract_fingerprint: 2fe5d962a706c822a63573bbd8e553a44b6b0fd082dd582af8cdaa25bc6c7c60
+superseded_contract_fingerprints:
+  2fe5d962a706c822a63573bbd8e553a44b6b0fd082dd582af8cdaa25bc6c7c60  SUPERSEDED FOR FORMAL-PATH COVERAGE
+  d16a8edb9f7edcb5a0dee69e37bb32f4f45dd661fcb324e166db31a2c6b06ff5  SUPERSEDED BY THE MEASUREMENT-MAP
+                                                                  IDENTITY + EXCEPTION-BOUNDARY CORRECTION
+firewall_deviation:       R4_FORMAL_ANALYSIS_FIREWALL_DEVIATION_ATTEMPT0.json
 ```
 
 This document defines **fields only**. It carries no real scientific value.
 
-The previous contract fingerprint `2fe5d962a706c822a63573bbd8e553a44b6b0fd082dd582af8cdaa25bc6c7c60`
-is retained as provenance and is marked **SUPERSEDED FOR FORMAL-PATH COVERAGE**. It described an
-orchestration path that did not cover the full frozen dependency graph; it is not claimed to be
-still valid.
+Both earlier contract fingerprints are retained as provenance and are marked **SUPERSEDED**.
+`2fe5d962…` described an orchestration path that did not cover the full frozen dependency graph.
+`d16a8edb…` described a direction/side fit identity (a measurement fitted once per directional
+role) and a catch-all mapping of any unknown fit exception to a scientific `FAILED` status.
+Neither is claimed to be still valid.
 
 ---
 
@@ -193,6 +198,56 @@ Fit source:
 cross fit   fit the SOURCE measurement A on the population TRAIN (N456 primary / N912 robustness)
 native fit  fit the TARGET measurement B on the population TRAIN (N456 primary / N912 robustness)
 ```
+
+### 7.1 Canonical fitted-map identity
+
+There is exactly **one** scientific fitted-map identity per
+
+```text
+fit_identity = model x population x budget x procedure x measurement
+measurement  = CAT | OVR
+```
+
+`direction`, `cross/native side`, `estimand` and `metric` are **references** into that registry,
+never distinct fit identities. The same fitted map therefore serves two directional roles:
+
+```text
+fit(CAT)  =  CAT->OVR cross   =  OVR->CAT native
+fit(OVR)  =  OVR->CAT cross   =  CAT->OVR native
+```
+
+A measurement is never fitted twice. A measurement-level failure propagates automatically to
+both of its directional roles:
+
+```text
+B-beta CAT fit FAILED -> CAT->OVR cross unavailable  AND  OVR->CAT native unavailable
+B-beta OVR fit FAILED -> OVR->CAT cross unavailable  AND  CAT->OVR native unavailable
+```
+
+Resulting truth table (only the affected estimands disappear):
+
+```text
+CAT failed:
+  CAT->OVR   Delta_deploy INCOMPLETE   Delta_native AVAILABLE   Delta_transport INCOMPLETE
+  OVR->CAT   Delta_deploy AVAILABLE    Delta_native INCOMPLETE  Delta_transport INCOMPLETE
+OVR failed:
+  CAT->OVR   Delta_deploy AVAILABLE    Delta_native INCOMPLETE  Delta_transport INCOMPLETE
+  OVR->CAT   Delta_deploy INCOMPLETE   Delta_native AVAILABLE   Delta_transport INCOMPLETE
+both failed:
+  both directions  Delta_deploy INCOMPLETE  Delta_native INCOMPLETE  Delta_transport INCOMPLETE
+```
+
+Unique fit counts:
+
+```text
+primary N456 current generation   4 models x 3 populations x 6 procedures x 2 measurements = 144
+legacy N456                       2 models x 2 populations x 6 procedures x 2 measurements =  48
+current N912 robustness           4 models x 2 populations x 6 procedures x 2 measurements =  96
+```
+
+The runner helper is `run_r4_analysis.canonical_fit_key` plus
+`run_r4_analysis.directional_measurement`; the reference map is
+`run_r4_analysis.directional_reference_map`.
 
 ---
 
@@ -416,25 +471,36 @@ execution; a qualification that exercises only a parallel path does not qualify 
 
 ```text
 coverage_record_fields:
-  model, population, procedure, direction, side, status, reason, failure_type
-coverage_key:   model|population|procedure|direction|side
+  fit_identity{model, population, budget, procedure, measurement}, status, failure_type,
+  reason, directional_references[{direction, side}]
+coverage_key:   model|population|budget|procedure|measurement
 fit_status_vocabulary: AVAILABLE, INELIGIBLE, FAILED
 ```
 
-The registry key includes the direction and the side, because CAT is the cross measurement for
-`CAT->OVR` and the native measurement for `OVR->CAT`; a measurement-only key collides and masks
-real failures. Failed and ineligible cells are retained: never dropped, replaced or averaged over.
+The registry is keyed by the **canonical fitted-map identity** and carries every directional
+role that references it under `directional_references`. Direction and side are references, so a
+single measurement-level failure is reported once — never as two independent fit states.
+Failed and ineligible cells are retained: never dropped, replaced or averaged over.
 
 A full-TRAIN fit that cannot produce a frozen accepted optimum is an explicit **FAILED** fit,
 never a fatal process exception and never a silent `INELIGIBLE`:
 
 ```text
-BetaFitIneligible        -> INELIGIBLE
-BetaContractViolation    -> FAILED
-BetaImplementationError  -> FAILED
-IsotonicContractViolation-> FAILED
-other exception          -> FAILED
+logistic core:
+  ProbabilityEndpointError -> INELIGIBLE
+  AnalysisError            -> FAILED
+I-isotonic:
+  IsotonicContractViolation-> FAILED
+B-beta:
+  BetaFitIneligible        -> INELIGIBLE
+  BetaContractViolation    -> FAILED
+  BetaImplementationError  -> FAILED
+any other exception        -> PROPAGATE (FORMAL_ANALYSIS_CODE_DEFECT)
 ```
+
+The whitelist is **explicit and closed**: there is no `except Exception -> FAILED` policy. An
+unknown fit exception is treated as an operational defect, not a scientific failure, and it must
+cross the fit layer to be classified as `FORMAL_ANALYSIS_CODE_DEFECT`.
 
 The exception type and message are retained, and the failure is never renamed to
 `DEPENDENCY_UNAVAILABLE` at the fit layer. The beta solver, tolerance, starts and constraint
@@ -497,9 +563,16 @@ Formal mode refuses a non-empty unknown output root, and never overwrites existi
 ```text
 R4 FORMAL ANALYSIS RUNNER = FROZEN CANDIDATE
 
+CANONICAL FIT IDENTITY = MODEL x POPULATION x BUDGET x PROCEDURE x MEASUREMENT
+DIRECTION / SIDE = REFERENCES, NOT DISTINCT FIT IDENTITIES
+UNKNOWN EXCEPTIONS = OPERATIONAL DEFECTS, NOT SCIENTIFIC FAILURES
+
 FORMAL R4 CALIBRATION / INFERENCE / PREDICTOR = NOT YET AUTHORIZED
 
-SCIENTIFIC OUTPUTS COMPUTED = NO
+FORMAL SCIENTIFIC OUTCOME ESTIMATES COMPUTED = NO
+REAL CALIBRATOR FIT ATTEMPTS IN THIS CLOSURE TASK = NO
+PRIOR UNAUTHORIZED REAL FIT STATUS EXPOSURE = YES (provenance-only deviation recorded)
+FORMAL RESULTS PRODUCED = NO
 
 RAW EVIDENCE = NOT ANALYZED
 ```
@@ -510,13 +583,26 @@ The blocked formal analysis attempt 0 is quarantined at
 `authority_validation` and it computed zero scientific outputs. The live formal analysis root
 `/root/rivermind-data/r4-formal-analysis` does not exist.
 
-The previous runner contract fingerprint
-`2fe5d962a706c822a63573bbd8e553a44b6b0fd082dd582af8cdaa25bc6c7c60` and the previous runner
-qualification fingerprint
-`405f3ffcbf2cc67ff179c75ed157437045c6a726a63ae6b81dede28bcfede5ac` are both marked
-**SUPERSEDED FOR FORMAL-PATH COVERAGE**.
+Superseded fingerprints, retained as provenance:
+
+```text
+contract      2fe5d962a706c822a63573bbd8e553a44b6b0fd082dd582af8cdaa25bc6c7c60  SUPERSEDED FOR FORMAL-PATH COVERAGE
+contract      d16a8edb9f7edcb5a0dee69e37bb32f4f45dd661fcb324e166db31a2c6b06ff5  SUPERSEDED BY THE IDENTITY/EXCEPTION CORRECTION
+qualification 405f3ffcbf2cc67ff179c75ed157437045c6a726a63ae6b81dede28bcfede5ac  SUPERSEDED FOR FORMAL-PATH COVERAGE
+qualification 9e7d998060daf761f1f8914714eb57b16128a18f6db4bde49ddf7db9a0267270  SUPERSEDED BY THE IDENTITY/EXCEPTION CORRECTION
+coverage      39ac890e7b7e564cfb14d42353b5db44997c9392513f433c7473cb0a53007d1d  SUPERSEDED BY THE IDENTITY CORRECTION
+```
 
 The frozen dependency-graph coverage matrix is
 `experiments/calibration_transport/R4_FORMAL_ANALYSIS_RUNNER_DAG_COVERAGE.json`, with
-`coverage_fingerprint 39ac890e7b7e564cfb14d42353b5db44997c9392513f433c7473cb0a53007d1d` and
+`coverage_fingerprint 5bbd1b0d11c337b410b02fa996ef44389d6c135177ccc3f76145a940819098d1` and
 `required_nodes_uncovered = 0`, `required_nodes_without_synthetic_test = 0`.
+
+### 20.1 Firewall deviation provenance
+
+`R4_FORMAL_ANALYSIS_FIREWALL_DEVIATION_ATTEMPT0.json` records a prior
+`UNAUTHORIZED_REAL_FIT_STATUS_EXPOSURE`: one ad-hoc debug invocation fitted real current-generation
+TRAIN calibrators. No Brier, LogLoss, risk, Delta, bootstrap interval, factorial effect, direction
+contrast, predictor value, Spearman correlation or model ranking was computed or inspected, and no
+fit parameter or scientific result was persisted. Disposition:
+`DO_NOT_USE_FOR_SELECTION_OR_INTERPRETATION`.

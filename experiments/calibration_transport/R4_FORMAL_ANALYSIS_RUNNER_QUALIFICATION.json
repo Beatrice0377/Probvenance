@@ -9,6 +9,38 @@
     "shared_across_procedures": true,
     "shared_draw_identity_equal_across_models": true
   },
+  "canonical_fit_identity": {
+    "budget_carrier": "PanelInputs.budget (one budget per panel) and the explicit budget field of every full-fit coverage registry key",
+    "components": [
+      "model_key",
+      "population_id",
+      "budget",
+      "procedure",
+      "measurement"
+    ],
+    "directional_reference_rule": {
+      "CAT->OVR|cross": "CAT",
+      "CAT->OVR|native": "OVR",
+      "OVR->CAT|cross": "OVR",
+      "OVR->CAT|native": "CAT"
+    },
+    "directional_roles_are_references_not_identities": true,
+    "duplicate_fitting_forbidden": true,
+    "duplicate_fitting_guard": "runner.canonical_fit_key + tests/test_r4_analysis_runner.py::test_fit_procedure_is_called_once_per_measurement",
+    "excluded_from_the_fit_identity": [
+      "direction",
+      "cross/native side",
+      "estimand",
+      "metric"
+    ],
+    "fit_function_is_called_exactly_once_per_model_population_budget_procedure_measurement": true,
+    "measurement_failure_propagates_to_both_directional_roles": true,
+    "measurements": [
+      "CAT",
+      "OVR"
+    ],
+    "rule": "model x population x budget x procedure x measurement"
+  },
   "checkpoint_policy": {
     "atomic_writes": true,
     "blocks": [
@@ -45,37 +77,163 @@
     }
   },
   "dependency_failure_propagation": {
-    "both": {
-      "estimands": [],
+    "baseline_families": {
+      "primary": {
+        "complete_count": 12,
+        "family_size": 12,
+        "incomplete_count": 0,
+        "status": "COMPLETE"
+      },
+      "secondary_direction_difference": {
+        "complete_count": 6,
+        "family_size": 6,
+        "incomplete_count": 0,
+        "status": "COMPLETE"
+      },
+      "secondary_extension": {
+        "complete_count": 8,
+        "family_size": 8,
+        "incomplete_count": 0,
+        "status": "COMPLETE"
+      },
+      "secondary_native_reference": {
+        "complete_count": 12,
+        "family_size": 12,
+        "incomplete_count": 0,
+        "status": "COMPLETE"
+      }
+    },
+    "baseline_refit_blocks": 288,
+    "both_measurements": {
+      "direction_status": {
+        "CAT->OVR": {
+          "Delta_deploy": "INCOMPLETE",
+          "Delta_native": "INCOMPLETE",
+          "Delta_transport": "INCOMPLETE"
+        },
+        "OVR->CAT": {
+          "Delta_deploy": "INCOMPLETE",
+          "Delta_native": "INCOMPLETE",
+          "Delta_transport": "INCOMPLETE"
+        }
+      },
+      "expected_direction_status": {
+        "CAT->OVR": {
+          "Delta_deploy": "INCOMPLETE",
+          "Delta_native": "INCOMPLETE",
+          "Delta_transport": "INCOMPLETE"
+        },
+        "OVR->CAT": {
+          "Delta_deploy": "INCOMPLETE",
+          "Delta_native": "INCOMPLETE",
+          "Delta_transport": "INCOMPLETE"
+        }
+      },
+      "expected_matches": true,
       "failed_fits": [
-        "falcon-h1-7b-instruct|r4-hellaswag-activity-primary|B-beta|CAT->OVR|cross",
-        "falcon-h1-7b-instruct|r4-hellaswag-activity-primary|B-beta|CAT->OVR|native"
+        "falcon-h1-7b-instruct|r4-hellaswag-activity-primary|N456|B-beta|CAT",
+        "falcon-h1-7b-instruct|r4-hellaswag-activity-primary|N456|B-beta|OVR"
       ],
       "failure_types": [
         "BetaImplementationError"
       ],
-      "family_sizes": {
-        "direction": 6,
-        "extension": 6,
-        "native": 11,
-        "primary": 12
-      }
-    },
-    "core4_primary_and_direction_complete_under_injection": true,
-    "cross_only": {
-      "estimands": [
-        "Delta_native"
-      ],
-      "failure_type": "BetaImplementationError",
-      "family_sizes": {
-        "direction": 6,
-        "extension": 6,
-        "native": 12,
-        "primary": 12
+      "families": {
+        "primary": {
+          "complete_count": 12,
+          "family_size": 12,
+          "incomplete_count": 0,
+          "status": "COMPLETE"
+        },
+        "secondary_direction_difference": {
+          "complete_count": 6,
+          "family_size": 6,
+          "incomplete_count": 0,
+          "status": "COMPLETE"
+        },
+        "secondary_extension": {
+          "complete_count": 4,
+          "family_size": 8,
+          "incomplete_count": 4,
+          "status": "INCOMPLETE"
+        },
+        "secondary_native_reference": {
+          "complete_count": 10,
+          "family_size": 12,
+          "incomplete_count": 2,
+          "status": "INCOMPLETE"
+        }
       },
-      "reason": "BetaImplementationError: no constraint face produced an accepted optimum",
-      "status": "FAILED"
+      "refit_blocks": 284,
+      "refit_failure_types": [
+        "BootstrapContractViolation"
+      ]
     },
+    "canonical_fit_count": 144,
+    "cat_only": {
+      "direction_status": {
+        "CAT->OVR": {
+          "Delta_deploy": "INCOMPLETE",
+          "Delta_native": "AVAILABLE",
+          "Delta_transport": "INCOMPLETE"
+        },
+        "OVR->CAT": {
+          "Delta_deploy": "AVAILABLE",
+          "Delta_native": "INCOMPLETE",
+          "Delta_transport": "INCOMPLETE"
+        }
+      },
+      "expected_direction_status": {
+        "CAT->OVR": {
+          "Delta_deploy": "INCOMPLETE",
+          "Delta_native": "AVAILABLE",
+          "Delta_transport": "INCOMPLETE"
+        },
+        "OVR->CAT": {
+          "Delta_deploy": "AVAILABLE",
+          "Delta_native": "INCOMPLETE",
+          "Delta_transport": "INCOMPLETE"
+        }
+      },
+      "expected_matches": true,
+      "failed_fits": [
+        "falcon-h1-7b-instruct|r4-hellaswag-activity-primary|N456|B-beta|CAT"
+      ],
+      "failure_types": [
+        "BetaImplementationError"
+      ],
+      "families": {
+        "primary": {
+          "complete_count": 12,
+          "family_size": 12,
+          "incomplete_count": 0,
+          "status": "COMPLETE"
+        },
+        "secondary_direction_difference": {
+          "complete_count": 6,
+          "family_size": 6,
+          "incomplete_count": 0,
+          "status": "COMPLETE"
+        },
+        "secondary_extension": {
+          "complete_count": 5,
+          "family_size": 8,
+          "incomplete_count": 3,
+          "status": "INCOMPLETE"
+        },
+        "secondary_native_reference": {
+          "complete_count": 11,
+          "family_size": 12,
+          "incomplete_count": 1,
+          "status": "INCOMPLETE"
+        }
+      },
+      "refit_blocks": 285,
+      "refit_failure_types": [
+        "BootstrapContractViolation"
+      ]
+    },
+    "core4_only_extension_unaffected_by_standalone_failure": true,
+    "core4_primary_and_direction_complete_under_injection": true,
     "dependency_truth_table": {
       "Delta_deploy": [
         "cross"
@@ -88,17 +246,88 @@
         "native"
       ]
     },
+    "directional_aliasing": {
+      "CAT->OVR|cross": "CAT",
+      "CAT->OVR|native": "OVR",
+      "OVR->CAT|cross": "OVR",
+      "OVR->CAT|native": "CAT"
+    },
+    "expected_canonical_fit_count": 144,
     "family_sizes_fixed": {
-      "direction_difference": 6,
-      "extension": 8,
-      "native_reference": 12,
-      "primary": 12
+      "primary": 12,
+      "secondary_direction_difference": 6,
+      "secondary_extension": 8,
+      "secondary_native_reference": 12
+    },
+    "injected_fit_identity": {
+      "budget": "N456",
+      "model": "falcon-h1-7b-instruct",
+      "population": "r4-hellaswag-activity-primary",
+      "procedure": "B-beta"
     },
     "injected_message": "no constraint face produced an accepted optimum",
-    "injected_unit": "falcon-h1-7b-instruct|r4-hellaswag-activity-primary|CAT->OVR|B-beta",
-    "native_only": {
-      "estimands": [
-        "Delta_deploy"
+    "injection_level": "canonical measurement-level fitted-map identity",
+    "ovr_only": {
+      "direction_status": {
+        "CAT->OVR": {
+          "Delta_deploy": "AVAILABLE",
+          "Delta_native": "INCOMPLETE",
+          "Delta_transport": "INCOMPLETE"
+        },
+        "OVR->CAT": {
+          "Delta_deploy": "INCOMPLETE",
+          "Delta_native": "AVAILABLE",
+          "Delta_transport": "INCOMPLETE"
+        }
+      },
+      "expected_direction_status": {
+        "CAT->OVR": {
+          "Delta_deploy": "AVAILABLE",
+          "Delta_native": "INCOMPLETE",
+          "Delta_transport": "INCOMPLETE"
+        },
+        "OVR->CAT": {
+          "Delta_deploy": "INCOMPLETE",
+          "Delta_native": "AVAILABLE",
+          "Delta_transport": "INCOMPLETE"
+        }
+      },
+      "expected_matches": true,
+      "failed_fits": [
+        "falcon-h1-7b-instruct|r4-hellaswag-activity-primary|N456|B-beta|OVR"
+      ],
+      "failure_types": [
+        "BetaImplementationError"
+      ],
+      "families": {
+        "primary": {
+          "complete_count": 12,
+          "family_size": 12,
+          "incomplete_count": 0,
+          "status": "COMPLETE"
+        },
+        "secondary_direction_difference": {
+          "complete_count": 6,
+          "family_size": 6,
+          "incomplete_count": 0,
+          "status": "COMPLETE"
+        },
+        "secondary_extension": {
+          "complete_count": 5,
+          "family_size": 8,
+          "incomplete_count": 3,
+          "status": "INCOMPLETE"
+        },
+        "secondary_native_reference": {
+          "complete_count": 11,
+          "family_size": 12,
+          "incomplete_count": 1,
+          "status": "INCOMPLETE"
+        }
+      },
+      "refit_blocks": 285,
+      "refit_failure_types": [
+        "BootstrapContractViolation"
       ]
     }
   },
@@ -120,6 +349,29 @@
       "OVR->CAT|I-isotonic|Delta_transport"
     ],
     "undefined_replicate_rule": "an UNDEFINED_EXTENDED_REAL replicate makes the whole dependent interval INCOMPLETE / UNDEFINED; no successful-subset interval"
+  },
+  "exception_boundary_qualification": {
+    "catch_all_mapping_forbidden": true,
+    "explicit_whitelist_only": true,
+    "tests": [
+      "test_beta_implementation_error_maps_to_failed",
+      "test_beta_fit_ineligible_maps_to_ineligible",
+      "test_beta_contract_violation_maps_to_failed",
+      "test_isotonic_contract_violation_maps_to_failed",
+      "test_beta_unexpected_runtime_error_propagates",
+      "test_isotonic_unexpected_runtime_error_propagates",
+      "test_unknown_keyerror_is_not_a_scientific_failure",
+      "test_unknown_fit_exception_escapes_the_panel_builder"
+    ],
+    "unknown_exception_action": "PROPAGATE",
+    "unknown_exception_classification": "FORMAL_ANALYSIS_CODE_DEFECT"
+  },
+  "firewall_deviation": {
+    "artifact": "R4_FORMAL_ANALYSIS_FIREWALL_DEVIATION_ATTEMPT0.json",
+    "deviation_type": "UNAUTHORIZED_REAL_FIT_STATUS_EXPOSURE",
+    "disposition": "DO_NOT_USE_FOR_SELECTION_OR_INTERPRETATION",
+    "formal_outcome_estimates_computed": false,
+    "recorded_before_any_new_real_fit": true
   },
   "formal_analysis_authorized": false,
   "formal_safety_tests": {
@@ -149,6 +401,8 @@
     "raw_evidence_ledger_sha256": "146ad254dda64778cb684283e24ae1dca2987bc6827652c448739b75ae2e1a6a"
   },
   "full_fit_coverage": {
+    "a_measurement_failure_is_reported_once_not_once_per_role": true,
+    "direction_and_side_are_references": true,
     "failed_or_ineligible_cells_are_retained": true,
     "fit_status_vocabulary": [
       "AVAILABLE",
@@ -156,17 +410,17 @@
       "FAILED"
     ],
     "legacy": {
-      "entries": 96,
+      "entries": 48,
       "failed": [],
       "ineligible": []
     },
     "never_dropped_never_replaced_never_averaged": true,
     "primary": {
-      "entries": 288,
+      "entries": 144,
       "failed": [],
       "ineligible": []
     },
-    "registry_key": "model|population|procedure|direction|side"
+    "registry_key": "model|population|budget|procedure|measurement"
   },
   "legacy_secondary_formal_path": {
     "bootstrap_family_status": {
@@ -266,6 +520,44 @@
     ],
     "unit_estimates": 4
   },
+  "measurement_failure_truth_table": {
+    "CAT_failure": {
+      "CAT->OVR": {
+        "Delta_deploy": "INCOMPLETE",
+        "Delta_native": "AVAILABLE",
+        "Delta_transport": "INCOMPLETE"
+      },
+      "OVR->CAT": {
+        "Delta_deploy": "AVAILABLE",
+        "Delta_native": "INCOMPLETE",
+        "Delta_transport": "INCOMPLETE"
+      }
+    },
+    "OVR_failure": {
+      "CAT->OVR": {
+        "Delta_deploy": "AVAILABLE",
+        "Delta_native": "INCOMPLETE",
+        "Delta_transport": "INCOMPLETE"
+      },
+      "OVR->CAT": {
+        "Delta_deploy": "INCOMPLETE",
+        "Delta_native": "AVAILABLE",
+        "Delta_transport": "INCOMPLETE"
+      }
+    },
+    "both_measurements_failure": {
+      "CAT->OVR": {
+        "Delta_deploy": "INCOMPLETE",
+        "Delta_native": "INCOMPLETE",
+        "Delta_transport": "INCOMPLETE"
+      },
+      "OVR->CAT": {
+        "Delta_deploy": "INCOMPLETE",
+        "Delta_native": "INCOMPLETE",
+        "Delta_transport": "INCOMPLETE"
+      }
+    }
+  },
   "n912_formal_path": {
     "cannot_rescue_primary": true,
     "comparisons": 32,
@@ -307,7 +599,7 @@
     "units_total": 32,
     "validation_units": 16
   },
-  "qualification_fingerprint": "9e7d998060daf761f1f8914714eb57b16128a18f6db4bde49ddf7db9a0267270",
+  "qualification_fingerprint": "89f808bd7f4574b73c176935f39ae940cf741e2cb3a56c541e1b04d5d5536164",
   "randomness_authority": {
     "builtin_hash_used": false,
     "kernel": "r4_inference.deterministic_index",
@@ -349,12 +641,12 @@
     "measurement_code_commit": "100c918345ff829dd6fdb96bf99cd14285d6472f",
     "raw_measurement_freeze_commit": "3aae4528a131ba32582fb015bd2f6a4d201da457"
   },
-  "runner_contract_fingerprint": "d16a8edb9f7edcb5a0dee69e37bb32f4f45dd661fcb324e166db31a2c6b06ff5",
+  "runner_contract_fingerprint": "630cafa6ec7943274c943b1354c6f8acbb7c722764f7770ef3de4c8c9c09fd2e",
   "runner_id": "r4-integrated-formal-analysis-runner",
   "runner_source_path": "experiments/calibration_transport/run_r4_analysis.py",
-  "runner_source_sha256": "e86ef34a3435c81fd78285fbc709a7966bf704fbe35987db6d3003d2cf31bac3",
+  "runner_source_sha256": "a2c231012893dd7d840aaadb1efd6f2f3b7fe74536ba7e3cf90fc6765fe8f55c",
   "runner_test_path": "tests/test_r4_analysis_runner.py",
-  "runner_test_sha256": "71661669cbbdb435f7913201656af5045c9613939ad4682b49c533216d8cb4ee",
+  "runner_test_sha256": "e35e9fdfc0ec13d73862d000b9770c3f851eda0b82766aaf2747e13b8f6adf8e",
   "runner_version": 1,
   "scientific_outputs_computed": false,
   "shared_formal_dag_engine_qualification": {
@@ -988,9 +1280,10 @@
     }
   },
   "status": "PASS",
-  "status_line": "R4 FORMAL ANALYSIS RUNNER FULL-DAG CLOSURE = PASS",
+  "status_line": "R4 FORMAL ANALYSIS RUNNER FITTED-MAP IDENTITY CLOSURE = PASS",
   "superseded_qualification_fingerprints": {
-    "405f3ffcbf2cc67ff179c75ed157437045c6a726a63ae6b81dede28bcfede5ac": "SUPERSEDED FOR FORMAL-PATH COVERAGE: the prior synthetic qualification passed its tested path but did not exercise the exact formal orchestration path (it used a separate orchestration path rather than the shared run_dag_engine)."
+    "405f3ffcbf2cc67ff179c75ed157437045c6a726a63ae6b81dede28bcfede5ac": "SUPERSEDED FOR FORMAL-PATH COVERAGE: the prior synthetic qualification passed its tested path but did not exercise the exact formal orchestration path (it used a separate orchestration path rather than the shared run_dag_engine).",
+    "9e7d998060daf761f1f8914714eb57b16128a18f6db4bde49ddf7db9a0267270": "SUPERSEDED BY THE MEASUREMENT-MAP IDENTITY + EXCEPTION-BOUNDARY CORRECTION: it described a direction/side fit identity (288/96 registry entries) and a catch-all unknown-exception-to-FAILED mapping."
   },
   "synthetic_fixture_identity": {
     "clusters_per_stratum": 3,
@@ -1002,15 +1295,24 @@
     "test_per_stratum": 12,
     "train_per_stratum": 12
   },
+  "synthetic_input_guard": {
+    "function": "run_r4_analysis.assert_synthetic_inputs",
+    "on_violation": "R4AnalysisOutcomeFirewallBreach",
+    "rule": "every synthetic panel row item_id must start with 'synthetic-'",
+    "tests": [
+      "test_synthetic_guard_accepts_the_invented_fixture",
+      "test_synthetic_guard_rejects_a_study_row"
+    ]
+  },
   "tests": {
     "determinism": "byte-identical synthetic qualification rerun",
     "full_repo_regression": "see the accompanying report",
     "new_runner_tests": {
-      "collected": 106,
+      "collected": 124,
       "failed": 0,
-      "passed": 106,
+      "passed": 124,
       "path": "tests/test_r4_analysis_runner.py",
-      "sha256": "71661669cbbdb435f7913201656af5045c9613939ad4682b49c533216d8cb4ee"
+      "sha256": "e35e9fdfc0ec13d73862d000b9770c3f851eda0b82766aaf2747e13b8f6adf8e"
     }
   },
   "train_refit_full_scope": {
@@ -1060,6 +1362,28 @@
       "P-historical",
       "P-low"
     ]
+  },
+  "truth_statement": {
+    "formal_scientific_outcome_estimates_computed_in_this_closure_task": false,
+    "prior_deviation_record": "R4_FORMAL_ANALYSIS_FIREWALL_DEVIATION_ATTEMPT0.json",
+    "prior_unauthorized_real_fit_status_exposure": true,
+    "raw_evidence_analyzed": false,
+    "real_calibrator_fit_attempts_in_this_closure_task": false
+  },
+  "unique_fit_counts": {
+    "current_generation_N912_robustness": {
+      "formula": "4 models x 2 populations x 6 procedures x 2 measurements",
+      "unique_fits": 96
+    },
+    "direction_side_fits_never_double_counted": true,
+    "legacy_N456": {
+      "formula": "2 models x 2 populations x 6 procedures x 2 measurements",
+      "unique_fits": 48
+    },
+    "primary_N456_current_generation": {
+      "formula": "4 models x 3 populations x 6 procedures x 2 measurements",
+      "unique_fits": 144
+    }
   },
   "validate_only_result": {
     "bootstrap_draws": 0,

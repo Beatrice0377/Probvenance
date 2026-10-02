@@ -83,6 +83,30 @@
     "incomplete_reason",
     "analysis_result_fingerprint"
   ],
+  "dag_coverage_artifact": {
+    "coverage_fingerprint": "39ac890e7b7e564cfb14d42353b5db44997c9392513f433c7473cb0a53007d1d",
+    "frozen_node_count": 20,
+    "path": "experiments/calibration_transport/R4_FORMAL_ANALYSIS_RUNNER_DAG_COVERAGE.json",
+    "required_nodes_uncovered": 0,
+    "required_nodes_without_synthetic_test": 0,
+    "sha256": "6de9fc5b342aeda0c835a15f09e40b279a2167f07e833963e0bcf5380a8f8c79"
+  },
+  "dependency_truth_table": {
+    "Delta_deploy": [
+      "cross"
+    ],
+    "Delta_native": [
+      "native"
+    ],
+    "Delta_transport": [
+      "cross",
+      "native"
+    ],
+    "cross_fit_source": "SOURCE measurement A TRAIN (N456 primary / N912 robustness)",
+    "native_fit_source": "TARGET measurement B TRAIN (N456 primary / N912 robustness)",
+    "note": "The runner never shares one dependency requirement across all three estimands merely because risk_matrix() returns them together; each estimand calls the frozen r4_inference.delta_* function directly.",
+    "raw_risk_dependency": "none"
+  },
   "directional_unit_record_fields": [
     "unit_id",
     "model_key",
@@ -127,6 +151,19 @@
     "POSITIVE_INFINITY",
     "UNDEFINED_EXTENDED_REAL"
   ],
+  "fixed_family_incompleteness_propagation": {
+    "core4_isolation": "a standalone I-isotonic / B-beta failure never blocks CORE4 primary12 or direction6",
+    "families": {
+      "direction6": 6,
+      "extension8": 8,
+      "native12": 12,
+      "primary12": 12
+    },
+    "family_sizes_never_shrink": true,
+    "member_rule": "each frozen family member independently checks its own dependency; a member with a missing required model x population dependency is INCOMPLETE and does not remove any member without that dependency",
+    "native_reference_isolation": "Delta_native depends only on the TARGET/native fit",
+    "no_complete_case_rescue": true
+  },
   "formal_analysis_authorized": false,
   "formal_evidence_root": "/root/rivermind-data/r4-formal-measurements",
   "formal_mode_preconditions": [
@@ -135,9 +172,35 @@
     "execution_manifest_status == FROZEN",
     "frozen file sha256 all match",
     "frozen implementation sha256 all match",
-    "formal output root clean or a frozen checkpoint resume"
+    "formal output root clean or a frozen checkpoint resume",
+    "the shared formal-DAG engine covers every frozen dependency-graph node"
   ],
   "formal_output_root": "/root/rivermind-data/r4-formal-analysis",
+  "full_fit_failure_semantics": {
+    "beta_gate_9": "unique finite accepted optimum",
+    "beta_solver_unchanged": true,
+    "description": "A full-TRAIN fit that cannot produce a frozen accepted optimum is an explicit FAILED fit, never a fatal process exception and never a silent INELIGIBLE.",
+    "downstream_propagation": "INCOMPLETE / DEPENDENCY_UNAVAILABLE per the frozen family contract",
+    "exception_type_and_message_retained": true,
+    "fit_status_mapping": {
+      "BetaContractViolation": "FAILED",
+      "BetaFitIneligible": "INELIGIBLE",
+      "BetaImplementationError": "FAILED",
+      "IsotonicContractViolation": "FAILED",
+      "other_exception": "FAILED"
+    },
+    "forbidden": [
+      "another solver",
+      "another start",
+      "loosen the 1e-10 KKT tolerance",
+      "clip probabilities",
+      "regularize",
+      "retry until success",
+      "use N912 to rescue N456"
+    ],
+    "never_renamed_to_dependency_unavailable_at_the_fit_layer": true,
+    "no_retry_no_rescue": true
+  },
   "input_identity_block_fields": [
     "cell_id",
     "model_key",
@@ -157,6 +220,52 @@
     "evidence_fingerprint",
     "split_counts"
   ],
+  "legacy_secondary_contract": {
+    "budget": "N456 only",
+    "can_rescue_the_16_unit_primary": false,
+    "legacy_n912_forbidden": true,
+    "models": [
+      "minicpm5-2b",
+      "qwen3-5-2b"
+    ],
+    "never_enters_predictor_validation16": true,
+    "never_enters_primary_families": true,
+    "populations": [
+      "HellaSwag",
+      "MedMCQA"
+    ],
+    "produces": [
+      "legacy secondary point estimates",
+      "legacy TEST-bootstrap quantities where frozen",
+      "legacy predictor8 quantities"
+    ]
+  },
+  "logloss_contract": {
+    "cannot_rescue_brier_primary": true,
+    "carrier": "r4_inference.ExtendedReal",
+    "estimands": [
+      "raw",
+      "native",
+      "cross",
+      "Delta_native",
+      "Delta_deploy",
+      "Delta_transport"
+    ],
+    "functions": [
+      "r4_inference.logloss_loss",
+      "r4_inference.mean_logloss",
+      "r4_inference.extended_real_subtract",
+      "r4_inference.extended_real_mean"
+    ],
+    "metric_id": "LogLoss",
+    "no_clipping": true,
+    "no_epsilon": true,
+    "no_nextafter": true,
+    "population_weighting_preserved": true,
+    "role": "exact secondary extended-real LogLoss",
+    "same_dependency_truth_table_as_brier": true,
+    "undefined_replicate_rule": "if any replicate contrast is UNDEFINED_EXTENDED_REAL the whole dependent interval is INCOMPLETE / UNDEFINED; undefined replicates are never dropped and no successful-subset interval is ever produced"
+  },
   "metric_ids": [
     "Brier",
     "LogLoss"
@@ -169,7 +278,18 @@
   ],
   "n912_robustness_invariants": {
     "cannot_replace_or_rescue_primary": true,
+    "computed": [
+      "Delta_deploy_456",
+      "Delta_deploy_912",
+      "Delta_transport_456",
+      "Delta_transport_912",
+      "Delta_N912_minus_N456"
+    ],
     "legacy_n912_forbidden": true,
+    "n456_failed_n912_succeeds_keeps_primary_failed": true,
+    "new_confirmatory_multiplicity_family": null,
+    "paired_within_the_same_shared_test_replicate": true,
+    "role": "SECONDARY_ROBUSTNESS",
     "separate_from_primary": true
   },
   "n912_robustness_record_fields": [
@@ -268,6 +388,41 @@
     "wall_clock_used": false
   },
   "raw_evidence_analyzed": false,
+  "refit_scope": {
+    "budgets": [
+      "N456",
+      "N912"
+    ],
+    "estimands": [
+      "Delta_deploy",
+      "Delta_transport"
+    ],
+    "failure_propagation": "any single failed refit replicate -> block INCOMPLETE with interval=None; no successful-subset interval is ever produced",
+    "legacy_scope": "legacy HellaSwag / MedMCQA, N456 only",
+    "n912_scope": "frozen new-population 912 manifests only (HellaSwag, MedMCQA)",
+    "never": [
+      "Delta_native"
+    ],
+    "procedures": [
+      "P-low",
+      "P-historical",
+      "L-low",
+      "L-historical",
+      "I-isotonic",
+      "B-beta"
+    ],
+    "recorded_failure_fields": [
+      "replicate",
+      "procedure",
+      "model",
+      "population",
+      "measurement_dependency",
+      "direction_dependency",
+      "exception_type",
+      "message"
+    ],
+    "shared_multiset": "across all 4 models, both measurements, all 6 procedures"
+  },
   "risk_ids": [
     "R_raw",
     "R_native",
@@ -282,13 +437,40 @@
     "state",
     "value"
   ],
-  "runner_contract_fingerprint": "2fe5d962a706c822a63573bbd8e553a44b6b0fd082dd582af8cdaa25bc6c7c60",
+  "runner_contract_fingerprint": "d16a8edb9f7edcb5a0dee69e37bb32f4f45dd661fcb324e166db31a2c6b06ff5",
   "runner_id": "r4-integrated-formal-analysis-runner",
   "runner_source_path": "experiments/calibration_transport/run_r4_analysis.py",
-  "runner_source_sha256": "5b4ab21d262afe1b1755120f83afaa37798df3a41dbef8274cd00ede1350f176",
+  "runner_source_sha256": "e86ef34a3435c81fd78285fbc709a7966bf704fbe35987db6d3003d2cf31bac3",
   "runner_version": 1,
   "scientific_outputs_computed": false,
   "scientific_semantics_changed": false,
+  "shared_dag_engine": {
+    "allowed_terminal_states": [
+      "COMPLETE",
+      "INCOMPLETE",
+      "UNDEFINED",
+      "DEPENDENCY_UNAVAILABLE",
+      "FAILED"
+    ],
+    "differences_between_formal_and_synthetic": [
+      "input source (frozen raw evidence vs invented synthetic fixture)",
+      "replicate counts",
+      "output root",
+      "formal / synthetic authority marker"
+    ],
+    "engine_blocks": [
+      "final_assembly",
+      "input_load",
+      "n912_robustness",
+      "point_estimates",
+      "predictor",
+      "test_bootstrap",
+      "train_refit"
+    ],
+    "formal_and_synthetic_use_the_same_engine": true,
+    "function": "run_r4_analysis.run_dag_engine",
+    "not_executed_placeholder_forbidden": true
+  },
   "status": "FROZEN CANDIDATE",
   "status_vocabulary": [
     "COMPLETE",

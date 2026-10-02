@@ -27,6 +27,81 @@
     "partial_draw_merge_forbidden": true,
     "replay_rule": "discard the uncommitted block output and recompute the whole block from identical frozen inputs and identical frozen randomness authority"
   },
+  "dag_coverage": {
+    "coverage_fingerprint": "39ac890e7b7e564cfb14d42353b5db44997c9392513f433c7473cb0a53007d1d",
+    "frozen_dependency_graph_fingerprint": "449c9b19d61e4edbe95ea856b1d13e3b373765f8a9d05931f20e4d12bf28ed9f",
+    "path": "experiments/calibration_transport/R4_FORMAL_ANALYSIS_RUNNER_DAG_COVERAGE.json",
+    "sha256": "6de9fc5b342aeda0c835a15f09e40b279a2167f07e833963e0bcf5380a8f8c79",
+    "summary": {
+      "frozen_node_count": 20,
+      "frozen_nodes_not_in_matrix": [],
+      "nodes_with_formal_path": 20,
+      "nodes_with_synthetic_test": 20,
+      "nodes_without_formal_path": 0,
+      "nodes_without_synthetic_test": 0,
+      "required_node_count": 20,
+      "required_nodes_uncovered": 0,
+      "required_nodes_without_synthetic_test": 0
+    }
+  },
+  "dependency_failure_propagation": {
+    "both": {
+      "estimands": [],
+      "failed_fits": [
+        "falcon-h1-7b-instruct|r4-hellaswag-activity-primary|B-beta|CAT->OVR|cross",
+        "falcon-h1-7b-instruct|r4-hellaswag-activity-primary|B-beta|CAT->OVR|native"
+      ],
+      "failure_types": [
+        "BetaImplementationError"
+      ],
+      "family_sizes": {
+        "direction": 6,
+        "extension": 6,
+        "native": 11,
+        "primary": 12
+      }
+    },
+    "core4_primary_and_direction_complete_under_injection": true,
+    "cross_only": {
+      "estimands": [
+        "Delta_native"
+      ],
+      "failure_type": "BetaImplementationError",
+      "family_sizes": {
+        "direction": 6,
+        "extension": 6,
+        "native": 12,
+        "primary": 12
+      },
+      "reason": "BetaImplementationError: no constraint face produced an accepted optimum",
+      "status": "FAILED"
+    },
+    "dependency_truth_table": {
+      "Delta_deploy": [
+        "cross"
+      ],
+      "Delta_native": [
+        "native"
+      ],
+      "Delta_transport": [
+        "cross",
+        "native"
+      ]
+    },
+    "family_sizes_fixed": {
+      "direction_difference": 6,
+      "extension": 8,
+      "native_reference": 12,
+      "primary": 12
+    },
+    "injected_message": "no constraint face produced an accepted optimum",
+    "injected_unit": "falcon-h1-7b-instruct|r4-hellaswag-activity-primary|CAT->OVR|B-beta",
+    "native_only": {
+      "estimands": [
+        "Delta_deploy"
+      ]
+    }
+  },
   "entry_git": {
     "ahead": 0,
     "behind": 0,
@@ -34,6 +109,17 @@
     "head": "47db3213b350ad9274af3780351c22b211dc21b6",
     "origin_main": "47db3213b350ad9274af3780351c22b211dc21b6",
     "worktree": "clean"
+  },
+  "exact_logloss_formal_path": {
+    "carrier": "r4_inference.ExtendedReal",
+    "contrasts": 36,
+    "no_clipping_no_epsilon_no_nextafter": true,
+    "status": "INCOMPLETE",
+    "undefined_contrasts": [
+      "CAT->OVR|I-isotonic|Delta_transport",
+      "OVR->CAT|I-isotonic|Delta_transport"
+    ],
+    "undefined_replicate_rule": "an UNDEFINED_EXTENDED_REAL replicate makes the whole dependent interval INCOMPLETE / UNDEFINED; no successful-subset interval"
   },
   "formal_analysis_authorized": false,
   "formal_safety_tests": {
@@ -62,7 +148,153 @@
     "predictor_freeze_sha256": "423c5cdaf68ce7cdbbb80cf704ed18f67692995e418d0dc8f707871322554f8c",
     "raw_evidence_ledger_sha256": "146ad254dda64778cb684283e24ae1dca2987bc6827652c448739b75ae2e1a6a"
   },
-  "nature": "OPERATIONAL SYNTHETIC QUALIFICATION",
+  "full_fit_coverage": {
+    "failed_or_ineligible_cells_are_retained": true,
+    "fit_status_vocabulary": [
+      "AVAILABLE",
+      "INELIGIBLE",
+      "FAILED"
+    ],
+    "legacy": {
+      "entries": 96,
+      "failed": [],
+      "ineligible": []
+    },
+    "never_dropped_never_replaced_never_averaged": true,
+    "primary": {
+      "entries": 288,
+      "failed": [],
+      "ineligible": []
+    },
+    "registry_key": "model|population|procedure|direction|side"
+  },
+  "legacy_secondary_formal_path": {
+    "bootstrap_family_status": {
+      "primary": {
+        "complete_count": 12,
+        "family_size": 12,
+        "incomplete_count": 0,
+        "members": {
+          "primary::Delta_deploy::CAT->OVR::Feature": "COMPLETE",
+          "primary::Delta_deploy::CAT->OVR::Interaction": "COMPLETE",
+          "primary::Delta_deploy::CAT->OVR::Regularization": "COMPLETE",
+          "primary::Delta_deploy::OVR->CAT::Feature": "COMPLETE",
+          "primary::Delta_deploy::OVR->CAT::Interaction": "COMPLETE",
+          "primary::Delta_deploy::OVR->CAT::Regularization": "COMPLETE",
+          "primary::Delta_transport::CAT->OVR::Feature": "COMPLETE",
+          "primary::Delta_transport::CAT->OVR::Interaction": "COMPLETE",
+          "primary::Delta_transport::CAT->OVR::Regularization": "COMPLETE",
+          "primary::Delta_transport::OVR->CAT::Feature": "COMPLETE",
+          "primary::Delta_transport::OVR->CAT::Interaction": "COMPLETE",
+          "primary::Delta_transport::OVR->CAT::Regularization": "COMPLETE"
+        },
+        "status": "COMPLETE"
+      },
+      "secondary_direction_difference": {
+        "complete_count": 6,
+        "family_size": 6,
+        "incomplete_count": 0,
+        "members": {
+          "direction-difference::Delta_deploy::Feature": "COMPLETE",
+          "direction-difference::Delta_deploy::Interaction": "COMPLETE",
+          "direction-difference::Delta_deploy::Regularization": "COMPLETE",
+          "direction-difference::Delta_transport::Feature": "COMPLETE",
+          "direction-difference::Delta_transport::Interaction": "COMPLETE",
+          "direction-difference::Delta_transport::Regularization": "COMPLETE"
+        },
+        "status": "COMPLETE"
+      },
+      "secondary_extension": {
+        "complete_count": 8,
+        "family_size": 8,
+        "incomplete_count": 0,
+        "members": {
+          "extension::B-beta::CAT->OVR::Delta_deploy": "COMPLETE",
+          "extension::B-beta::CAT->OVR::Delta_transport": "COMPLETE",
+          "extension::B-beta::OVR->CAT::Delta_deploy": "COMPLETE",
+          "extension::B-beta::OVR->CAT::Delta_transport": "COMPLETE",
+          "extension::I-isotonic::CAT->OVR::Delta_deploy": "COMPLETE",
+          "extension::I-isotonic::CAT->OVR::Delta_transport": "COMPLETE",
+          "extension::I-isotonic::OVR->CAT::Delta_deploy": "COMPLETE",
+          "extension::I-isotonic::OVR->CAT::Delta_transport": "COMPLETE"
+        },
+        "status": "COMPLETE"
+      },
+      "secondary_native_reference": {
+        "complete_count": 12,
+        "family_size": 12,
+        "incomplete_count": 0,
+        "members": {
+          "native-reference::CAT->OVR::B-beta": "COMPLETE",
+          "native-reference::CAT->OVR::I-isotonic": "COMPLETE",
+          "native-reference::CAT->OVR::L-historical": "COMPLETE",
+          "native-reference::CAT->OVR::L-low": "COMPLETE",
+          "native-reference::CAT->OVR::P-historical": "COMPLETE",
+          "native-reference::CAT->OVR::P-low": "COMPLETE",
+          "native-reference::OVR->CAT::B-beta": "COMPLETE",
+          "native-reference::OVR->CAT::I-isotonic": "COMPLETE",
+          "native-reference::OVR->CAT::L-historical": "COMPLETE",
+          "native-reference::OVR->CAT::L-low": "COMPLETE",
+          "native-reference::OVR->CAT::P-historical": "COMPLETE",
+          "native-reference::OVR->CAT::P-low": "COMPLETE"
+        },
+        "status": "COMPLETE"
+      }
+    },
+    "models": [
+      "minicpm5-2b",
+      "qwen3-5-2b"
+    ],
+    "never_enters_primary12": true,
+    "never_enters_validation16": true,
+    "populations": [
+      "r4-hellaswag-activity-primary",
+      "r4-medmcqa-subject-primary"
+    ],
+    "refit_blocks": 96,
+    "refit_estimands": [
+      "Delta_deploy",
+      "Delta_transport"
+    ],
+    "refit_procedures": [
+      "B-beta",
+      "I-isotonic",
+      "L-historical",
+      "L-low",
+      "P-historical",
+      "P-low"
+    ],
+    "unit_estimates": 4
+  },
+  "n912_formal_path": {
+    "cannot_rescue_primary": true,
+    "comparisons": 32,
+    "paired_within_the_same_shared_test_replicate": true,
+    "refit_blocks": 189,
+    "refit_scope": "frozen new-population 912 manifests only (HellaSwag, MedMCQA)",
+    "refit_statuses": [
+      "COMPLETE"
+    ],
+    "role": "SECONDARY_ROBUSTNESS",
+    "shared_test_draw_paired_by_replicate": true
+  },
+  "nature": "OPERATIONAL SYNTHETIC FORMAL-DAG QUALIFICATION",
+  "predictor_formal_path": {
+    "development_units": 8,
+    "development_units_never_rescue": true,
+    "legacy_units": 8,
+    "legacy_units_never_rescue": true,
+    "planned_replicates": 16,
+    "point_estimate": -0.09955962033049993,
+    "primary_statistic_units": "exactly the 16 PRIMARY_VALIDATION units",
+    "status": "COMPLETE",
+    "successful_replicates": 16,
+    "tail_rule": "1/40/39/40",
+    "undefined_replicate_rule": "the predictor interval is INCOMPLETE",
+    "units_total": 32,
+    "validation_rows": 16,
+    "validation_units": 16
+  },
   "predictor_sharing_test": {
     "core4_only_outcome_mean": true,
     "development_units": 8,
@@ -75,7 +307,7 @@
     "units_total": 32,
     "validation_units": 16
   },
-  "qualification_fingerprint": "405f3ffcbf2cc67ff179c75ed157437045c6a726a63ae6b81dede28bcfede5ac",
+  "qualification_fingerprint": "9e7d998060daf761f1f8914714eb57b16128a18f6db4bde49ddf7db9a0267270",
   "randomness_authority": {
     "builtin_hash_used": false,
     "kernel": "r4_inference.deterministic_index",
@@ -117,106 +349,79 @@
     "measurement_code_commit": "100c918345ff829dd6fdb96bf99cd14285d6472f",
     "raw_measurement_freeze_commit": "3aae4528a131ba32582fb015bd2f6a4d201da457"
   },
-  "runner_contract_fingerprint": "2fe5d962a706c822a63573bbd8e553a44b6b0fd082dd582af8cdaa25bc6c7c60",
+  "runner_contract_fingerprint": "d16a8edb9f7edcb5a0dee69e37bb32f4f45dd661fcb324e166db31a2c6b06ff5",
   "runner_id": "r4-integrated-formal-analysis-runner",
   "runner_source_path": "experiments/calibration_transport/run_r4_analysis.py",
-  "runner_source_sha256": "5b4ab21d262afe1b1755120f83afaa37798df3a41dbef8274cd00ede1350f176",
+  "runner_source_sha256": "e86ef34a3435c81fd78285fbc709a7966bf704fbe35987db6d3003d2cf31bac3",
+  "runner_test_path": "tests/test_r4_analysis_runner.py",
+  "runner_test_sha256": "71661669cbbdb435f7913201656af5045c9613939ad4682b49c533216d8cb4ee",
   "runner_version": 1,
   "scientific_outputs_computed": false,
-  "status": "PASS",
-  "status_line": "R4 FORMAL ANALYSIS RUNNER = QUALIFIED CANDIDATE",
-  "synthetic_direct_oracle_equivalence": {
-    "legacy": {
-      "bootstrap_family_status": {
-        "primary": {
-          "complete_count": 12,
-          "family_size": 12,
-          "incomplete_count": 0,
-          "members": {
-            "primary::Delta_deploy::CAT->OVR::Feature": "COMPLETE",
-            "primary::Delta_deploy::CAT->OVR::Interaction": "COMPLETE",
-            "primary::Delta_deploy::CAT->OVR::Regularization": "COMPLETE",
-            "primary::Delta_deploy::OVR->CAT::Feature": "COMPLETE",
-            "primary::Delta_deploy::OVR->CAT::Interaction": "COMPLETE",
-            "primary::Delta_deploy::OVR->CAT::Regularization": "COMPLETE",
-            "primary::Delta_transport::CAT->OVR::Feature": "COMPLETE",
-            "primary::Delta_transport::CAT->OVR::Interaction": "COMPLETE",
-            "primary::Delta_transport::CAT->OVR::Regularization": "COMPLETE",
-            "primary::Delta_transport::OVR->CAT::Feature": "COMPLETE",
-            "primary::Delta_transport::OVR->CAT::Interaction": "COMPLETE",
-            "primary::Delta_transport::OVR->CAT::Regularization": "COMPLETE"
-          },
-          "status": "COMPLETE"
-        },
-        "secondary_direction_difference": {
-          "complete_count": 6,
-          "family_size": 6,
-          "incomplete_count": 0,
-          "members": {
-            "direction-difference::Delta_deploy::Feature": "COMPLETE",
-            "direction-difference::Delta_deploy::Interaction": "COMPLETE",
-            "direction-difference::Delta_deploy::Regularization": "COMPLETE",
-            "direction-difference::Delta_transport::Feature": "COMPLETE",
-            "direction-difference::Delta_transport::Interaction": "COMPLETE",
-            "direction-difference::Delta_transport::Regularization": "COMPLETE"
-          },
-          "status": "COMPLETE"
-        },
-        "secondary_extension": {
-          "complete_count": 8,
-          "family_size": 8,
-          "incomplete_count": 0,
-          "members": {
-            "extension::B-beta::CAT->OVR::Delta_deploy": "COMPLETE",
-            "extension::B-beta::CAT->OVR::Delta_transport": "COMPLETE",
-            "extension::B-beta::OVR->CAT::Delta_deploy": "COMPLETE",
-            "extension::B-beta::OVR->CAT::Delta_transport": "COMPLETE",
-            "extension::I-isotonic::CAT->OVR::Delta_deploy": "COMPLETE",
-            "extension::I-isotonic::CAT->OVR::Delta_transport": "COMPLETE",
-            "extension::I-isotonic::OVR->CAT::Delta_deploy": "COMPLETE",
-            "extension::I-isotonic::OVR->CAT::Delta_transport": "COMPLETE"
-          },
-          "status": "COMPLETE"
-        },
-        "secondary_native_reference": {
-          "complete_count": 12,
-          "family_size": 12,
-          "incomplete_count": 0,
-          "members": {
-            "native-reference::CAT->OVR::B-beta": "COMPLETE",
-            "native-reference::CAT->OVR::I-isotonic": "COMPLETE",
-            "native-reference::CAT->OVR::L-historical": "COMPLETE",
-            "native-reference::CAT->OVR::L-low": "COMPLETE",
-            "native-reference::CAT->OVR::P-historical": "COMPLETE",
-            "native-reference::CAT->OVR::P-low": "COMPLETE",
-            "native-reference::OVR->CAT::B-beta": "COMPLETE",
-            "native-reference::OVR->CAT::I-isotonic": "COMPLETE",
-            "native-reference::OVR->CAT::L-historical": "COMPLETE",
-            "native-reference::OVR->CAT::L-low": "COMPLETE",
-            "native-reference::OVR->CAT::P-historical": "COMPLETE",
-            "native-reference::OVR->CAT::P-low": "COMPLETE"
-          },
-          "status": "COMPLETE"
-        }
+  "shared_formal_dag_engine_qualification": {
+    "dependency": {
+      "both_estimands": [],
+      "both_failed_fits": [
+        "falcon-h1-7b-instruct|r4-hellaswag-activity-primary|B-beta|CAT->OVR|cross",
+        "falcon-h1-7b-instruct|r4-hellaswag-activity-primary|B-beta|CAT->OVR|native"
+      ],
+      "both_failure_types": [
+        "BetaImplementationError"
+      ],
+      "both_family_sizes": {
+        "direction": 6,
+        "extension": 6,
+        "native": 11,
+        "primary": 12
       },
-      "point_estimate_mismatches": [],
-      "point_estimate_oracle_equal": true,
-      "refit_blocks": 64,
-      "refit_statuses": [
-        "COMPLETE"
+      "core4_primary_and_direction_complete_under_injection": true,
+      "cross_only_estimands": [
+        "Delta_native"
+      ],
+      "cross_only_failure_type": "BetaImplementationError",
+      "cross_only_family_sizes": {
+        "direction": 6,
+        "extension": 6,
+        "native": 12,
+        "primary": 12
+      },
+      "cross_only_reason": "BetaImplementationError: no constraint face produced an accepted optimum",
+      "cross_only_status": "FAILED",
+      "dependency_truth_table": {
+        "Delta_deploy": [
+          "cross"
+        ],
+        "Delta_native": [
+          "native"
+        ],
+        "Delta_transport": [
+          "cross",
+          "native"
+        ]
+      },
+      "family_sizes_fixed": {
+        "direction_difference": 6,
+        "extension": 8,
+        "native_reference": 12,
+        "primary": 12
+      },
+      "injected_message": "no constraint face produced an accepted optimum",
+      "injected_unit": "falcon-h1-7b-instruct|r4-hellaswag-activity-primary|CAT->OVR|B-beta",
+      "native_only_estimands": [
+        "Delta_deploy"
       ]
     },
-    "method": "independent recomposition via r3_analysis.fit_calibrator / r4_calibration_families / r4_inference.risk_matrix",
-    "metric_oracle": {
-      "inf_minus_inf_state": "UNDEFINED_EXTENDED_REAL",
-      "inf_plus_finite_state": "POSITIVE_INFINITY",
-      "logloss_zero_mass_correct_state": "FINITE",
-      "logloss_zero_mass_incorrect_state": "POSITIVE_INFINITY",
-      "mean_brier": 0.28125,
-      "mean_logloss_state": "FINITE",
-      "undefined_constant": "UNDEFINED_EXTENDED_REAL"
-    },
-    "primary": {
+    "engine": "run_r4_analysis.run_dag_engine",
+    "engine_blocks": [
+      "final_assembly",
+      "input_load",
+      "n912_robustness",
+      "point_estimates",
+      "predictor",
+      "test_bootstrap",
+      "train_refit"
+    ],
+    "formal_and_synthetic_use_the_same_engine": true,
+    "legacy": {
       "available_procedures": [
         "P-low",
         "P-historical",
@@ -225,6 +430,8 @@
         "I-isotonic",
         "B-beta"
       ],
+      "bootstrap_direction_differences": 6,
+      "bootstrap_extension_panel": 8,
       "bootstrap_family_status": {
         "primary": {
           "complete_count": 12,
@@ -297,6 +504,10 @@
           "status": "COMPLETE"
         }
       },
+      "bootstrap_native_reference": 12,
+      "bootstrap_primary_contrasts": 12,
+      "cluster_never_split": true,
+      "core4_only_extension_panel": 0,
       "core4_only_family_status": {
         "primary": {
           "complete_count": 12,
@@ -369,13 +580,417 @@
           "status": "INCOMPLETE"
         }
       },
+      "core4_only_primary_contrasts": 12,
+      "fit_coverage": {
+        "entries": 96,
+        "failed": [],
+        "ineligible": []
+      },
+      "fixture_marker": "SYNTHETIC_ONLY_NOT_SCIENTIFIC_EVIDENCE",
+      "metric_oracle": {
+        "inf_minus_inf_state": "UNDEFINED_EXTENDED_REAL",
+        "inf_plus_finite_state": "POSITIVE_INFINITY",
+        "logloss_zero_mass_correct_state": "FINITE",
+        "logloss_zero_mass_incorrect_state": "POSITIVE_INFINITY",
+        "mean_brier": 0.28125,
+        "mean_logloss_state": "FINITE",
+        "undefined_constant": "UNDEFINED_EXTENDED_REAL"
+      },
+      "models": [
+        "minicpm5-2b",
+        "qwen3-5-2b"
+      ],
       "point_estimate_mismatches": [],
       "point_estimate_oracle_equal": true,
-      "refit_blocks": 192,
+      "populations": [
+        "r4-hellaswag-activity-primary",
+        "r4-medmcqa-subject-primary"
+      ],
+      "refit_blocks": 96,
+      "refit_estimands": [
+        "Delta_deploy",
+        "Delta_transport"
+      ],
+      "refit_failure_records": [
+        "B-beta|BootstrapContractViolation|refit calibrator is unavailable: cross='BetaImplementationError: no constraint face produced an accepted optimum' native=None",
+        "B-beta|BootstrapContractViolation|refit calibrator is unavailable: cross=None native='BetaImplementationError: no constraint face produced an accepted optimum'"
+      ],
+      "refit_incomplete_blocks": [
+        "minicpm5-2b|r4-medmcqa-subject-primary|CAT->OVR|B-beta|Delta_deploy",
+        "minicpm5-2b|r4-medmcqa-subject-primary|CAT->OVR|B-beta|Delta_transport",
+        "minicpm5-2b|r4-medmcqa-subject-primary|OVR->CAT|B-beta|Delta_deploy",
+        "minicpm5-2b|r4-medmcqa-subject-primary|OVR->CAT|B-beta|Delta_transport"
+      ],
+      "refit_intervals_withheld": 4,
+      "refit_procedures": [
+        "B-beta",
+        "I-isotonic",
+        "L-historical",
+        "L-low",
+        "P-historical",
+        "P-low"
+      ],
       "refit_statuses": [
-        "COMPLETE"
-      ]
+        "COMPLETE",
+        "INCOMPLETE"
+      ],
+      "role": "legacy",
+      "shared_draw_identity_equal_across_models": true
+    },
+    "method": "the qualification consumes the shared-engine output and independently recomposes the point estimates via r3_analysis.fit_calibrator / r4_calibration_families / r4_inference.risk_*",
+    "oracle_method": "independent recomposition via r3_analysis / r4_calibration_families / r4_inference",
+    "primary": {
+      "available_procedures": [
+        "P-low",
+        "P-historical",
+        "L-low",
+        "L-historical",
+        "I-isotonic",
+        "B-beta"
+      ],
+      "bootstrap_direction_differences": 6,
+      "bootstrap_extension_panel": 8,
+      "bootstrap_family_status": {
+        "primary": {
+          "complete_count": 12,
+          "family_size": 12,
+          "incomplete_count": 0,
+          "members": {
+            "primary::Delta_deploy::CAT->OVR::Feature": "COMPLETE",
+            "primary::Delta_deploy::CAT->OVR::Interaction": "COMPLETE",
+            "primary::Delta_deploy::CAT->OVR::Regularization": "COMPLETE",
+            "primary::Delta_deploy::OVR->CAT::Feature": "COMPLETE",
+            "primary::Delta_deploy::OVR->CAT::Interaction": "COMPLETE",
+            "primary::Delta_deploy::OVR->CAT::Regularization": "COMPLETE",
+            "primary::Delta_transport::CAT->OVR::Feature": "COMPLETE",
+            "primary::Delta_transport::CAT->OVR::Interaction": "COMPLETE",
+            "primary::Delta_transport::CAT->OVR::Regularization": "COMPLETE",
+            "primary::Delta_transport::OVR->CAT::Feature": "COMPLETE",
+            "primary::Delta_transport::OVR->CAT::Interaction": "COMPLETE",
+            "primary::Delta_transport::OVR->CAT::Regularization": "COMPLETE"
+          },
+          "status": "COMPLETE"
+        },
+        "secondary_direction_difference": {
+          "complete_count": 6,
+          "family_size": 6,
+          "incomplete_count": 0,
+          "members": {
+            "direction-difference::Delta_deploy::Feature": "COMPLETE",
+            "direction-difference::Delta_deploy::Interaction": "COMPLETE",
+            "direction-difference::Delta_deploy::Regularization": "COMPLETE",
+            "direction-difference::Delta_transport::Feature": "COMPLETE",
+            "direction-difference::Delta_transport::Interaction": "COMPLETE",
+            "direction-difference::Delta_transport::Regularization": "COMPLETE"
+          },
+          "status": "COMPLETE"
+        },
+        "secondary_extension": {
+          "complete_count": 8,
+          "family_size": 8,
+          "incomplete_count": 0,
+          "members": {
+            "extension::B-beta::CAT->OVR::Delta_deploy": "COMPLETE",
+            "extension::B-beta::CAT->OVR::Delta_transport": "COMPLETE",
+            "extension::B-beta::OVR->CAT::Delta_deploy": "COMPLETE",
+            "extension::B-beta::OVR->CAT::Delta_transport": "COMPLETE",
+            "extension::I-isotonic::CAT->OVR::Delta_deploy": "COMPLETE",
+            "extension::I-isotonic::CAT->OVR::Delta_transport": "COMPLETE",
+            "extension::I-isotonic::OVR->CAT::Delta_deploy": "COMPLETE",
+            "extension::I-isotonic::OVR->CAT::Delta_transport": "COMPLETE"
+          },
+          "status": "COMPLETE"
+        },
+        "secondary_native_reference": {
+          "complete_count": 12,
+          "family_size": 12,
+          "incomplete_count": 0,
+          "members": {
+            "native-reference::CAT->OVR::B-beta": "COMPLETE",
+            "native-reference::CAT->OVR::I-isotonic": "COMPLETE",
+            "native-reference::CAT->OVR::L-historical": "COMPLETE",
+            "native-reference::CAT->OVR::L-low": "COMPLETE",
+            "native-reference::CAT->OVR::P-historical": "COMPLETE",
+            "native-reference::CAT->OVR::P-low": "COMPLETE",
+            "native-reference::OVR->CAT::B-beta": "COMPLETE",
+            "native-reference::OVR->CAT::I-isotonic": "COMPLETE",
+            "native-reference::OVR->CAT::L-historical": "COMPLETE",
+            "native-reference::OVR->CAT::L-low": "COMPLETE",
+            "native-reference::OVR->CAT::P-historical": "COMPLETE",
+            "native-reference::OVR->CAT::P-low": "COMPLETE"
+          },
+          "status": "COMPLETE"
+        }
+      },
+      "bootstrap_native_reference": 12,
+      "bootstrap_primary_contrasts": 12,
+      "cluster_never_split": true,
+      "core4_only_extension_panel": 0,
+      "core4_only_family_status": {
+        "primary": {
+          "complete_count": 12,
+          "family_size": 12,
+          "incomplete_count": 0,
+          "members": {
+            "primary::Delta_deploy::CAT->OVR::Feature": "COMPLETE",
+            "primary::Delta_deploy::CAT->OVR::Interaction": "COMPLETE",
+            "primary::Delta_deploy::CAT->OVR::Regularization": "COMPLETE",
+            "primary::Delta_deploy::OVR->CAT::Feature": "COMPLETE",
+            "primary::Delta_deploy::OVR->CAT::Interaction": "COMPLETE",
+            "primary::Delta_deploy::OVR->CAT::Regularization": "COMPLETE",
+            "primary::Delta_transport::CAT->OVR::Feature": "COMPLETE",
+            "primary::Delta_transport::CAT->OVR::Interaction": "COMPLETE",
+            "primary::Delta_transport::CAT->OVR::Regularization": "COMPLETE",
+            "primary::Delta_transport::OVR->CAT::Feature": "COMPLETE",
+            "primary::Delta_transport::OVR->CAT::Interaction": "COMPLETE",
+            "primary::Delta_transport::OVR->CAT::Regularization": "COMPLETE"
+          },
+          "status": "COMPLETE"
+        },
+        "secondary_direction_difference": {
+          "complete_count": 6,
+          "family_size": 6,
+          "incomplete_count": 0,
+          "members": {
+            "direction-difference::Delta_deploy::Feature": "COMPLETE",
+            "direction-difference::Delta_deploy::Interaction": "COMPLETE",
+            "direction-difference::Delta_deploy::Regularization": "COMPLETE",
+            "direction-difference::Delta_transport::Feature": "COMPLETE",
+            "direction-difference::Delta_transport::Interaction": "COMPLETE",
+            "direction-difference::Delta_transport::Regularization": "COMPLETE"
+          },
+          "status": "COMPLETE"
+        },
+        "secondary_extension": {
+          "complete_count": 0,
+          "family_size": 8,
+          "incomplete_count": 8,
+          "members": {
+            "extension::B-beta::CAT->OVR::Delta_deploy": "INCOMPLETE",
+            "extension::B-beta::CAT->OVR::Delta_transport": "INCOMPLETE",
+            "extension::B-beta::OVR->CAT::Delta_deploy": "INCOMPLETE",
+            "extension::B-beta::OVR->CAT::Delta_transport": "INCOMPLETE",
+            "extension::I-isotonic::CAT->OVR::Delta_deploy": "INCOMPLETE",
+            "extension::I-isotonic::CAT->OVR::Delta_transport": "INCOMPLETE",
+            "extension::I-isotonic::OVR->CAT::Delta_deploy": "INCOMPLETE",
+            "extension::I-isotonic::OVR->CAT::Delta_transport": "INCOMPLETE"
+          },
+          "status": "INCOMPLETE"
+        },
+        "secondary_native_reference": {
+          "complete_count": 8,
+          "family_size": 12,
+          "incomplete_count": 4,
+          "members": {
+            "native-reference::CAT->OVR::B-beta": "INCOMPLETE",
+            "native-reference::CAT->OVR::I-isotonic": "INCOMPLETE",
+            "native-reference::CAT->OVR::L-historical": "COMPLETE",
+            "native-reference::CAT->OVR::L-low": "COMPLETE",
+            "native-reference::CAT->OVR::P-historical": "COMPLETE",
+            "native-reference::CAT->OVR::P-low": "COMPLETE",
+            "native-reference::OVR->CAT::B-beta": "INCOMPLETE",
+            "native-reference::OVR->CAT::I-isotonic": "INCOMPLETE",
+            "native-reference::OVR->CAT::L-historical": "COMPLETE",
+            "native-reference::OVR->CAT::L-low": "COMPLETE",
+            "native-reference::OVR->CAT::P-historical": "COMPLETE",
+            "native-reference::OVR->CAT::P-low": "COMPLETE"
+          },
+          "status": "INCOMPLETE"
+        }
+      },
+      "core4_only_primary_contrasts": 12,
+      "fit_coverage": {
+        "entries": 288,
+        "failed": [],
+        "ineligible": []
+      },
+      "fixture_marker": "SYNTHETIC_ONLY_NOT_SCIENTIFIC_EVIDENCE",
+      "legacy": {
+        "bootstrap_family_status": {
+          "primary": {
+            "complete_count": 12,
+            "family_size": 12,
+            "incomplete_count": 0,
+            "members": {
+              "primary::Delta_deploy::CAT->OVR::Feature": "COMPLETE",
+              "primary::Delta_deploy::CAT->OVR::Interaction": "COMPLETE",
+              "primary::Delta_deploy::CAT->OVR::Regularization": "COMPLETE",
+              "primary::Delta_deploy::OVR->CAT::Feature": "COMPLETE",
+              "primary::Delta_deploy::OVR->CAT::Interaction": "COMPLETE",
+              "primary::Delta_deploy::OVR->CAT::Regularization": "COMPLETE",
+              "primary::Delta_transport::CAT->OVR::Feature": "COMPLETE",
+              "primary::Delta_transport::CAT->OVR::Interaction": "COMPLETE",
+              "primary::Delta_transport::CAT->OVR::Regularization": "COMPLETE",
+              "primary::Delta_transport::OVR->CAT::Feature": "COMPLETE",
+              "primary::Delta_transport::OVR->CAT::Interaction": "COMPLETE",
+              "primary::Delta_transport::OVR->CAT::Regularization": "COMPLETE"
+            },
+            "status": "COMPLETE"
+          },
+          "secondary_direction_difference": {
+            "complete_count": 6,
+            "family_size": 6,
+            "incomplete_count": 0,
+            "members": {
+              "direction-difference::Delta_deploy::Feature": "COMPLETE",
+              "direction-difference::Delta_deploy::Interaction": "COMPLETE",
+              "direction-difference::Delta_deploy::Regularization": "COMPLETE",
+              "direction-difference::Delta_transport::Feature": "COMPLETE",
+              "direction-difference::Delta_transport::Interaction": "COMPLETE",
+              "direction-difference::Delta_transport::Regularization": "COMPLETE"
+            },
+            "status": "COMPLETE"
+          },
+          "secondary_extension": {
+            "complete_count": 8,
+            "family_size": 8,
+            "incomplete_count": 0,
+            "members": {
+              "extension::B-beta::CAT->OVR::Delta_deploy": "COMPLETE",
+              "extension::B-beta::CAT->OVR::Delta_transport": "COMPLETE",
+              "extension::B-beta::OVR->CAT::Delta_deploy": "COMPLETE",
+              "extension::B-beta::OVR->CAT::Delta_transport": "COMPLETE",
+              "extension::I-isotonic::CAT->OVR::Delta_deploy": "COMPLETE",
+              "extension::I-isotonic::CAT->OVR::Delta_transport": "COMPLETE",
+              "extension::I-isotonic::OVR->CAT::Delta_deploy": "COMPLETE",
+              "extension::I-isotonic::OVR->CAT::Delta_transport": "COMPLETE"
+            },
+            "status": "COMPLETE"
+          },
+          "secondary_native_reference": {
+            "complete_count": 12,
+            "family_size": 12,
+            "incomplete_count": 0,
+            "members": {
+              "native-reference::CAT->OVR::B-beta": "COMPLETE",
+              "native-reference::CAT->OVR::I-isotonic": "COMPLETE",
+              "native-reference::CAT->OVR::L-historical": "COMPLETE",
+              "native-reference::CAT->OVR::L-low": "COMPLETE",
+              "native-reference::CAT->OVR::P-historical": "COMPLETE",
+              "native-reference::CAT->OVR::P-low": "COMPLETE",
+              "native-reference::OVR->CAT::B-beta": "COMPLETE",
+              "native-reference::OVR->CAT::I-isotonic": "COMPLETE",
+              "native-reference::OVR->CAT::L-historical": "COMPLETE",
+              "native-reference::OVR->CAT::L-low": "COMPLETE",
+              "native-reference::OVR->CAT::P-historical": "COMPLETE",
+              "native-reference::OVR->CAT::P-low": "COMPLETE"
+            },
+            "status": "COMPLETE"
+          }
+        },
+        "models": [
+          "minicpm5-2b",
+          "qwen3-5-2b"
+        ],
+        "populations": [
+          "r4-hellaswag-activity-primary",
+          "r4-medmcqa-subject-primary"
+        ],
+        "refit_blocks": 96,
+        "unit_estimates": 48
+      },
+      "logloss_contrasts": 36,
+      "logloss_status": "INCOMPLETE",
+      "logloss_undefined_contrasts": [
+        "CAT->OVR|I-isotonic|Delta_transport",
+        "OVR->CAT|I-isotonic|Delta_transport"
+      ],
+      "metric_oracle": {
+        "inf_minus_inf_state": "UNDEFINED_EXTENDED_REAL",
+        "inf_plus_finite_state": "POSITIVE_INFINITY",
+        "logloss_zero_mass_correct_state": "FINITE",
+        "logloss_zero_mass_incorrect_state": "POSITIVE_INFINITY",
+        "mean_brier": 0.28125,
+        "mean_logloss_state": "FINITE",
+        "undefined_constant": "UNDEFINED_EXTENDED_REAL"
+      },
+      "models": [
+        "falcon-h1-7b-instruct",
+        "granite-4-0-h-tiny",
+        "olmo-3-7b-instruct",
+        "qwen3-5-9b"
+      ],
+      "n912_robustness": {
+        "cannot_rescue_primary": true,
+        "comparisons": 32,
+        "refit_blocks": 189,
+        "refit_statuses": [
+          "COMPLETE"
+        ],
+        "role": "SECONDARY_ROBUSTNESS",
+        "shared_test_draw_paired_by_replicate": true
+      },
+      "point_estimate_mismatches": [],
+      "point_estimate_oracle_equal": true,
+      "populations": [
+        "r4-hellaswag-activity-primary",
+        "r4-medmcqa-subject-primary",
+        "r4-mmlu-57-subject"
+      ],
+      "predictor": {
+        "development_units": 8,
+        "legacy_units": 8,
+        "planned_replicates": 16,
+        "point_estimate": -0.09955962033049993,
+        "status": "COMPLETE",
+        "successful_replicates": 16,
+        "tail_rule": "1/40/39/40",
+        "units_total": 32,
+        "validation_rows": 16,
+        "validation_units": 16
+      },
+      "refit_blocks": 288,
+      "refit_estimands": [
+        "Delta_deploy",
+        "Delta_transport"
+      ],
+      "refit_failure_records": [
+        "B-beta|BootstrapContractViolation|refit calibrator is unavailable: cross='BetaImplementationError: no constraint face produced an accepted optimum' native=None",
+        "B-beta|BootstrapContractViolation|refit calibrator is unavailable: cross=None native='BetaImplementationError: no constraint face produced an accepted optimum'"
+      ],
+      "refit_incomplete_blocks": [
+        "falcon-h1-7b-instruct|r4-medmcqa-subject-primary|CAT->OVR|B-beta|Delta_deploy",
+        "falcon-h1-7b-instruct|r4-medmcqa-subject-primary|CAT->OVR|B-beta|Delta_transport",
+        "falcon-h1-7b-instruct|r4-medmcqa-subject-primary|OVR->CAT|B-beta|Delta_deploy",
+        "falcon-h1-7b-instruct|r4-medmcqa-subject-primary|OVR->CAT|B-beta|Delta_transport",
+        "granite-4-0-h-tiny|r4-hellaswag-activity-primary|CAT->OVR|B-beta|Delta_deploy",
+        "granite-4-0-h-tiny|r4-hellaswag-activity-primary|CAT->OVR|B-beta|Delta_transport",
+        "granite-4-0-h-tiny|r4-hellaswag-activity-primary|OVR->CAT|B-beta|Delta_deploy",
+        "granite-4-0-h-tiny|r4-hellaswag-activity-primary|OVR->CAT|B-beta|Delta_transport",
+        "olmo-3-7b-instruct|r4-hellaswag-activity-primary|CAT->OVR|B-beta|Delta_deploy",
+        "olmo-3-7b-instruct|r4-hellaswag-activity-primary|CAT->OVR|B-beta|Delta_transport",
+        "olmo-3-7b-instruct|r4-hellaswag-activity-primary|OVR->CAT|B-beta|Delta_deploy",
+        "olmo-3-7b-instruct|r4-hellaswag-activity-primary|OVR->CAT|B-beta|Delta_transport",
+        "qwen3-5-9b|r4-medmcqa-subject-primary|CAT->OVR|B-beta|Delta_deploy",
+        "qwen3-5-9b|r4-medmcqa-subject-primary|CAT->OVR|B-beta|Delta_transport",
+        "qwen3-5-9b|r4-medmcqa-subject-primary|OVR->CAT|B-beta|Delta_deploy",
+        "qwen3-5-9b|r4-medmcqa-subject-primary|OVR->CAT|B-beta|Delta_transport",
+        "qwen3-5-9b|r4-mmlu-57-subject|CAT->OVR|B-beta|Delta_deploy",
+        "qwen3-5-9b|r4-mmlu-57-subject|CAT->OVR|B-beta|Delta_transport",
+        "qwen3-5-9b|r4-mmlu-57-subject|OVR->CAT|B-beta|Delta_deploy",
+        "qwen3-5-9b|r4-mmlu-57-subject|OVR->CAT|B-beta|Delta_transport"
+      ],
+      "refit_intervals_withheld": 20,
+      "refit_procedures": [
+        "B-beta",
+        "I-isotonic",
+        "L-historical",
+        "L-low",
+        "P-historical",
+        "P-low"
+      ],
+      "refit_statuses": [
+        "COMPLETE",
+        "INCOMPLETE"
+      ],
+      "role": "primary",
+      "shared_draw_identity_equal_across_models": true
     }
+  },
+  "status": "PASS",
+  "status_line": "R4 FORMAL ANALYSIS RUNNER FULL-DAG CLOSURE = PASS",
+  "superseded_qualification_fingerprints": {
+    "405f3ffcbf2cc67ff179c75ed157437045c6a726a63ae6b81dede28bcfede5ac": "SUPERSEDED FOR FORMAL-PATH COVERAGE: the prior synthetic qualification passed its tested path but did not exercise the exact formal orchestration path (it used a separate orchestration path rather than the shared run_dag_engine)."
   },
   "synthetic_fixture_identity": {
     "clusters_per_stratum": 3,
@@ -389,12 +1004,62 @@
   },
   "tests": {
     "determinism": "byte-identical synthetic qualification rerun",
+    "full_repo_regression": "see the accompanying report",
     "new_runner_tests": {
-      "collected": 89,
+      "collected": 106,
       "failed": 0,
-      "passed": 89,
-      "path": "tests/test_r4_analysis_runner.py"
+      "passed": 106,
+      "path": "tests/test_r4_analysis_runner.py",
+      "sha256": "71661669cbbdb435f7913201656af5045c9613939ad4682b49c533216d8cb4ee"
     }
+  },
+  "train_refit_full_scope": {
+    "estimands": [
+      "Delta_deploy",
+      "Delta_transport"
+    ],
+    "failure_records": [
+      "B-beta|BootstrapContractViolation|refit calibrator is unavailable: cross='BetaImplementationError: no constraint face produced an accepted optimum' native=None",
+      "B-beta|BootstrapContractViolation|refit calibrator is unavailable: cross=None native='BetaImplementationError: no constraint face produced an accepted optimum'"
+    ],
+    "incomplete_blocks": [
+      "falcon-h1-7b-instruct|r4-medmcqa-subject-primary|CAT->OVR|B-beta|Delta_deploy",
+      "falcon-h1-7b-instruct|r4-medmcqa-subject-primary|CAT->OVR|B-beta|Delta_transport",
+      "falcon-h1-7b-instruct|r4-medmcqa-subject-primary|OVR->CAT|B-beta|Delta_deploy",
+      "falcon-h1-7b-instruct|r4-medmcqa-subject-primary|OVR->CAT|B-beta|Delta_transport",
+      "granite-4-0-h-tiny|r4-hellaswag-activity-primary|CAT->OVR|B-beta|Delta_deploy",
+      "granite-4-0-h-tiny|r4-hellaswag-activity-primary|CAT->OVR|B-beta|Delta_transport",
+      "granite-4-0-h-tiny|r4-hellaswag-activity-primary|OVR->CAT|B-beta|Delta_deploy",
+      "granite-4-0-h-tiny|r4-hellaswag-activity-primary|OVR->CAT|B-beta|Delta_transport",
+      "olmo-3-7b-instruct|r4-hellaswag-activity-primary|CAT->OVR|B-beta|Delta_deploy",
+      "olmo-3-7b-instruct|r4-hellaswag-activity-primary|CAT->OVR|B-beta|Delta_transport",
+      "olmo-3-7b-instruct|r4-hellaswag-activity-primary|OVR->CAT|B-beta|Delta_deploy",
+      "olmo-3-7b-instruct|r4-hellaswag-activity-primary|OVR->CAT|B-beta|Delta_transport",
+      "qwen3-5-9b|r4-medmcqa-subject-primary|CAT->OVR|B-beta|Delta_deploy",
+      "qwen3-5-9b|r4-medmcqa-subject-primary|CAT->OVR|B-beta|Delta_transport",
+      "qwen3-5-9b|r4-medmcqa-subject-primary|OVR->CAT|B-beta|Delta_deploy",
+      "qwen3-5-9b|r4-medmcqa-subject-primary|OVR->CAT|B-beta|Delta_transport",
+      "qwen3-5-9b|r4-mmlu-57-subject|CAT->OVR|B-beta|Delta_deploy",
+      "qwen3-5-9b|r4-mmlu-57-subject|CAT->OVR|B-beta|Delta_transport",
+      "qwen3-5-9b|r4-mmlu-57-subject|OVR->CAT|B-beta|Delta_deploy",
+      "qwen3-5-9b|r4-mmlu-57-subject|OVR->CAT|B-beta|Delta_transport"
+    ],
+    "intervals_withheld": 20,
+    "legacy_blocks": 96,
+    "n912_blocks": 189,
+    "never": [
+      "Delta_native"
+    ],
+    "no_successful_subset_interval": true,
+    "primary_blocks": 288,
+    "procedures": [
+      "B-beta",
+      "I-isotonic",
+      "L-historical",
+      "L-low",
+      "P-historical",
+      "P-low"
+    ]
   },
   "validate_only_result": {
     "bootstrap_draws": 0,

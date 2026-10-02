@@ -4,19 +4,26 @@
 artifact_type:               r4-formal-analysis-runner-qualification
 artifact_version:            1
 status:                      PASS
-nature:                      OPERATIONAL SYNTHETIC QUALIFICATION
+nature:                      OPERATIONAL SYNTHETIC FORMAL-DAG QUALIFICATION
 runner_id:                   r4-integrated-formal-analysis-runner
 runner_source_path:          experiments/calibration_transport/run_r4_analysis.py
-runner_source_sha256:        5b4ab21d262afe1b1755120f83afaa37798df3a41dbef8274cd00ede1350f176
-runner_contract_fingerprint: 2fe5d962a706c822a63573bbd8e553a44b6b0fd082dd582af8cdaa25bc6c7c60
-qualification_fingerprint:   405f3ffcbf2cc67ff179c75ed157437045c6a726a63ae6b81dede28bcfede5ac
+runner_source_sha256:        e86ef34a3435c81fd78285fbc709a7966bf704fbe35987db6d3003d2cf31bac3
+runner_contract_fingerprint: d16a8edb9f7edcb5a0dee69e37bb32f4f45dd661fcb324e166db31a2c6b06ff5
+qualification_fingerprint:   9e7d998060daf761f1f8914714eb57b16128a18f6db4bde49ddf7db9a0267270
 scientific_outputs_computed: false
 raw_evidence_analyzed:       false
 formal_analysis_authorized:  false
+superseded_qualification_fingerprint: 405f3ffcbf2cc67ff179c75ed157437045c6a726a63ae6b81dede28bcfede5ac
 ```
 
 The runner is **implementation-qualified against the frozen synthetic / direct-call contract**. It
 is not claimed to be "scientifically validated" or "empirically validated".
+
+The previous qualification fingerprint
+`405f3ffcbf2cc67ff179c75ed157437045c6a726a63ae6b81dede28bcfede5ac` is marked **SUPERSEDED FOR
+FORMAL-PATH COVERAGE**: it passed its tested path, but that path was a separate orchestration path
+and did not exercise the exact formal orchestration path. Formal execution and synthetic
+qualification now call the **same** engine (`run_r4_analysis.run_dag_engine`).
 
 ---
 
@@ -103,6 +110,10 @@ formal evidence consumed: false
 The synthetic fixture never reads the formal evidence root, and the formal mode never accepts the
 synthetic fixture. The rejection is enforced in both directions.
 
+The N912 nested synthetic fixture is built by doubling `train_per_stratum` (24 instead of 12), so
+the N456 TRAIN item set is a strict prefix of the N912 TRAIN item set and the TEST rows are
+byte-identical.
+
 ---
 
 ## 5. Synthetic CORE4 / isotonic / beta qualification
@@ -154,12 +165,27 @@ CORE4-only family status:
   extension8              0/8 INCOMPLETE
   native_reference12      8/12 INCOMPLETE
 
-refit blocks:             192 (primary) / 64 (legacy), statuses ["COMPLETE"]
+refit blocks:             288 (primary) / 96 (legacy) / 189 (n912), all six procedures
+                          and both refit estimands (Delta_deploy, Delta_transport)
 ```
 
 This is exactly the dependency-unavailable propagation the freeze allows: the primary family and
 the direction-contrast family remain complete, the extension family and the native-reference
 family degrade to INCOMPLETE, no family is shrunk, and no complete-case rescue is performed.
+
+Some primary refit blocks are INCOMPLETE because individual refit replicates fail (B-beta /
+I-isotonic resample failures); the interval is withheld and the failure is recorded, e.g.
+`B-beta|BootstrapContractViolation|refit calibrator is unavailable:
+cross='BetaImplementationError: no constraint face produced an accepted optimum' native=None`.
+
+Full-fit coverage on the synthetic panel:
+
+```text
+primary: 288 registry entries (4 models x 3 populations x 2 directions x 6 procedures x 2 sides)
+legacy:   96 registry entries (2 models x 2 populations x 2 directions x 6 procedures x 2 sides)
+failed / ineligible: []
+registry key: model|population|procedure|direction|side
+```
 
 ---
 
@@ -267,20 +293,139 @@ Two independent `--synthetic-qualification --synthetic-replicates 16` runs produ
 
 ---
 
-## 15. Tests
+## 15. Shared formal-DAG engine
+
+Formal execution and synthetic qualification call **the same** engine,
+`run_r4_analysis.run_dag_engine`, so the qualification exercises the exact formal orchestration
+path. The only differences between the modes are the input source, the replicate counts, the
+output root and the formal/synthetic authority marker.
 
 ```text
-tests/test_r4_analysis_runner.py:  collected 89, passed 89, failed 0
+engine blocks observed:
+  input_load, point_estimates, n912_robustness, test_bootstrap,
+  train_refit, predictor, final_assembly
+```
+
+The final artifact contains no `NOT_EXECUTED_IN_THIS_INVOCATION` token for any frozen node.
+
+---
+
+## 16. Dependency failure propagation
+
+The frozen dependency truth table is encoded and tested:
+
+```text
+Delta_deploy     requires CROSS fit only
+Delta_native     requires NATIVE fit only
+Delta_transport  requires CROSS + NATIVE fits
+```
+
+A `BetaImplementationError("no constraint face produced an accepted optimum")` was injected into
+one synthetic unit (`falcon-h1-7b-instruct|r4-hellaswag-activity-primary|CAT->OVR|B-beta`):
+
+```text
+cross-only failure:  computable estimands ["Delta_native"],  status FAILED,
+                     failure_type BetaImplementationError
+                     family sizes {primary 12, direction 6, extension 6, native 12}
+native-only failure: computable estimands ["Delta_deploy"]
+both failed:         computable estimands []
+                     family sizes {primary 12, direction 6, extension 6, native 11}
+both failed fits:    the two injected B-beta cross/native keys
+core4 primary12 and direction6 remain COMPLETE under injection: true
+family sizes fixed:  {primary 12, extension 8, direction_difference 6, native_reference 12}
+```
+
+The runner does not crash, the exact failure class and message are retained, dependent members are
+INCOMPLETE, unaffected members continue, and no family is shrunk.
+
+---
+
+## 17. Exact LogLoss formal path
+
+```text
+status:              INCOMPLETE
+contrasts:           36
+undefined contrasts: CAT->OVR|I-isotonic|Delta_transport,
+                     OVR->CAT|I-isotonic|Delta_transport
+```
+
+An isotonic calibrator producing exact 0/1 probabilities makes the replicate contrast
+`+inf - +inf = UNDEFINED_EXTENDED_REAL`; the whole dependent interval is withheld. No undefined
+replicate is dropped and no successful-subset interval is produced. The carrier is
+`r4_inference.ExtendedReal`, with no clipping, epsilon or `nextafter`.
+
+---
+
+## 18. N912 robustness formal path
+
+```text
+role:                         SECONDARY ROBUSTNESS ONLY
+comparisons:                  32
+paired within the same TEST replicate: true
+cannot_rescue_primary:        true
+refit blocks:                 189 (192 minus 3 dependency-skipped), statuses ["COMPLETE"]
+scope:                        frozen new-population 912 manifests only (HellaSwag, MedMCQA)
+```
+
+The `N912 - N456` difference is subtracted directly within the same shared TEST replicate index;
+no independent resampling stream is introduced. If N456 failed and N912 succeeded, the primary
+would stay FAILED / INCOMPLETE.
+
+---
+
+## 19. Legacy secondary formal path
+
+```text
+models:        minicpm5-2b, qwen3-5-2b
+populations:   HellaSwag, MedMCQA
+budget:        N456 only
+refit blocks:  96, covering all six procedures and both refit estimands
+```
+
+The legacy panel produces its own secondary point estimates, bootstrap quantities and predictor
+legacy-8 quantities. A legacy model never enters `primary12` and never enters the predictor
+`validation16`; the legacy units can never rescue the 16-unit primary statistic.
+
+---
+
+## 20. Frozen-DAG coverage matrix
+
+```text
+artifact:   experiments/calibration_transport/R4_FORMAL_ANALYSIS_RUNNER_DAG_COVERAGE.json
+coverage_fingerprint: 39ac890e7b7e564cfb14d42353b5db44997c9392513f433c7473cb0a53007d1d
+frozen dependency graph: 449c9b19d61e4edbe95ea856b1d13e3b373765f8a9d05931f20e4d12bf28ed9f
+frozen nodes:                 20
+required nodes with no formal path:            0
+required nodes with no synthetic test:         0
+```
+
+Every frozen node records its formal engine path, its engine output key, its result-schema path,
+its synthetic test and its status propagation rule.
+
+---
+
+## 21. Tests
+
+```text
+tests/test_r4_analysis_runner.py:  collected 106, passed 106, failed 0
 ```
 
 ---
 
-## 16. Status
+## 22. Status
 
 ```text
 R4 FORMAL ANALYSIS RUNNER BUILD = PASS
 
 R4 FORMAL ANALYSIS RUNNER SYNTHETIC QUALIFICATION = PASS
+
+R4 FORMAL ANALYSIS RUNNER FULL-DAG CLOSURE = PASS
+
+EXACT LOGLOSS FORMAL PATH = QUALIFIED
+N912 FORMAL PATH = QUALIFIED
+LEGACY SECONDARY FORMAL PATH = QUALIFIED
+PREDICTOR 8/16/8 FORMAL PATH = QUALIFIED
+DEPENDENCY FAILURE PROPAGATION = QUALIFIED
 
 FROZEN STATISTICAL IMPLEMENTATIONS = UNCHANGED
 

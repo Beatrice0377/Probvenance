@@ -8,15 +8,21 @@ nature:                   OPERATIONAL ANALYSIS ORCHESTRATION CONTRACT
 runner_id:                r4-integrated-formal-analysis-runner
 runner_version:           1
 runner_source_path:       experiments/calibration_transport/run_r4_analysis.py
-runner_source_sha256:     5b4ab21d262afe1b1755120f83afaa37798df3a41dbef8274cd00ede1350f176
-runner_contract_fingerprint: 2fe5d962a706c822a63573bbd8e553a44b6b0fd082dd582af8cdaa25bc6c7c60
+runner_source_sha256:     e86ef34a3435c81fd78285fbc709a7966bf704fbe35987db6d3003d2cf31bac3
+runner_contract_fingerprint: d16a8edb9f7edcb5a0dee69e37bb32f4f45dd661fcb324e166db31a2c6b06ff5
 formal_analysis_authorized:  false
 scientific_semantics_changed: false
 scientific_outputs_computed:  false
 raw_evidence_analyzed:        false
+superseded_contract_fingerprint: 2fe5d962a706c822a63573bbd8e553a44b6b0fd082dd582af8cdaa25bc6c7c60
 ```
 
 This document defines **fields only**. It carries no real scientific value.
+
+The previous contract fingerprint `2fe5d962a706c822a63573bbd8e553a44b6b0fd082dd582af8cdaa25bc6c7c60`
+is retained as provenance and is marked **SUPERSEDED FOR FORMAL-PATH COVERAGE**. It described an
+orchestration path that did not cover the full frozen dependency graph; it is not claimed to be
+still valid.
 
 ---
 
@@ -169,6 +175,25 @@ Delta_deploy(F)    = R_cross(F)  - R_raw
 Delta_transport(F) = R_cross(F)  - R_native(F)
 ```
 
+Each estimand carries its **own** dependency requirement. The runner never shares one requirement
+across all three merely because `risk_matrix()` returns them together; it calls the frozen
+`r4_inference.delta_deploy` / `delta_native` / `delta_transport` individually.
+
+```text
+dependency truth table:
+  Delta_deploy     requires CROSS fit only
+  Delta_native     requires NATIVE fit only
+  Delta_transport  requires CROSS + NATIVE fits
+  R_raw            requires no calibrator
+```
+
+Fit source:
+
+```text
+cross fit   fit the SOURCE measurement A on the population TRAIN (N456 primary / N912 robustness)
+native fit  fit the TARGET measurement B on the population TRAIN (N456 primary / N912 robustness)
+```
+
 ---
 
 ## 8. Metrics
@@ -182,6 +207,21 @@ extended_real_states: FINITE, POSITIVE_INFINITY, UNDEFINED_EXTENDED_REAL
 Primary metric is Brier; secondary metric is exact LogLoss. There is **no clipping, no epsilon,
 no finite cap**. `+inf` is representable, and `+inf - +inf` is `UNDEFINED_EXTENDED_REAL`, which
 marks the dependent result incomplete.
+
+The exact LogLoss secondary is formally wired through the frozen extended-real carrier:
+
+```text
+carrier:      r4_inference.ExtendedReal
+functions:    r4_inference.logloss_loss, r4_inference.mean_logloss,
+              r4_inference.extended_real_subtract, r4_inference.extended_real_mean
+estimands:    raw, native, cross, Delta_native, Delta_deploy, Delta_transport
+rule:         if any replicate contrast is UNDEFINED_EXTENDED_REAL the whole dependent
+              interval is INCOMPLETE / UNDEFINED; undefined replicates are never dropped
+              and no successful-subset interval is produced
+```
+
+LogLoss uses the same dependency truth table as Brier and can never rescue the Brier primary.
+Population weighting is preserved.
 
 ---
 
@@ -262,11 +302,27 @@ formal counts and cannot be selected in formal mode.
 ```text
 n912_robustness_record_fields:
   cell_id, population_id, train_budget, role, status, reason,
-  separate_from_primary, cannot_rescue_primary
+  separate_from_primary, cannot_rescue_primary,
+  shared_test_draw_paired_by_replicate, comparisons, refit_blocks, refit_statuses
 ```
 
 N912 is a nested `N456 + extension456` direct-robustness budget. It never replaces, overrides or
 rescues the `N456` primary result, and legacy cells never use N912.
+
+```text
+role:        SECONDARY ROBUSTNESS ONLY
+computed:    Delta_deploy_456, Delta_deploy_912,
+             Delta_transport_456, Delta_transport_912,
+             Delta_N912_minus_N456
+pairing:     the N912 - N456 difference is subtracted directly within the SAME shared
+             TEST replicate index; no independent resampling stream is introduced
+scope:       frozen new-population 912 manifests only (HellaSwag, MedMCQA)
+new_confirmatory_multiplicity_family: null
+rule:        if N456 failed and N912 succeeds, the primary stays FAILED / INCOMPLETE
+```
+
+The N912 secondary-robustness TRAIN-refit blocks are executed as well, over the same frozen
+procedure set and estimands as the primary refit.
 
 ---
 
@@ -288,6 +344,18 @@ units; the CORE4-only outcome mean never includes isotonic or beta. The same TES
 recomputes both target `X` and outcome `Y`, while the source TRAIN thresholds stay fixed. An
 undefined replicate makes the interval incomplete; a successful-subset CI is forbidden.
 
+The formal predictor path runs over the **merged** panel, which must provide all three roles:
+
+```text
+development 8   MMLU continuity units — can never rescue the primary
+primary_validation 16   the ONLY units entering the primary Spearman statistic
+legacy_extension 8      legacy lineage units — can never rescue the primary
+```
+
+A merged panel is required so the legacy units are reachable; the primary statistic is still
+computed over exactly the 16 validation units. The predictor result is recorded in the final
+artifact under `secondary_diagnostics.predictor`.
+
 ---
 
 ## 14. Completeness
@@ -296,12 +364,86 @@ undefined replicate makes the interval incomplete; a successful-subset CI is for
 completeness_record_fields:
   status, complete_blocks, incomplete_blocks, missing_dependency,
   undefined_reason, incomplete_reason, analysis_result_fingerprint
-status_vocabulary: COMPLETE, INCOMPLETE, UNDEFINED, DEPENDENCY_UNAVAILABLE
+status_vocabulary: COMPLETE, INCOMPLETE, UNDEFINED, DEPENDENCY_UNAVAILABLE, FAILED
+```
+
+A frozen required node is never reported as `NOT_EXECUTED_IN_THIS_INVOCATION`; only the frozen
+terminal states above are permitted.
+
+```text
+fixed family incompleteness propagation:
+  primary12              12   never shrinks
+  extension8              8   never shrinks
+  direction6              6   never shrinks
+  native12               12   never shrinks
+  member_rule            each family member independently checks its own required
+                         model x population dependency; a member whose dependency is
+                         missing is INCOMPLETE and does not remove a member without
+                         that dependency
+  core4_isolation        a standalone I-isotonic / B-beta failure never blocks CORE4
+                         primary12 or direction6
+  native_isolation       Delta_native depends only on the TARGET / native fit
+  complete_case_rescue   forbidden
 ```
 
 ---
 
-## 15. Checkpoint policy
+## 15. Shared formal-DAG engine
+
+Formal execution and synthetic qualification call **the same** engine:
+
+```text
+engine:  run_r4_analysis.run_dag_engine
+blocks:  input_load, point_estimates, n912_robustness, test_bootstrap,
+         train_refit, predictor, final_assembly
+```
+
+The only differences between the two modes are:
+
+```text
+input source (frozen raw evidence vs invented synthetic fixture)
+replicate counts
+output root
+formal / synthetic authority marker
+```
+
+The synthetic qualification must never use a different orchestration path from the formal
+execution; a qualification that exercises only a parallel path does not qualify the formal path.
+
+---
+
+## 16. Full-fit coverage and failure semantics
+
+```text
+coverage_record_fields:
+  model, population, procedure, direction, side, status, reason, failure_type
+coverage_key:   model|population|procedure|direction|side
+fit_status_vocabulary: AVAILABLE, INELIGIBLE, FAILED
+```
+
+The registry key includes the direction and the side, because CAT is the cross measurement for
+`CAT->OVR` and the native measurement for `OVR->CAT`; a measurement-only key collides and masks
+real failures. Failed and ineligible cells are retained: never dropped, replaced or averaged over.
+
+A full-TRAIN fit that cannot produce a frozen accepted optimum is an explicit **FAILED** fit,
+never a fatal process exception and never a silent `INELIGIBLE`:
+
+```text
+BetaFitIneligible        -> INELIGIBLE
+BetaContractViolation    -> FAILED
+BetaImplementationError  -> FAILED
+IsotonicContractViolation-> FAILED
+other exception          -> FAILED
+```
+
+The exception type and message are retained, and the failure is never renamed to
+`DEPENDENCY_UNAVAILABLE` at the fit layer. The beta solver, tolerance, starts and constraint
+handling are unchanged: no other solver, no other start, no loosened `1e-10` KKT tolerance, no
+probability clipping, no regularization, no retry-until-success, and no N912 rescue of N456.
+
+---
+
+## 17. Checkpoint policy
 
 ```text
 granularity:                 block-level
@@ -320,9 +462,12 @@ bootstrap_chunking:          not introduced
 Every terminal block carries an identity, an input fingerprint, an output fingerprint and a
 status.
 
+Formal mode refuses to start unless the live formal analysis root is absent or empty; an aborted
+attempt's checkpoint root is quarantined, never resumed and never merged into a later attempt.
+
 ---
 
-## 16. CLI modes
+## 18. CLI modes
 
 ```text
 (default)                  no mode: no analysis, exit non-zero
@@ -335,7 +480,7 @@ The default invocation performs no calibration fit, no bootstrap and no metric c
 
 ---
 
-## 17. Formal output roots
+## 19. Formal output roots
 
 ```text
 formal analysis root:       /root/rivermind-data/r4-formal-analysis
@@ -347,7 +492,7 @@ Formal mode refuses a non-empty unknown output root, and never overwrites existi
 
 ---
 
-## 18. Status
+## 20. Status
 
 ```text
 R4 FORMAL ANALYSIS RUNNER = FROZEN CANDIDATE
@@ -358,3 +503,20 @@ SCIENTIFIC OUTPUTS COMPUTED = NO
 
 RAW EVIDENCE = NOT ANALYZED
 ```
+
+The blocked formal analysis attempt 0 is quarantined at
+`/root/rivermind-data/r4-formal-analysis-aborted/attempt0-beta-gate9-runner-defect/` and is
+`READ_ONLY / DO_NOT_RESUME / DO_NOT_MERGE / DO_NOT_USE_AS_RESULT`. Its last committed block was
+`authority_validation` and it computed zero scientific outputs. The live formal analysis root
+`/root/rivermind-data/r4-formal-analysis` does not exist.
+
+The previous runner contract fingerprint
+`2fe5d962a706c822a63573bbd8e553a44b6b0fd082dd582af8cdaa25bc6c7c60` and the previous runner
+qualification fingerprint
+`405f3ffcbf2cc67ff179c75ed157437045c6a726a63ae6b81dede28bcfede5ac` are both marked
+**SUPERSEDED FOR FORMAL-PATH COVERAGE**.
+
+The frozen dependency-graph coverage matrix is
+`experiments/calibration_transport/R4_FORMAL_ANALYSIS_RUNNER_DAG_COVERAGE.json`, with
+`coverage_fingerprint 39ac890e7b7e564cfb14d42353b5db44997c9392513f433c7473cb0a53007d1d` and
+`required_nodes_uncovered = 0`, `required_nodes_without_synthetic_test = 0`.

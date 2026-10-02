@@ -1,0 +1,60 @@
+{
+  "artifact_type": "r4-formal-analysis-firewall-deviation",
+  "artifact_version": 1,
+  "deviation_fingerprint": "ba8dd5a155e1c42fe2693d59e2067b6b6dfe97dceea58686303651b7098c0dc4",
+  "deviation_id": "r4-formal-analysis-firewall-deviation-attempt0",
+  "deviation_type": "UNAUTHORIZED_REAL_FIT_STATUS_EXPOSURE",
+  "disposition": "DO_NOT_USE_FOR_SELECTION_OR_INTERPRETATION",
+  "exposed_observations": [
+    "full-TRAIN fit availability status per fitted map (AVAILABLE / INELIGIBLE / FAILED)",
+    "the exact exception class and message of a failed fit",
+    "incidental: olmo-3-7b-instruct + r4-mmlu-57-subject + B-beta full-TRAIN fits, both directional roles, returned BetaImplementationError ('no constraint face produced an accepted optimum')"
+  ],
+  "fingerprint_version": 1,
+  "formal_outcome_estimates_computed": false,
+  "human_adjudication": {
+    "classification": "LIMITED ANALYSIS FIREWALL DEVIATION",
+    "do_not_use_for": [
+      "scientific inference",
+      "estimator selection",
+      "procedure selection",
+      "threshold selection",
+      "family selection",
+      "solver modification"
+    ],
+    "is_a_formal_result": false,
+    "provenance_recorded": true,
+    "study_not_discarded_because": [
+      "beta gate-9 failure handling had already been human-adjudicated before this accidental exposure",
+      "scientific procedure identities remain frozen",
+      "no scientific threshold, family or estimator changed"
+    ]
+  },
+  "not_computed_and_not_inspected": [
+    "Brier",
+    "LogLoss",
+    "risk",
+    "Delta",
+    "bootstrap confidence intervals",
+    "factorial effects",
+    "direction contrasts",
+    "predictor X / Y",
+    "Spearman",
+    "model ranking"
+  ],
+  "persisted_fit_parameters": false,
+  "persisted_scientific_results": false,
+  "real_calibrator_fit_attempt_occurred": true,
+  "recorded_before_any_new_real_fit": true,
+  "scientific_design_changed_after_exposure": false,
+  "scientific_interpretation_performed": false,
+  "scope": {
+    "artifact_changed": false,
+    "input": "frozen real TRAIN evidence (current-generation panel, budget N456)",
+    "invocation_count": 1,
+    "mechanism": "run_r4_analysis.build_panel_inputs on the real frozen cells",
+    "nature": "one ad-hoc debug invocation",
+    "output_written_to_disk": false,
+    "scientific_outcome_estimates_computed": false
+  }
+}
